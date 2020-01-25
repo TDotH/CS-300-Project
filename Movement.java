@@ -1,53 +1,37 @@
-package com.Frupal;
-import javax.swing.JPanel;
+package fruPack;
+
+//May be changed to player.java later on
+
 import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 
 public class Movement {
-
+	
     //integers that hold the current position coordinates, as well as the map boundaries
     private int posX, posY, upBoundX, upBoundY, lowBoundX, lowBoundY;
 
-    //initializes position coordinates to specified arguments
-    public void initPos(int startX, int startY) {
-    posX = startX;
-    posY = startY;
+    //Constructor: startX, startY, maxX, maxY, minX, minY
+	public Movement( int posX, int posY, int maxX, int maxY, int minX, int minY ) {
+		
+		setPos( posX, posY );
+		setBounds( maxX, maxY, minX, minY );
+		
+	}
+
+    //sets position coordinates to specified arguments
+    public void setPos(int startX, int startY) {
+	    posX = startX;
+	    posY = startY;
     }
 
-    //initializes map boundary coordinates
-    public void initBounds(int maxX, int maxY, int minX, int minY) {
+    //set map boundary coordinates
+    public void setBounds(int maxX, int maxY, int minX, int minY) {
         upBoundX = maxX;
         upBoundY = maxY;
         lowBoundX = minX;
         lowBoundY = minY;
     }
 
-    @SuppressWarnings("serial")
-    public class KeyboardExample extends JPanel {
-
-        public KeyboardExample() {
-            KeyListener listener = new MyKeyListener();
-            addKeyListener(listener);
-            setFocusable(true);
-        }
-
-        public class MyKeyListener implements KeyListener {
-            @Override
-            public void keyTyped(KeyEvent e) {
-            }
-
-            @Override
-            public void keyPressed(KeyEvent e) {
-                System.out.println("keyPressed="+KeyEvent.getKeyText(e.getKeyCode()));
-            }
-
-            @Override
-            public void keyReleased(KeyEvent e) {
-                System.out.println("keyReleased="+KeyEvent.getKeyText(e.getKeyCode()));
-            }
-        }
-    }
-
+    //Keyboard events from Frupal.java
     public void keyPressed(KeyEvent e) {
         if (e.getKeyCode() == KeyEvent.VK_LEFT)
             moveWest();
@@ -89,5 +73,15 @@ public class Movement {
             return 0;
         }
         return 1;
+    }
+    
+    public int getPosX() {
+    	
+    	return posX;
+    }
+    
+    public int getPosY() {
+    	
+    	return posY;
     }
 }
