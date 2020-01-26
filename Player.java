@@ -1,19 +1,27 @@
+//
+
 package fruPack;
 
 //May be changed to player.java later on
 
 import java.awt.event.KeyEvent;
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 
-public class Movement {
+public class Player {
 	
     //integers that hold the current position coordinates, as well as the map boundaries
-    private int posX, posY, upBoundX, upBoundY, lowBoundX, lowBoundY;
+    private int posX, posY, upBoundX, upBoundY;
+    
+    //Energy and money
+    private int energy, money;
 
     //Constructor: startX, startY, maxX, maxY, minX, minY
-	public Movement( int posX, int posY, int maxX, int maxY, int minX, int minY ) {
+	public Player( int posX, int posY, int maxX, int maxY ) {
 		
 		setPos( posX, posY );
-		setBounds( maxX, maxY, minX, minY );
+		setBounds( maxX - 1, maxY - 1);
 		
 	}
 
@@ -24,11 +32,9 @@ public class Movement {
     }
 
     //set map boundary coordinates
-    public void setBounds(int maxX, int maxY, int minX, int minY) {
+    public void setBounds(int maxX, int maxY) {
         upBoundX = maxX;
         upBoundY = maxY;
-        lowBoundX = minX;
-        lowBoundY = minY;
     }
 
     //Keyboard events from Frupal.java
@@ -43,17 +49,18 @@ public class Movement {
             moveSouth();
     }
 
+    //Checks if player is within bounds before moving
     public int moveNorth() {
-        if((posY + 1) <= upBoundY) {
-            ++posY;
+        if((posY - 1) >= 0) {
+            --posY;
             return 0;
         }
         return 1;
     }
 
     public int moveSouth() {
-        if((posY - 1) >= lowBoundY) {
-            --posY;
+        if((posY + 1) <= upBoundY) {
+            ++posY;
             return 0;
         }
         return 1;
@@ -68,11 +75,24 @@ public class Movement {
     }
 
     public int moveWest() {
-        if ((posX - 1) >= lowBoundX) {
+        if ((posX + 1) >= 0) {
             --posX;
             return 0;
         }
         return 1;
+    }
+    
+    //Draws the player according to the given tile size; offsets movement by tile size
+    public void draw( Graphics2D g, int tile_size ) {
+    	
+    	int playerSz = (tile_size/2);
+    	int offSetX = (tile_size/4) + tile_size * posX;
+    	int offSetY = (tile_size/4) + tile_size * posY;
+   
+    	g.setColor(Color.RED);
+    	
+    	g.fillRect( offSetX, offSetY, playerSz, playerSz);
+    	
     }
     
     public int getPosX() {
