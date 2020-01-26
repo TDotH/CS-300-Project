@@ -1,4 +1,4 @@
-package fruPack;
+//package fruPack;
 
 /* Author: Forrest Daggett
     Date: 1/25/20
@@ -25,7 +25,6 @@ public class Tile {
         this.X = x;
         this.Y = y;
         this.line_width = line_width; //hard-coded for now
-        
     }
 
     public void draw(Graphics2D g2d) {

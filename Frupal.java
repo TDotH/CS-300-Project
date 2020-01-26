@@ -2,15 +2,14 @@
  * Date: 1/25/20
  */
 
-import fruPack.Player;
-import fruPack.Map;
+//import fruPack.Player;
+//import fruPack.Map;
 
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
 import javax.swing.*;
-
 
 public class Frupal extends JPanel {
 
@@ -41,14 +40,16 @@ public class Frupal extends JPanel {
 		//Main game loop
 		while( gameOn ) {
 			//Do stuff
+			frupal.repaint(); //Repaint canvas
+			Thread.sleep(10); //Wait 10 ms
 			
 		}
+
 	}
 	
 	public Frupal() throws Exception {
 		
 		initGame();
-		
 	}
 	
 	//Paint override
@@ -65,7 +66,7 @@ public class Frupal extends JPanel {
 	
 	//Updates game upon player input (key) release!
 	private static void update() {
-		System.out.println("Player coordinates: (" + player.getPosX() + "," + player.getPosY() + ")");
+		//System.out.println("Player coordinates: (" + player.getPosX() + "," + player.getPosY() + ")");
 		 //Repaint canvas
 		newGame.repaint();
 	}

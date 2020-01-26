@@ -22,7 +22,7 @@
     TODO: Allow user to change the coordinates of where this will be drawn on the canvas
  */
 
-package fruPack;
+//package fruPack;
 
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -33,12 +33,12 @@ public class Map {
     private Tile[][] map; //Container for the map/tiles
     private int width, height; //Width and height of the map
     private int line_width;
-
-
+  
     //Constructor through a file
     public Map(String filename, int line_width) throws Exception {
         File file = new File(filename); //Read in file
         this.line_width = line_width; //Set tile width
+
         BufferedReader br = new BufferedReader(new FileReader(file)); //set up buffer reader
 
         String str; //Holds the data from file
