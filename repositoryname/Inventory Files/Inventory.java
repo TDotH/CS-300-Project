@@ -16,7 +16,7 @@ public class Inventory
     // Private Fields //
     // The size of the CLL.
     // final private int ARRAY_SIZE = 5;
-    // A reference to the rear of the circular linked list.
+    // A reference to the head of the item array.
     private Item [] heroInv;
     // The name of the inventory
     private String name;
