@@ -75,7 +75,7 @@ public class Player {
     }
 
     public int moveWest() {
-        if ((posX + 1) >= 0) {
+        if ((posX - 1) >= 0) {
             --posX;
             return 0;
         }
