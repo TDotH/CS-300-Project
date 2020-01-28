@@ -311,7 +311,7 @@ public abstract class Item
         {
             if (description != null)
             {
-                System.out.println("Item " + name + "'s description is " + description + ".\n");
+                System.out.println("Item " + name + "'s description is " + description + ".");
                 System.out.print("There ");
                 if (quantity == 1)
                     System.out.print("is ");
