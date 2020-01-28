@@ -50,10 +50,11 @@ public class Tool extends Item
         super(name);
         Scanner input = new Scanner(System.in);
 
-        System.out.print("What tools will you sell at ");
+     /* System.out.print("What tools will you sell at ");
         displayName();
         System.out.println("? (Use a comma separated list of all tools)");
         toolsSold = input.nextLine();
+      */
     }
 
 
@@ -106,7 +107,7 @@ public class Tool extends Item
         {
             if (toolsSold != null)
             {
-                System.out.println("The tools sold at this venue are: " + toolsSold);
+               // System.out.println("The tools sold at this venue are: " + toolsSold);
             }
             return true;
         }
