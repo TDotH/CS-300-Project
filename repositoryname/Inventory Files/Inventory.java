@@ -16,7 +16,7 @@ public class Inventory
     // Private Fields //
     // The size of the CLL.
     // final private int ARRAY_SIZE = 5;
-    // A reference to the head of the item array.
+    // A reference to the rear of the circular linked list.
     private Item [] heroInv;
     // The name of the inventory
     private String name;
@@ -439,7 +439,10 @@ public class Inventory
         {
             for (i = 0; i < maxItems; ++i) {
                 if (heroInv[i] != null)
-                heroInv[i].display();
+                {
+                    heroInv[i].display();
+                    System.out.println();
+                }
             }
         }
         else
@@ -452,8 +455,9 @@ public class Inventory
 
     public void Alphabetize()
     {
-        int offset, lo1, lo2, hi1, hi2, i, j, index;
-        Item [] arranged = new Item[maxItems];
+        int offset, offset1, offset2, lo1, lo2, hi1, hi2, i, j, index;
+        Item [] arranged1;
+        Item [] arranged2;
 
         if (items == 0)
         {
@@ -479,52 +483,70 @@ public class Inventory
             lo2 = hi1 + 1;
             hi2 = maxItems - 1;
 
-            AlphabetizeRec(lo1, hi1, arranged);
-            AlphabetizeRec(lo2, hi2, arranged);
+            offset1 = (hi1 - lo1) + 1;
+            offset2 = (hi2 - lo2) + 1;
 
-            i = lo1;
-            index = i;
-            j = lo2;
-            while (i <= hi1 && j <= hi2)
+            arranged1 = new Item[offset1];
+            arranged2 = new Item[offset2];
+
+            AlphabetizeRec(lo1, hi1, arranged1);
+            AlphabetizeRec(lo2, hi2, arranged2);
+
+            index = 0;
+            i = 0;
+            j = 0;
+            while (i < offset1 && j < offset2)
             {
-                if (arranged[i] == null)
+                if (arranged1[i] == null)
                 {
-                    if (arranged[j] == null)
+                    if (arranged2[j] == null)
                     {
                         ++j;
                     }
                     ++i;
                 }
-                else if (arranged[j] == null)
+                else if (arranged2[j] == null)
                 {
                     ++j;
                 }
                 else
                 {
-                    if (arranged[i].compareName(arranged[j]))
+                    if (arranged1[i].compareName(arranged2[j]))
                     {
-                        heroInv[index] = arranged[j];
+                        heroInv[index] = arranged2[j];
                         ++j;
                     }
                     else
                     {
-                        heroInv[index] = arranged[i];
+                        heroInv[index] = arranged1[i];
                         ++i;
                     }
                     ++index;
                 }
             }
-            while (i <= hi1)
+            while (i < offset1)
             {
-                heroInv[index] = arranged[i];
+                if (arranged1[i] != null)
+                {
+                    heroInv[index] = arranged1[i];
+                    ++index;
+                }
                 ++i;
-                ++index;
             }
-            while (j <= hi2)
+            while (j < offset2)
             {
-                heroInv[index] = arranged[j];
+                if (arranged2[j] != null)
+                {
+                    heroInv[index] = arranged2[j];
+                    ++index;
+                }
                 ++j;
-                ++index;
+            }
+            if (index < maxItems)
+            {
+               for (i = index; i < maxItems; ++i) {
+                   heroInv[i] = null;
+               }
             }
         }
     }
@@ -532,12 +554,13 @@ public class Inventory
 
     public void AlphabetizeRec(int low, int high, Item [] des)
     {
-        int offset, lo1, lo2, hi1, hi2, i, j, index, items = high - low;
-        Item [] arranged = new Item[maxItems];
+        int offset, offset1, offset2, lo1, lo2, hi1, hi2, i, j, index, items = high - low;
+        Item [] arranged1;
+        Item [] arranged2;
 
         if (items == 0)
         {
-            des[low] = heroInv[low];
+            des[0] = heroInv[low];
         }
         else
         {
@@ -555,56 +578,67 @@ public class Inventory
             lo2 = hi1 + 1;
             hi2 = high;
 
-            AlphabetizeRec(lo1, hi1, arranged);
-            AlphabetizeRec(lo2, hi2, arranged);
+            offset1 = (hi1 - lo1) + 1;
+            offset2 = (hi2 - lo2) + 1;
 
-            i = lo1;
-            index = i;
-            j = lo2;
-            while (i <= hi1 && j <= hi2)
+            arranged1 = new Item[offset1];
+            arranged2 = new Item[offset2];
+
+            AlphabetizeRec(lo1, hi1, arranged1);
+            AlphabetizeRec(lo2, hi2, arranged2);
+
+            index = 0;
+            i = 0;
+            j = 0;
+            while (i < offset1 && j < offset2)
             {
-                if (arranged[i] == null)
+                if (arranged1[i] == null)
                 {
-                    if (arranged[j] == null)
+                    if (arranged2[j] == null)
                     {
                         ++j;
                     }
                     ++i;
                 }
-                else if (arranged[j] == null)
+                else if (arranged2[j] == null)
                 {
                     ++j;
                 }
                 else
                 {
-                    if (arranged[i].compareName(arranged[j]))
+                    if (arranged1[i].compareName(arranged2[j]))
                     {
-                        des[index] = arranged[j];
+                        des[index] = arranged2[j];
                         ++j;
                     }
                     else
                     {
-                        des[index] = arranged[i];
+                        des[index] = arranged1[i];
                         ++i;
                     }
                     ++index;
                 }
             }
-            while (i <= hi1)
+            while (i < offset1)
             {
-                des[index] = arranged[i];
+                if (arranged1[i] != null)
+                {
+                    des[index] = arranged1[i];
+                    ++index;
+                }
                 ++i;
-                ++index;
             }
-            while (j <= hi2)
+            while (j < offset2)
             {
-                des[index] = arranged[j];
+                if (arranged2[j] != null)
+                {
+                    des[index] = arranged2[j];
+                    ++index;
+                }
                 ++j;
-                ++index;
             }
         }
     }
-
 
 
     // Protected Methods
