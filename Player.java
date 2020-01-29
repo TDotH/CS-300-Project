@@ -1,12 +1,13 @@
-//
-
 package fruPack;
 
-//May be changed to player.java later on
+/*TODO
+ * -Add energy and money
+ * -Add inventory
+ * -Add a way for the player to know what tile they've stepped on?
+ */
 
 import java.awt.event.KeyEvent;
 import java.awt.Color;
-import java.awt.Graphics;
 import java.awt.Graphics2D;
 
 public class Player {
@@ -14,8 +15,8 @@ public class Player {
     //integers that hold the current position coordinates, as well as the map boundaries
     private int posX, posY, upBoundX, upBoundY;
     
-    //Energy and money
-    private int energy, money;
+    //Energy and money; unused until items are ready
+    //private int energy, money;
 
     //Constructor: startX, startY, maxX, maxY, minX, minY
 	public Player( int posX, int posY, int maxX, int maxY ) {
@@ -82,16 +83,41 @@ public class Player {
         return 1;
     }
     
-    //Draws the player according to the given tile size; offsets movement by tile size
-    public void draw( Graphics2D g, int tile_size ) {
+    //Draws the player according to the given tile size and relative to the camera; offsets movement by tile size
+    public void draw( Graphics2D g, int tile_size, Camera camera ) {
     	
     	int playerSz = (tile_size/2);
-    	int offSetX = (tile_size/4) + tile_size * posX;
-    	int offSetY = (tile_size/4) + tile_size * posY;
+    	int offSetX = (tile_size/4);
+    	int offSetY = (tile_size/4);
    
+    	//Default render positions (at camera origin)
+    	int tempPosX = camera.getwindowPosX() + offSetX;
+    	int tempPosY = camera.getwindowPosX() + offSetY;
+    	
     	g.setColor(Color.RED);
     	
-    	g.fillRect( offSetX, offSetY, playerSz, playerSz);
+    	//If the player is at the bounds, render past the camera
+    	if ( this.posX - camera.getRadius() <= 0 ) {
+    		
+    		tempPosX = camera.getwindowPosX() - tile_size * ( camera.getRadius() - posX ) + offSetX;
+    	}
+    	
+    	if ( this.posX + camera.getRadius() >= upBoundX ) {
+    		
+    		tempPosX = camera.getwindowPosX() + tile_size * ( camera.getRadius() - ( upBoundX - posX ) ) + offSetX;
+    	}
+    	
+    	if ( this.posY - camera.getRadius() <= 0 ) {
+    		
+    		tempPosY = camera.getwindowPosY() - tile_size * ( camera.getRadius() - posY ) + offSetY;
+    	}
+    	
+    	if ( this.posY + camera.getRadius() >= upBoundY ) {
+    		
+    		tempPosY = camera.getwindowPosY() + tile_size * ( camera.getRadius() - ( upBoundY - posY ) ) + offSetY;
+    	}
+    	
+    	g.fillRect( tempPosX, tempPosY, playerSz, playerSz );
     	
     }
     
