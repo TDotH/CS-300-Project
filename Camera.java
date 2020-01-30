@@ -2,6 +2,8 @@
 
 /* Author: Tyde Hashimoto
  * Date: 1/28/20
+ * Camera automatically centers itself around the player unless it would show the map out of bounds, then it doesn't move
+ * Takes in viewport dimensions and will calculated how many tiles x and y it can show
  */
 
 public class Camera {
