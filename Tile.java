@@ -1,3 +1,5 @@
+//package fruPack;
+
 /* Author: Forrest Daggett
     Date: 1/25/20
 --------------------------------------
@@ -14,21 +16,13 @@ import java.awt.*;
 //Contains the type in an int and tests with the enums from the tiles.java file
 public class Tile {
     private Types type; //Type of tile
-    private int X, Y; //Coordinates of grid
-    private int line_width; //Width of the grid lines
 
     //Constructor
-    Tile(Types type, int x, int y) {
+    Tile(Types type) {
         this.type = type;
-        this.X = x;
-        this.Y = y;
-        this.line_width = 50; //hard-coded for now
     }
 
-    public void draw(Graphics2D g2d) {
-        //calculate position
-        int x = X*line_width;
-        int y = Y*line_width;
+    public void draw(Graphics2D g2d, int line_width, int posX, int posY) {
 
         //Fill in squares by color
         //TODO: Draw graphics instead of flat colors (maybe lol)
@@ -58,10 +52,10 @@ public class Tile {
                 g2d.setColor(Color.WHITE);
         }
         //Fill color
-        g2d.fillRect(x,y,line_width,line_width);
+        g2d.fillRect(posX, posY,line_width,line_width);
         //Draw rectangle (for the grid)
         g2d.setColor(Color.BLACK);
-        g2d.drawRect(x,y,line_width,line_width);
+        g2d.drawRect(posX ,posY,line_width,line_width);
     }
 
 }
