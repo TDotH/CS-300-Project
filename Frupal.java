@@ -2,7 +2,7 @@
  * Date: 1/25/20
  */
 
-import fruPack.*;
+//import fruPack.*;
 
 import java.awt.*;
 import java.awt.event.KeyEvent;
@@ -50,7 +50,7 @@ public class Frupal extends JPanel {
 	
 	//Paint override
 	@Override
-	public void paint(Graphics g) {
+	public void paint(Graphics g) {		
 		//Set up graphics library
 		super.paint(g);
 		Graphics2D g2d = (Graphics2D) g;
@@ -73,19 +73,20 @@ public class Frupal extends JPanel {
 	private void initGame() {
 		
 		// x,y origin for player and camera
-		int startX = 1;
-		int startY = 1;
-		
-		//Viewport "size" for the camera to render around the player
-		int cameraRadius = 2;
+		int startX = 4;
+		int startY = 0;
 		
 		//Viewport "Center" for the camera to render at
-		int cameraPosX = SCREEN_WIDTH/4;
-		int cameraPosY = SCREEN_HEIGHT/3;
+		int cameraPosX = 0;
+		int cameraPosY = 0;
+		
+		//Viewport dimensions for the camera
+		int viewPortSzX = 400;
+		int viewPortSzY = 600;
 		
 		frame = new JFrame("Frupal vAlpha");
 		player = new Player( startX, startY, map.getWidth(), map.getHeight() );
-		camera = new Camera( cameraRadius, cameraPosX, cameraPosY, startX, startY, map.getWidth(), map.getHeight() );
+		camera = new Camera( viewPortSzX, viewPortSzY, TILE_SIZE, cameraPosX, cameraPosY, startX, startY, map.getWidth(), map.getHeight() );
 		
 		frame.setSize( SCREEN_WIDTH, SCREEN_HEIGHT );
 		frame.setVisible( true );

@@ -1,4 +1,4 @@
-package fruPack;
+//package fruPack;
 
 /*TODO
  * -Add energy and money
@@ -91,31 +91,14 @@ public class Player {
     	int offSetY = (tile_size/4);
    
     	//Default render positions (at camera origin)
-    	int tempPosX = camera.getwindowPosX() + offSetX;
-    	int tempPosY = camera.getwindowPosX() + offSetY;
+    	int tempPosX = camera.getWindowPosX() + offSetX;
+    	int tempPosY = camera.getWindowPosY() + offSetY;
     	
     	g.setColor(Color.RED);
     	
-    	//If the player is at the bounds, render past the camera
-    	if ( this.posX - camera.getRadius() <= 0 ) {
-    		
-    		tempPosX = camera.getwindowPosX() - tile_size * ( camera.getRadius() - posX ) + offSetX;
-    	}
-    	
-    	if ( this.posX + camera.getRadius() >= upBoundX ) {
-    		
-    		tempPosX = camera.getwindowPosX() + tile_size * ( camera.getRadius() - ( upBoundX - posX ) ) + offSetX;
-    	}
-    	
-    	if ( this.posY - camera.getRadius() <= 0 ) {
-    		
-    		tempPosY = camera.getwindowPosY() - tile_size * ( camera.getRadius() - posY ) + offSetY;
-    	}
-    	
-    	if ( this.posY + camera.getRadius() >= upBoundY ) {
-    		
-    		tempPosY = camera.getwindowPosY() + tile_size * ( camera.getRadius() - ( upBoundY - posY ) ) + offSetY;
-    	}
+    	//Set the player's position relative to the camera
+    	tempPosX = camera.getWindowPosX() + tile_size * ( posX - camera.getCameraPosX() + camera.gettileMaxWidth()/2 ) + offSetX;
+    	tempPosY = camera.getWindowPosY() + tile_size * ( posY - camera.getCameraPosY() + camera.gettileMaxHeight()/2 ) + offSetY;
     	
     	g.fillRect( tempPosX, tempPosY, playerSz, playerSz );
     	

@@ -10,7 +10,7 @@
     Also I'm not committed to this naming convention if someone else has a better idea
  */
 
-package fruPack;
+//package fruPack;
 
 public enum Types {
     FOREST, SWAMP, DESERT, WATER,

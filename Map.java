@@ -22,7 +22,7 @@
     TODO: Allow user to change the coordinates of where this will be drawn on the canvas
  */
 
-package fruPack;
+//package fruPack;
 
 import java.awt.Graphics2D;
 import java.io.*;
@@ -89,8 +89,7 @@ public class Map {
 
     //TODO: constructor for a user defined map (blank constructor)
 
-    /* Takes in the player's coordinates and a given camera size and 
-     * draws relative to the player position in a cameraRadiusxcameraRadius circle around the player
+    /* Takes in the player's coordinates and a given camera size and draws relative to the camera's position on the map
      * - Deals with what tiles to render and gives the position of rendering to each individual tile.draw()
      */
     public void draw(Graphics2D g, int line_width, int playerPosX, int playerPosY, Camera camera ) {
@@ -98,34 +97,24 @@ public class Map {
     	 * If so just render the same part of the map
     	 */
     	
-    	/*
-    	if ( playerPosX - cameraRadius < 0 ) {
-    		playerPosX += Math.abs( cameraRadius - playerPosX );
-    	} 
-    	else if ( playerPosX + cameraRadius > width - 1  ) {
-    		playerPosX -= Math.abs( cameraRadius - ( width - 1 - playerPosX ) );
-    	} 
-    	
-    	if ( playerPosY - cameraRadius < 0 ) {
-    		playerPosY += Math.abs( cameraRadius - playerPosY );
-    	} 
-    	else if ( playerPosY + cameraRadius > height - 1 ) {
-    		playerPosY -= Math.abs( cameraRadius - ( height - 1 - playerPosY ) );
-    	} 
-		*/
-    	
-    	//Used to render render coordinates relative to the player
+    	//Used to render render coordinates relative to the camera
     	int tempPosX, tempPosY;
     	
-        for (int x = camera.getCameraPosX() - camera.getRadius(); x <= camera.getCameraPosX() + camera.getRadius(); ++x) {
+    	int i = 0;
+    	int j = 0;
+    	
+        for (int x = camera.getCameraPosX() - camera.gettileMaxWidth()/2; x <= camera.getCameraPosX() + camera.gettileMaxWidth()/2; ++x) {
         	if ( x >= 0 && x < width ) {
-	            for (int y = camera.getCameraPosY() - camera.getRadius(); y <= camera.getCameraPosY() + camera.getRadius(); ++y) {
+	            for (int y = camera.getCameraPosY() - camera.gettileMaxHeight()/2; y <= camera.getCameraPosY() + camera.gettileMaxHeight()/2; ++y) {
 	            	if ( y >= 0 && y < height ) {
-	            		tempPosX = camera.getwindowPosX() + line_width * ( x - playerPosX );
-	            		tempPosY = camera.getwindowPosY() + line_width * ( y - playerPosY );
+	            		tempPosX = camera.getWindowPosX() + line_width * ( i );
+	            		tempPosY = camera.getWindowPosY() + line_width * ( j );
 		                map[x][y].draw(g, line_width, tempPosX, tempPosY);
+		                j++;
 	            	}
 	            }
+	        	j = 0;
+	        	i++;
         	}
         }
     }
