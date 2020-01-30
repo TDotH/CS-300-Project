@@ -24,7 +24,6 @@
 
 //package fruPack;
 
-import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.io.*;
 
@@ -32,13 +31,10 @@ public class Map {
 
     private Tile[][] map; //Container for the map/tiles
     private int width, height; //Width and height of the map
-    private int line_width;
-  
-    //Constructor through a file
-    public Map(String filename, int line_width) throws Exception {
-        File file = new File(filename); //Read in file
-        this.line_width = line_width; //Set tile width
 
+    //Constructor through a file
+    public Map(String filename) throws Exception {
+        File file = new File(filename); //Read in file
         BufferedReader br = new BufferedReader(new FileReader(file)); //set up buffer reader
 
         String str; //Holds the data from file
@@ -50,8 +46,8 @@ public class Map {
             height = Integer.parseInt(size_of_map[1]);
 
             map = new Tile[width][height]; //Initialize map
-        } else return;
-
+        } else { br.close(); }
+        
         //Iterate through file (The for loops may cause errors if the file doesn't match the given size)
         for (int y = 0; y < height; ++y) {
             str = br.readLine(); //Read in line
@@ -86,20 +82,40 @@ public class Map {
                 }
 
                 //Initialize tile
-                map[x][y] = new Tile(type,x,y, line_width);
+                map[x][y] = new Tile(type);
             }
         }
     }
 
     //TODO: constructor for a user defined map (blank constructor)
 
-    //Draws the map as it is
-    //TODO: give coordinates to draw so we can see the map from the players perspective
-    public void draw(Graphics2D g) {
-        for (int x = 0; x < width; ++x) {
-            for (int y = 0; y < height; ++y) {
-                map[x][y].draw(g);
-            }
+    /* Takes in the player's coordinates and a given camera size and draws relative to the camera's position on the map
+     * - Deals with what tiles to render and gives the position of rendering to each individual tile.draw()
+     */
+    public void draw(Graphics2D g, int line_width, int playerPosX, int playerPosY, Camera camera ) {
+    	/* Check if the player is near the bounds of the map
+    	 * If so just render the same part of the map
+    	 */
+    	
+    	//Used to render render coordinates relative to the camera
+    	int tempPosX, tempPosY;
+    	
+    	int i = 0;
+    	int j = 0;
+    	
+        for (int x = camera.getCameraPosX() - camera.gettileMaxWidth()/2; x <= camera.getCameraPosX() + camera.gettileMaxWidth()/2; ++x) {
+        	if ( x >= 0 && x < width ) {
+	            for (int y = camera.getCameraPosY() - camera.gettileMaxHeight()/2; y <= camera.getCameraPosY() + camera.gettileMaxHeight()/2; ++y) {
+	            	if ( y >= 0 && y < height ) {
+	            		tempPosX = camera.getWindowPosX() + line_width * ( i );
+	            		tempPosY = camera.getWindowPosY() + line_width * ( j );
+		                map[x][y].draw(g, line_width, tempPosX, tempPosY);
+		                j++;
+	            	}
+	            }
+	        	j = 0;
+	        	i++;
+        	}
         }
     }
 
@@ -120,6 +136,9 @@ public class Map {
             return;
         map[x][y] = tile;
     }
-
+    
+    // Height and Width getters
+    public int getHeight() { return height; }
+    public int getWidth() { return width; }
 
 }
