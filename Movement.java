@@ -1,4 +1,4 @@
-package com.Frupal;
+package com.company;
 import javax.swing.JPanel;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -10,8 +10,8 @@ public class Movement {
 
     //initializes position coordinates to specified arguments
     public void initPos(int startX, int startY) {
-    posX = startX;
-    posY = startY;
+        posX = startX;
+        posY = startY;
     }
 
     //initializes map boundary coordinates
