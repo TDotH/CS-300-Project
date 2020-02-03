@@ -1,4 +1,4 @@
-//package fruPack;
+package fruPack;
 
 /* Author: Forrest Daggett
     Date: 1/25/20
@@ -56,6 +56,15 @@ public class Tile {
         //Draw rectangle (for the grid)
         g2d.setColor(Color.BLACK);
         g2d.drawRect(posX ,posY,line_width,line_width);
+    }
+    
+    //Type getter
+    public Types getType( ) { return this.type; }
+    public int getTileID() { return this.type.getTileID(); };
+    
+    //Type setter
+    public void setType( Types type ) {
+    	this.type = type;
     }
 
 }

@@ -1,4 +1,4 @@
-//package fruPack;
+package fruPack;
 
 /* Author: Tyde Hashimoto
  * Date: 1/28/20
@@ -44,7 +44,7 @@ public class Camera {
 			tileMaxHeight = mapMaxY - 1;
 		}
 		
-		System.out.println("tileMaxWidth: " + tileMaxWidth);
+		//System.out.println("tileMaxWidth: " + tileMaxWidth);
 		
 		// Origin of the camera in window
 		this.windowPosX = windowPosX;

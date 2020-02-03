@@ -1,4 +1,4 @@
-//package fruPack;
+package fruPack;
 
 /*TODO
  * -Add energy and money
@@ -104,6 +104,7 @@ public class Player {
     	
     }
     
+    //Getters
     public int getPosX() {
     	
     	return posX;

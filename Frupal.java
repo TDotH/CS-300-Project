@@ -2,7 +2,7 @@
  * Date: 1/25/20
  */
 
-//import fruPack.*;
+import fruPack.*;
 
 import java.awt.*;
 import java.awt.event.KeyEvent;
@@ -24,12 +24,15 @@ public class Frupal extends JPanel {
 	private static Frupal newGame;
 	private static JFrame frame;
 	private static Camera camera;
+	private static Map_Editor editor;
 	
-	Map map = new Map("src/maps/default_map");
+	static Map map = new Map();
 	
 	//main game loop
 	public static void main( String[] args ) throws Exception  {
 		
+		//map.loadMap("src/maps/default_map.map");
+		editor = new Map_Editor();
 		newGame = new Frupal();
 		
 		frame.add(newGame);
@@ -62,8 +65,8 @@ public class Frupal extends JPanel {
 	
 	//Updates game upon player input (key) release!
 	private static void update()  {
-		System.out.println("Player coordinates: (" + player.getPosX() + "," + player.getPosY() + ")");
-		System.out.println("Camera coordinates: (" + camera.getCameraPosX() + "," + camera.getCameraPosY()  + ")");
+		//System.out.println("Player coordinates: (" + player.getPosX() + "," + player.getPosY() + ")");
+		//System.out.println("Camera coordinates: (" + camera.getCameraPosX() + "," + camera.getCameraPosY()  + ")");
 		//Repaint canvas
 		camera.update(player.getPosX(), player.getPosY());
 		newGame.repaint();
@@ -89,7 +92,7 @@ public class Frupal extends JPanel {
 		camera = new Camera( viewPortSzX, viewPortSzY, TILE_SIZE, cameraPosX, cameraPosY, startX, startY, map.getWidth(), map.getHeight() );
 		
 		frame.setSize( SCREEN_WIDTH, SCREEN_HEIGHT );
-		frame.setVisible( true );
+		//frame.setVisible( true );
 		frame.setResizable( false );
 		frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
 		

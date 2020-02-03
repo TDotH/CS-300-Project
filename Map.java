@@ -18,11 +18,9 @@
 
     Map is constructed so that the 0,0 coordinates are in the top left of the grid
     and increase as you go right/down
-
-    TODO: Allow user to change the coordinates of where this will be drawn on the canvas
  */
 
-//package fruPack;
+package fruPack;
 
 import java.awt.Graphics2D;
 import java.io.*;
@@ -31,9 +29,28 @@ public class Map {
 
     private Tile[][] map; //Container for the map/tiles
     private int width, height; //Width and height of the map
+    
+    //Blank Constructor
+    public Map() {}
+    
+    //Construct a blank map with the given width and height
+    public Map( int width, int height ) {
+    	
+    	this.width = width;
+    	this.height = height;
+    	
+    	map = new Tile[width][height]; //Initialize map
+    			
+    	// Initialize tiles
+    	for ( int x = 0; x < width; x++ ) { 
+    		for ( int y = 0; y < height; y++) {
+    			map[x][y] = new Tile( Types.DEFAULT );
+    		}
+    	} 	
+    }
 
-    //Constructor through a file
-    public Map(String filename) throws Exception {
+    //Loads a map with the given filename of format (src/maps/(filename).map)
+    public void loadMap(String filename) throws Exception {
         File file = new File(filename); //Read in file
         BufferedReader br = new BufferedReader(new FileReader(file)); //set up buffer reader
 
@@ -53,30 +70,32 @@ public class Map {
             str = br.readLine(); //Read in line
             for (int x = 0; x < width; ++x) {
                 Types type; // For initializing individual tiles
-
-                switch (str.charAt(x)) { //assign from file index
-                    case 'F':
-                        type = Types.FOREST;
-                        break;
-                    case 'S':
-                        type = Types.SWAMP;
-                        break;
-                    case 'D':
-                        type = Types.DESERT;
-                        break;
-                    case 'W':
-                        type = Types.WATER;
-                        break;
-                    case 'M':
-                        type = Types.MOUNTAINS;
-                        break;
-                    case 'K':
-                        type = Types.SHOPKEEPER;
-                        break;
-                    case 'C':
-                        type = Types.CAVERNS;
-                        break;
-
+                
+                switch ( Integer.parseInt( String.valueOf(str.charAt(x)))) { //assign from file index
+	                case 0:
+	                	type = Types.DEFAULT;
+	                	break;
+	                case 1:
+	                    type = Types.FOREST;
+	                    break;
+	                case 2:
+	                    type = Types.SWAMP;
+	                    break;
+	                case 3:
+	                    type = Types.DESERT;
+	                    break;
+	                case 4:
+	                    type = Types.WATER;
+	                    break;
+	                case 5:
+	                    type = Types.MOUNTAINS;
+	                    break;
+	                case 6:
+	                    type = Types.SHOPKEEPER;
+	                    break;
+	                case 7:
+	                    type = Types.CAVERNS;
+	                    break;
                     default: //okay intelliJ lol
                         throw new IllegalStateException("Unexpected value: " + str.charAt(x));
                 }
@@ -87,8 +106,48 @@ public class Map {
         }
     }
 
-    //TODO: constructor for a user defined map (blank constructor)
-
+    //Saves the current map with format (src/maps/(filename).map)
+    public void saveMap ( String fileName ) throws Exception {
+    	
+    	try {
+    		PrintWriter aWriter = new PrintWriter( fileName ); //Open file
+    		
+    		//Temp string to hold chars
+    		String tempString;
+    		
+    		//Write the width and height
+    		tempString = String.valueOf(width) + "," + String.valueOf(height);
+    		aWriter.println( tempString );
+    		
+    		//Write each tile
+    		for ( int y = 0; y < height; y++ ) {
+    			
+    			//Clear string
+    			tempString = "";
+    			for ( int x = 0; x < width; x++ ) {
+    				
+    				tempString = tempString.concat( ( String.valueOf( String.valueOf(map[x][y].getTileID() ))));
+    			}
+    			
+    			aWriter.println(tempString);
+    		}
+    		
+    		aWriter.close();
+    	} catch (Exception e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+    	
+    }
+    
+    public void draw(Graphics2D g, int line_width, int centerPosX, int centerPosY ) {
+    	
+    	for ( int x = 0; x < width; x++ ) { 
+    		for ( int y = 0; y < height; y++) {
+    			map[x][y].draw(g, 50, centerPosX + line_width * x, centerPosY + line_width * y);
+    		}
+    	}    	
+    }
     /* Takes in the player's coordinates and a given camera size and draws relative to the camera's position on the map
      * - Deals with what tiles to render and gives the position of rendering to each individual tile.draw()
      */
@@ -135,6 +194,18 @@ public class Map {
                 || y < 0 || y >= height)
             return;
         map[x][y] = tile;
+    }
+    
+    //Searches for a specific tile that posX, posY would be in on the map given a centerPosX and centerPosY
+    public void set_tile_at( Types type, int posX, int posY ) {
+    	
+    	//Check if within bounds
+    	if ( posX >= 0 && posX < width ) {
+    		
+    		if ( posY >= 0 && posY < height ) {
+    	    	map[posX][posY].setType(type);
+    		}
+    	}
     }
     
     // Height and Width getters
