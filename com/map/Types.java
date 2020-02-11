@@ -14,14 +14,21 @@ package com.map;
 
 public enum Types {
 	
-	DEFAULT(0), FOREST(1), SWAMP(2), DESERT(3), WATER(4),
-    MOUNTAINS(5), SHOPKEEPER(6), CAVERNS(7);
+	DEFAULT(0, 0, true), FOREST(1, 1, true), SWAMP(2, 2, true), DESERT(3, 1, true), WATER(4, 2, true),
+    MOUNTAINS(5, 1, false), SHOPKEEPER(6, 0, true), CAVERNS(7, 0, true);
 	
 	int tileID;
+	int energyCost;
+	boolean passable; 
 	
-	Types(int tileID) {
+	Types(int tileID, int energyCost, boolean passable ) {
 		this.tileID = tileID;
+		this.energyCost = energyCost;
+		this.passable = passable;
 	}
 	
 	int getTileID() { return tileID; }
+	int getEnergyCost() { return energyCost; }
+	boolean getPassable() { return passable; }
+	
 }

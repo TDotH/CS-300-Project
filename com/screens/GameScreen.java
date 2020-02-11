@@ -4,7 +4,9 @@
  */
 
 package com.screens;
+import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -14,6 +16,7 @@ import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.awt.event.WindowEvent;
 
 import javax.swing.*;
 
@@ -23,18 +26,19 @@ import com.player.*;
 
 public class GameScreen implements IState {
 
+	//Sorry about all the globals, the ui stuff is a pain to work around without them
 	private StateMachine aStateMachine;
 	private MapScreenPanel aMapPanel;
 	private EventLogPanel aEventLogPanel;
 	private InventoryPanel aInventoryPanel;
 	private KeyboardFocusManager manager;
+	private GameMenu gameMenu;
+	private JLayeredPane gamePanes;
+	private boolean paused = false;
 	
 	public JFrame aFrame;
 	
-	private boolean redraw = false;
-	
 	private static final int MAP_SCREEN_PANEL_WIDTH = 624;
-	private static final int MAP_SCREEN_PANEL_HEIGHT = 624;
 	
 	public GameScreen ( StateMachine aStateMachine ) {
 		
@@ -98,12 +102,18 @@ public class GameScreen implements IState {
 	            } 
 	            else if (e.getID() == KeyEvent.KEY_RELEASED) {
 	            	if ( e.getKeyCode() == KeyEvent.VK_ESCAPE ) {
-	            		manager.removeKeyEventDispatcher(aKeyDispatcher);
-	            		aStateMachine.change("mainmenu");
+	            		//manager.removeKeyEventDispatcher(aKeyDispatcher);
+	            		if ( paused == false ) {
+	            			gameMenu.openMenu(aFrame, player, map);
+	            		} 
+	            		else if ( paused == true ) {
+	            			gameMenu.closeMenu();
+	            		}
+	            	
 	            	}
-	    			player.keyPressed(e);
-	    			redraw = true;
-
+	            	if ( paused == false ) {
+	            		player.keyPressed(e);
+	            	}
 	            } 
 	            else if (e.getID() == KeyEvent.KEY_TYPED) {
 
@@ -114,6 +124,138 @@ public class GameScreen implements IState {
 		
 	}
 	
+	//Holds the menu screen
+	class GameMenu extends JPanel implements ActionListener {
+		
+		private int width = 200;
+		private int height = 300;
+		
+		private int offSetY = 50;
+		
+		private int buttonWidth = 125;
+		private int buttonHeight = 25; 
+		
+		private JButton resumeButton;
+		private JButton menuButton;
+		private JButton quitButton;
+		
+		public GameMenu() {
+	
+			this.setBounds(0, 0, aFrame.getContentPane().getWidth(), aFrame.getContentPane().getHeight());
+			this.setBackground( new Color(100, 100, 100, 100) );
+			
+			//Panel to hold all the buttons
+			JPanel menuPanel = new JPanel();
+			menuPanel.setBounds( this.getWidth()/2 - width/2, aFrame.getContentPane().getHeight()/2 - height/2 + offSetY, width, height);
+			menuPanel.setBorder( BorderFactory.createCompoundBorder( BorderFactory.createLineBorder(Color.black), BorderFactory.createEmptyBorder(15, 15, 15, 15 )));
+			
+			menuPanel.setBackground( Color.WHITE );
+			menuPanel.setLayout( new BoxLayout( menuPanel, BoxLayout.PAGE_AXIS ));
+			//menuPanel.setLayout( null );
+			
+			resumeButton = new JButton("Resume");
+			resumeButton.setMinimumSize( new Dimension( buttonWidth, buttonHeight ));
+			resumeButton.setMaximumSize( new Dimension( buttonWidth, buttonHeight ));
+			resumeButton.addActionListener(this);
+			resumeButton.setActionCommand("resume");
+			resumeButton.setAlignmentX( Component.CENTER_ALIGNMENT );
+			
+			menuButton = new JButton( "Main Menu");
+			menuButton.addActionListener(this);
+			menuButton.setActionCommand("menu");
+			menuButton.setMinimumSize( new Dimension( buttonWidth, buttonHeight ));
+			menuButton.setMaximumSize( new Dimension( buttonWidth, buttonHeight ));
+			menuButton.setAlignmentX( Component.CENTER_ALIGNMENT );
+			
+			quitButton = new JButton( "Quit Game");
+			quitButton.addActionListener(this);
+			quitButton.setActionCommand("quit");
+			quitButton.setMinimumSize( new Dimension( buttonWidth, buttonHeight ));
+			quitButton.setMaximumSize( new Dimension( buttonWidth, buttonHeight ));
+			quitButton.setAlignmentX( Component.CENTER_ALIGNMENT );
+			
+			menuPanel.add( resumeButton, BorderLayout.CENTER );
+			menuPanel.add( Box.createVerticalGlue() );
+			menuPanel.add( menuButton, BorderLayout.CENTER );
+			menuPanel.add( Box.createVerticalGlue() );
+			menuPanel.add( quitButton, BorderLayout.CENTER );
+			
+			resumeButton.setEnabled(false);
+			menuButton.setEnabled(false);
+			quitButton.setEnabled(false);
+			
+			this.add(menuPanel);
+		}
+		
+		//Will be used for saving and loading potentially later
+		public void openMenu( JFrame aFrame, Player player, Map map ) {
+			
+			gamePanes.moveToFront(this);
+			//Enable the buttons
+			resumeButton.setEnabled(true);
+			menuButton.setEnabled(true);
+			quitButton.setEnabled(true);
+			paused = true;
+			//System.out.println("here");
+			
+		}
+		
+		public void closeMenu() {
+			
+			gamePanes.moveToBack(this);
+			//Disable the buttons so they wont react when moused over
+			resumeButton.setEnabled(false);
+			menuButton.setEnabled(false);
+			quitButton.setEnabled(false);
+			paused = false;
+		}
+		
+		@Override
+		protected void paintComponent( Graphics g ) {
+			
+			super.paintComponent(g);
+			Graphics2D g2d = (Graphics2D) g;
+			g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+							RenderingHints.VALUE_ANTIALIAS_ON);
+			
+		}
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			// TODO Auto-generated method stub
+			switch ( e.getActionCommand() ) {
+			case "resume":
+				closeMenu();
+				break;
+			case "menu":
+				aStateMachine.change("mainmenu");
+				break;
+			case "quit":
+				aFrame.dispatchEvent( new WindowEvent( aFrame, WindowEvent.WINDOW_CLOSING));
+				break;
+			default:
+				throw new IllegalStateException("Unexpected value: " + String.valueOf( e.getActionCommand()));
+			}
+		}
+	}
+	
+	/*
+	//Initial menu the player views
+	class LoadPanel extends JPanel implements ActionListener {
+		
+		public LoadPanel( JFrame frame ) {
+			
+		}
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			// TODO Auto-generated method stub
+			
+		}
+		
+	}*/
+	
+	//Holds Events
 	class EventLogPanel extends JPanel {
 		
 		public EventLogPanel( JFrame aFrame ) {
@@ -133,6 +275,7 @@ public class GameScreen implements IState {
 		
 	}
 	
+	//Holds the inventory
 	class InventoryPanel extends JPanel {
 		
 		public InventoryPanel( JFrame aFrame ) {
@@ -163,15 +306,27 @@ public class GameScreen implements IState {
 		aMapPanel = new MapScreenPanel( aFrame );
 		aEventLogPanel = new EventLogPanel( aFrame );
 		aInventoryPanel = new InventoryPanel( aFrame );
+		gameMenu = new GameMenu();
 		
-		aFrame.add( aMapPanel );
-		aFrame.add( aEventLogPanel );
-		aFrame.add( aInventoryPanel );
+		//Used so we can make panels on top of other panels
+		gamePanes = new JLayeredPane();
+		gamePanes.setBounds(0, 0, aFrame.getContentPane().getSize().width , aFrame.getContentPane().getSize().height);
 		
-		aFrame.setLayout( null );
+		//Panel to hold all the panels
+		JPanel gamePanelsHolder = new JPanel( null );
+		gamePanelsHolder.setBounds(0, 0, aFrame.getContentPane().getSize().width , aFrame.getContentPane().getSize().height);
+		gamePanelsHolder.add( aMapPanel );
+		gamePanelsHolder.add( aEventLogPanel );
+		gamePanelsHolder.add( aInventoryPanel );
+		
+		gamePanes.add( gamePanelsHolder, 0 );
+		gamePanes.add( gameMenu, 1 );
+		
+		aFrame.add( gamePanes );
+		
+		//aFrame.setLayout( null );
 		aFrame.revalidate();
 		aFrame.repaint();
-
 	}
 	
 	
@@ -185,13 +340,8 @@ public class GameScreen implements IState {
 
 	@Override
 	public void render() {
-		//Only redraw if we need to
-		if ( redraw == true ) {
-			aFrame.repaint();
-			redraw = false;
-		}
+		aFrame.repaint();
 		
-
 	}
 
 	@Override
@@ -203,7 +353,7 @@ public class GameScreen implements IState {
 
 	@Override
 	public void onExit() {
-		// TODO Auto-generated method stub
+		aFrame.getContentPane().removeAll();
 	}
 
 }

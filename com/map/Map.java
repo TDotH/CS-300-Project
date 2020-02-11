@@ -23,7 +23,12 @@
 package com.map;
 
 import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.Toolkit;
 import java.io.*;
+
+import javax.imageio.ImageIO;
+
 import com.player.*;
 
 public class Map {
@@ -35,8 +40,21 @@ public class Map {
     //Controls size of tiles
     private static int LINE_WIDTH = 48;
     
+    //The tileset to be used
+    private Image tileset = null;
+    
     //Blank Constructor
-    public Map() {}
+    public Map() {
+    	//Ignore for now
+    	//tileset = Toolkit.getDefaultToolkit().getImage(("src/images/tileset.png"));
+    	/*try {
+    		tileset = ImageIO.read(getClass().getClassLoader().getResourceAsStream("resources/images/tileset.png"));
+    	}
+    	catch (IOException ex) {
+    		System.out.println("Error! Tileset can't be loaded!");
+    	}*/
+    	
+    }
     
     //Construct a blank map with the given width and height
     public Map( int width, int height ) {
@@ -58,7 +76,8 @@ public class Map {
     public void loadMap(String filename) throws Exception {
         File file = new File(filename); //Read in file
         BufferedReader br = new BufferedReader(new FileReader(file)); //set up buffer reader
-
+       // tileset = Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("src/images/tileset.png"));
+        
         String str; //Holds the data from file
         if ((str = br.readLine()) != null) { //Check for first line
             String[] size_of_map = str.split(","); //Split string
@@ -84,6 +103,7 @@ public class Map {
             str = br.readLine(); //Read in line
             for (int x = 0; x < width; ++x) {
                 Types type; // For initializing individual tiles
+                int tempInt = -1;
                 
                 switch ( Integer.parseInt( String.valueOf(str.charAt(x)))) { //assign from file index
 	                case 0:
@@ -91,6 +111,7 @@ public class Map {
 	                	break;
 	                case 1:
 	                    type = Types.FOREST;
+	                    tempInt = 0;
 	                    break;
 	                case 2:
 	                    type = Types.SWAMP;
@@ -100,6 +121,7 @@ public class Map {
 	                    break;
 	                case 4:
 	                    type = Types.WATER;
+	                    tempInt = 12;
 	                    break;
 	                case 5:
 	                    type = Types.MOUNTAINS;
@@ -116,6 +138,7 @@ public class Map {
 
                 //Initialize tile
                 map[x][y] = new Tile(type);
+                //map[x][y].setImageID(tempInt);
             }
         }
     }
@@ -163,7 +186,7 @@ public class Map {
     	
     	for ( int x = 0; x < width; x++ ) { 
     		for ( int y = 0; y < height; y++) {
-    			map[x][y].draw(g, 50, centerPosX + LINE_WIDTH * x, centerPosY + LINE_WIDTH * y);
+    			map[x][y].draw(g, LINE_WIDTH, centerPosX + LINE_WIDTH * x, centerPosY + LINE_WIDTH * y ); // tileset );
     		}
     	}    	
     }
@@ -188,7 +211,7 @@ public class Map {
 	            	if ( y >= 0 && y < height ) {
 	            		tempPosX =  LINE_WIDTH * ( i );
 	            		tempPosY = LINE_WIDTH * ( j );
-		                map[x][y].draw(g, LINE_WIDTH, tempPosX, tempPosY);
+		                map[x][y].draw(g, LINE_WIDTH, tempPosX, tempPosY ); //, tileset );
 		                j++;
 	            	}
 	            }
@@ -234,5 +257,9 @@ public class Map {
     public int getStartX() { return startX; }
     public int getStartY() { return startY; }
     public int getTileSize() { return LINE_WIDTH; }
+    
+    //Setters
+    public void setStartX( int startX ) { this.startX = startX; }
+    public void setStartY( int startY ) { this.startY = startY; }
 
 }

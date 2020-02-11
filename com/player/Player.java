@@ -18,6 +18,9 @@ public class Player {
     //Energy and money; unused until items are ready
     //private int energy, money;
 
+    //Empty Constructor
+    public Player() {}
+    
     //Constructor: startX, startY, maxX, maxY, minX, minY
 	public Player( int posX, int posY, int maxX, int maxY ) {
 		
@@ -95,6 +98,23 @@ public class Player {
     	//Set the player's position relative to the camera
     	int tempPosX = tile_size * ( posX - camera.getCameraPosX() + camera.gettileMaxWidth()/2 ) + offSetX;
     	int tempPosY = tile_size * ( posY - camera.getCameraPosY() + camera.gettileMaxHeight()/2 ) + offSetY;
+    	
+    	g.fillRect( tempPosX, tempPosY, playerSz, playerSz );
+    	
+    }
+    
+    //Draws at the current location, used for the map editor
+    public void draw( Graphics2D g, int tile_size, int centerPosX, int centerPosY ) {
+    	
+    	int playerSz = (tile_size/2);
+    	int offSetX = (tile_size/4);
+    	int offSetY = (tile_size/4);
+    	
+    	g.setColor(Color.RED);
+    	
+    	//Set the player's position 
+    	int tempPosX = centerPosX + tile_size * ( this.posX ) + offSetX;
+    	int tempPosY = centerPosY + tile_size * ( this.posY ) + offSetY;
     	
     	g.fillRect( tempPosX, tempPosY, playerSz, playerSz );
     	

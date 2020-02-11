@@ -4,7 +4,6 @@
  *  Passes stuff to the event log
  */
 package com.statemachine;
-import java.awt.KeyboardFocusManager;
 import java.util.HashMap;
 
 import javax.swing.JFrame;
@@ -42,7 +41,8 @@ public class StateMachine {
 		
 		//System.out.println(stateName);
 		if ( currentState != null ) {
-			mainFrame.getContentPane().removeAll(); //Clean the frame
+			//mainFrame.getContentPane().removeAll(); //Clean the frame
+			currentState.onExit();
 		}
 		currentState = mStates.get(stateName);
 		currentState.onEnter( mainFrame );

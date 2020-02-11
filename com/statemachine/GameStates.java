@@ -2,18 +2,21 @@
  * A enum of all possible game states
  */
 package com.statemachine;
+import com.screens.*;
 
 public enum GameStates {
 
 	MAINMENU("mainmenu"), MAPEDITOR("mapeditor"), GAMESCREEN("gamescreen");
 	
-	String state;
+	String stateName;
+	String className;
 	
-	GameStates( String state ) {
+	GameStates( String stateName ) {
 		
-		this.state = state;
+		this.stateName = stateName;
 	}
 	
-	public String getState() { return state; }
+	public String getStateName() { return stateName; }
+	//public IState getGameState() { return gameState; }
 	
 }

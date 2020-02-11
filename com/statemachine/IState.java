@@ -10,5 +10,5 @@ public interface IState {
 	public void render();
 	public void onEnter( JFrame aFrame );
 	public void onExit();
-
+	
 }
