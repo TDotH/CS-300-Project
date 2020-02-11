@@ -9,30 +9,32 @@ package com.player;
 import java.awt.event.KeyEvent;
 import java.awt.Color;
 import java.awt.Graphics2D;
+import Tile.java;
+import Types.java;
 
 public class Player {
-	
+
     //integers that hold the current position coordinates, as well as the map boundaries
     private int posX, posY, upBoundX, upBoundY;
-    
+
     //Energy and money; unused until items are ready
     //private int energy, money;
 
     //Empty Constructor
     public Player() {}
-    
+
     //Constructor: startX, startY, maxX, maxY, minX, minY
-	public Player( int posX, int posY, int maxX, int maxY ) {
-		
-		setPos( posX, posY );
-		setBounds( maxX - 1, maxY - 1);
-		
-	}
+    public Player( int posX, int posY, int maxX, int maxY ) {
+
+        setPos( posX, posY );
+        setBounds( maxX - 1, maxY - 1);
+
+    }
 
     //sets position coordinates to specified arguments
     public void setPos(int startX, int startY) {
-	    posX = startX;
-	    posY = startY;
+        posX = startX;
+        posY = startY;
     }
 
     //set map boundary coordinates
@@ -42,92 +44,131 @@ public class Player {
     }
 
     //Keyboard events from Frupal.java
-    public void keyPressed(KeyEvent e) {
-        if (e.getKeyCode() == KeyEvent.VK_LEFT)
-            moveWest();
-        if (e.getKeyCode() == KeyEvent.VK_RIGHT)
-            moveEast();
-        if(e.getKeyCode() == KeyEvent.VK_UP)
-            moveNorth();
-        if(e.getKeyCode() == KeyEvent.VK_DOWN)
-            moveSouth();
+    //returns an int greater than 0 (energy spent) if movement possible, 0 if obstacle is in the way,
+    //-1 if shopkeeper tile is encountered, -2 if caverns (jewels, gameOver) are encountered
+    //returns -3 if player tries to move out of bounds (no movement occurs)
+    public int keyPressed(KeyEvent e) {
+        Tile current_tile;
+        int energyUsed;
+        if(e.getKeyCode() == KeyEvent.VK_LEFT) {
+            if ((posX - 1) >= 0) {
+                current_tile = get_tile(posX - 1, posY);
+                energyUsed = determineEnergy(current_tile);
+                if(energyUsed > 0)
+                    --posX;
+                else
+                    return energyUsed;
+            }
+            else
+                return -3;
+        }
+        if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
+            if((posX + 1) <= upBoundX) {
+                current_tile = get_tile(posX + 1, posY);
+                energyUsed = determineEnergy(current_tile);
+                if(energyused > 0)
+                    ++posX;
+                else
+                    return energyUsed;
+            }
+            else
+                return -3;
+        }
+        if(e.getKeyCode() == KeyEvent.VK_UP) {
+            if((posY + 1) <= upBoundY) {
+                current_tile = get_tile(posX, posyY + 1);
+                energyUsed = determineEnergy(current_tile);
+                if(energyUsed > 0)
+                    ++posY;
+                else
+                    return energyUsed;
+            else
+                return -3;
+        }
+        if(e.getKeyCode() == KeyEvent.VK_DOWN) {
+            if ((posY - 1 >= 0)) {
+                current_tile = get_tile(posX, posY - 1);
+                energyUsed = determineEnergy(current_tile);
+                if(energyUsed > 0)
+                    --posY;
+                else
+                    return energyUsed;
+            else
+                return -3;
+        }
     }
 
-    //Checks if player is within bounds before moving
-    public int moveNorth() {
-        if((posY - 1) >= 0) {
-            --posY;
-            return 0;
+    //Returns the amount of energy used to move
+    public int determineEnergy(Tile current_tile) {
+        switch (current_tile) {
+            case 1:
+                current_tile instanceof Types.FOREST;
+                return 1;
+            case 2:
+                current_tile instanceof Types.SWAMP;
+                return 2;
+            case 3:
+                current_tile instanceof Types.DESERT;
+                return 2;
+            case 4:
+                current_tile instanceof Types.WATER;
+                return 0;
+            case 5:
+                current_tile instanceof Types.MOUNTAINS;
+                return 0;
+            case 6:
+                current_tile instanceof Types.SHOPKEEPER;
+                return -1;
+            case 7:
+                current_tile instanceof Types.CAVERNS;
+                return -2;
         }
-        return 1;
     }
 
-    public int moveSouth() {
-        if((posY + 1) <= upBoundY) {
-            ++posY;
-            return 0;
-        }
-        return 1;
-    }
 
-    public int moveEast() {
-        if((posX + 1) <= upBoundX) {
-            ++posX;
-            return 0;
-        }
-        return 1;
-    }
-
-    public int moveWest() {
-        if ((posX - 1) >= 0) {
-            --posX;
-            return 0;
-        }
-        return 1;
-    }
-    
     //Draws the player according to the given tile size and relative to the camera; offsets movement by tile size
     public void draw( Graphics2D g, int tile_size, Camera camera ) {
-    	
+
     	int playerSz = (tile_size/2);
     	int offSetX = (tile_size/4);
     	int offSetY = (tile_size/4);
-    	
+
     	g.setColor(Color.RED);
-    	
+
     	//Set the player's position relative to the camera
     	int tempPosX = tile_size * ( posX - camera.getCameraPosX() + camera.gettileMaxWidth()/2 ) + offSetX;
     	int tempPosY = tile_size * ( posY - camera.getCameraPosY() + camera.gettileMaxHeight()/2 ) + offSetY;
-    	
+
     	g.fillRect( tempPosX, tempPosY, playerSz, playerSz );
-    	
+
     }
-    
+
     //Draws at the current location, used for the map editor
     public void draw( Graphics2D g, int tile_size, int centerPosX, int centerPosY ) {
-    	
+
     	int playerSz = (tile_size/2);
     	int offSetX = (tile_size/4);
     	int offSetY = (tile_size/4);
-    	
+
     	g.setColor(Color.RED);
-    	
-    	//Set the player's position 
+
+    	//Set the player's position
     	int tempPosX = centerPosX + tile_size * ( this.posX ) + offSetX;
     	int tempPosY = centerPosY + tile_size * ( this.posY ) + offSetY;
-    	
+
     	g.fillRect( tempPosX, tempPosY, playerSz, playerSz );
-    	
+
     }
-    
+
     //Getters
+
     public int getPosX() {
-    	
-    	return posX;
+
+        return posX;
     }
-    
+
     public int getPosY() {
-    	
-    	return posY;
+
+        return posY;
     }
 }
