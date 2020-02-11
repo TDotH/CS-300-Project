@@ -34,7 +34,7 @@ public class GameScreen implements IState {
 	private KeyboardFocusManager manager;
 	private GameMenu gameMenu;
 	private JLayeredPane gamePanes;
-	private boolean paused = false;
+	private boolean paused;
 	
 	public JFrame aFrame;
 	
@@ -73,6 +73,10 @@ public class GameScreen implements IState {
 			manager = KeyboardFocusManager.getCurrentKeyboardFocusManager();
 			manager.addKeyEventDispatcher( aKeyDispatcher );
 
+		}
+		
+		private void closeManager() {
+			manager.removeKeyEventDispatcher(aKeyDispatcher);
 		}
 		
 		//Update the camera
@@ -140,6 +144,8 @@ public class GameScreen implements IState {
 		private JButton quitButton;
 		
 		public GameMenu() {
+			
+			paused = false;
 	
 			this.setBounds(0, 0, aFrame.getContentPane().getWidth(), aFrame.getContentPane().getHeight());
 			this.setBackground( new Color(100, 100, 100, 100) );
@@ -228,6 +234,7 @@ public class GameScreen implements IState {
 				closeMenu();
 				break;
 			case "menu":
+				paused = false; //Make sure paused is always false
 				aStateMachine.change("mainmenu");
 				break;
 			case "quit":
@@ -327,6 +334,7 @@ public class GameScreen implements IState {
 		//aFrame.setLayout( null );
 		aFrame.revalidate();
 		aFrame.repaint();
+		
 	}
 	
 	
@@ -353,6 +361,7 @@ public class GameScreen implements IState {
 
 	@Override
 	public void onExit() {
+		aMapPanel.closeManager();
 		aFrame.getContentPane().removeAll();
 	}
 

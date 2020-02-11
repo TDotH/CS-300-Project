@@ -520,6 +520,7 @@ public class MapEditor extends JFrame implements IState {
 
 	@Override
 	public void onExit() {
+		manager.removeKeyEventDispatcher(aKeyDispatcher);
 		frame.getContentPane().removeAll(); //Clear the frame
 	}
 	
