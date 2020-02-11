@@ -1,4 +1,4 @@
-//package fruPack;
+package com.player;
 
 /* Author: Tyde Hashimoto
  * Date: 1/28/20
@@ -8,11 +8,6 @@
 
 public class Camera {
 	
-	//Size of the viewport in the window
-	private int viewPortSzX, viewPortSzY;
-	
-	//Position of the origin of the viewport in the window
-	private int windowPosX, windowPosY;
 	
 	//How many tiles can be rendered with the given viewport and tile sizes
 	private int tileMaxWidth, tileMaxHeight;
@@ -23,19 +18,14 @@ public class Camera {
 	//The outer bounds of the map
 	private int mapMaxX, mapMaxY;
 	
-	public Camera( int viewPortSzX, int viewPortSzY, int tileWidth, int windowPosX, int windowPosY, int cameraPosX, int cameraPosY, int mapMaxX, int mapMaxY ) {		
-		
-
-		//Set the viewport size in the window
-		this.viewPortSzX = viewPortSzX;
-		this.viewPortSzY = viewPortSzY;
+	public Camera( int viewPortSzX, int viewPortSzY, int tileWidth, int cameraPosX, int cameraPosY, int mapMaxX, int mapMaxY ) {		
 		
 		// Calculate max tile size that can be drawn
 		tileMaxWidth = viewPortSzX / tileWidth;
 		tileMaxHeight = viewPortSzY / tileWidth;
-
 		
-		//If the max is greater than the size of the map, change if to the max of the map
+		
+		//If the max is greater than the size of the map, change it to the max of the map
 		if( tileMaxWidth > mapMaxX ) {
 			tileMaxWidth = mapMaxX - 1;
 		}
@@ -44,19 +34,13 @@ public class Camera {
 			tileMaxHeight = mapMaxY - 1;
 		}
 		
-		System.out.println("tileMaxWidth: " + tileMaxWidth);
-		
-		// Origin of the camera in window
-		this.windowPosX = windowPosX;
-		this.windowPosY = windowPosY;
-		
 		// Current position of the camera on the map
 		this.cameraPosX = cameraPosX;
 		this.cameraPosY = cameraPosY;
 		
 		// Max bounds of the map
-		this.mapMaxX = mapMaxX - 1;
-		this.mapMaxY = mapMaxY - 1;	
+		this.mapMaxX = mapMaxX -1;
+		this.mapMaxY = mapMaxY -1;	
 		
 		//Make sure the camera is in the correct position no matter what origin is given
 		update( cameraPosX, cameraPosY );
@@ -69,28 +53,24 @@ public class Camera {
 		cameraPosX = playerPosX;
 		cameraPosY = playerPosY;
 		
-		if( cameraPosX - tileMaxWidth/2 < 0 ) {
+		if( cameraPosX - mapMaxX/2 < 0 ) {
 			
-			cameraPosX = tileMaxWidth/2;
-	
+			cameraPosX = mapMaxX/2;
 		}
 		
-		if( cameraPosY - tileMaxHeight/2 < 0 ) {
+		if( cameraPosY - mapMaxY/2 < 0 ) {
 			
-			cameraPosY = tileMaxHeight/2;
-	
+			cameraPosY = mapMaxY/2;
 		}
 		
-		if( cameraPosX + tileMaxWidth/2 > mapMaxX ) {
+		if( cameraPosX + tileMaxWidth/2 > mapMaxX  ) {
 			
 			cameraPosX = mapMaxX - tileMaxWidth/2;
-	
 		}
 		
 		if( cameraPosY + tileMaxHeight/2 > mapMaxY ) {
 			
 			cameraPosY = mapMaxY - tileMaxHeight/2;
-	
 		}
 		
 	}
@@ -98,8 +78,6 @@ public class Camera {
 	// Getters
 	public int gettileMaxWidth() { return tileMaxWidth; }
 	public int gettileMaxHeight() { return tileMaxHeight; }
-	public int getWindowPosX() { return windowPosX; }
-	public int getWindowPosY() { return windowPosY; }
 	public int getCameraPosX() { return cameraPosX; }
 	public int getCameraPosY() { return cameraPosY; }
 	

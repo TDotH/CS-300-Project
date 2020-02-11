@@ -1,4 +1,4 @@
-//package fruPack;
+package com.player;
 
 /*TODO
  * -Add energy and money
@@ -19,6 +19,9 @@ public class Player {
 
     //Energy and money; unused until items are ready
     //private int energy, money;
+
+    //Empty Constructor
+    public Player() {}
 
     //Constructor: startX, startY, maxX, maxY, minX, minY
     public Player( int posX, int posY, int maxX, int maxY ) {
@@ -126,23 +129,38 @@ public class Player {
     //Draws the player according to the given tile size and relative to the camera; offsets movement by tile size
     public void draw( Graphics2D g, int tile_size, Camera camera ) {
 
-        int playerSz = (tile_size/2);
-        int offSetX = (tile_size/4);
-        int offSetY = (tile_size/4);
+    	int playerSz = (tile_size/2);
+    	int offSetX = (tile_size/4);
+    	int offSetY = (tile_size/4);
 
-        //Default render positions (at camera origin)
-        int tempPosX = camera.getWindowPosX() + offSetX;
-        int tempPosY = camera.getWindowPosY() + offSetY;
+    	g.setColor(Color.RED);
 
-        g.setColor(Color.RED);
+    	//Set the player's position relative to the camera
+    	int tempPosX = tile_size * ( posX - camera.getCameraPosX() + camera.gettileMaxWidth()/2 ) + offSetX;
+    	int tempPosY = tile_size * ( posY - camera.getCameraPosY() + camera.gettileMaxHeight()/2 ) + offSetY;
 
-        //Set the player's position relative to the camera
-        tempPosX = camera.getWindowPosX() + tile_size * ( posX - camera.getCameraPosX() + camera.gettileMaxWidth()/2 ) + offSetX;
-        tempPosY = camera.getWindowPosY() + tile_size * ( posY - camera.getCameraPosY() + camera.gettileMaxHeight()/2 ) + offSetY;
-
-        g.fillRect( tempPosX, tempPosY, playerSz, playerSz );
+    	g.fillRect( tempPosX, tempPosY, playerSz, playerSz );
 
     }
+
+    //Draws at the current location, used for the map editor
+    public void draw( Graphics2D g, int tile_size, int centerPosX, int centerPosY ) {
+
+    	int playerSz = (tile_size/2);
+    	int offSetX = (tile_size/4);
+    	int offSetY = (tile_size/4);
+
+    	g.setColor(Color.RED);
+
+    	//Set the player's position
+    	int tempPosX = centerPosX + tile_size * ( this.posX ) + offSetX;
+    	int tempPosY = centerPosY + tile_size * ( this.posY ) + offSetY;
+
+    	g.fillRect( tempPosX, tempPosY, playerSz, playerSz );
+
+    }
+
+    //Getters
 
     public int getPosX() {
 
