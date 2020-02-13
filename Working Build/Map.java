@@ -82,34 +82,34 @@ public class Map {
                 ++x;
                 switch (str.charAt(x)) { //assign from file index
                     case 'B':
-                        item = new Tool("Boat");
+                        item = new Tool(Items.BOAT);
                         break;
                     case 'C':
-                        item = new Tool("Chainsaw");
+                        item = new Tool(Items.CHAINSAW);
                         break;
                     case 'E':
-                        item = new Food("Energy");
+                        item = new Food(Items.POWERBAR);
                         break;
                     case 'F':
-                        item = new Food("Fish");
+                        item = new Food(Items.FISH);
                         break;
                     case 'G':
-                        item = new Tool("Gold");
+                        item = new Food(Items.GOLD);
                         break;
                     case 'L':
-                        item = new Tool("Flashlight");
+                        item = new Tool(Items.BINOCULARS);
                         break;
                     case 'P':
-                        item = new Tool("Pickaxe");
+                        item = new Tool(Items.JACKHAMMER);
                         break;
                     case 'R':
-                        item = new Tool("Rope");
+                        item = new Tool(Items.ROPE);
                         break;
                     case 'S':
-                        item = new Tool("Shears");
+                        item = new Tool(Items.WEEDWHACKER);
                         break;
                     case 'X':
-                        item = new Tool(" ");
+                        item = new Tool(Items.DEFAULT);
                         break;
 
                     default: //okay intelliJ lol

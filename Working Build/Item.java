@@ -5,116 +5,41 @@ package com.company;
    Course: CS300
    Date: 1/18/2020
    File: Implementation File
-   Proj: This file contains the com.company.Item class.
+   Proj: This file contains the Item class.
 */
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.util.Scanner;
 
 public abstract class Item
 {
+    private Items item;
     protected Scanner input = null;
     // Private Fields //
-    // The name of the venue.
-    private String name;
-    // The name of the venue.
-    private String description;
     private int quantity;
-  //  private Tile[][] item; //Container for the map/tiles
-    private int width, height; //Width and height of the map
 
-    /*
-    public Item(String filename) throws Exception {
-        File file = new File(filename); //Read in file
-        BufferedReader br = new BufferedReader(new FileReader("src/default_map.txt")); //set up buffer reader
-
-        String str; //Holds the data from file
-        if ((str = br.readLine()) != null) { //Check for first line
-            String[] size_of_map = str.split(","); //Split string
-
-            //Get map size
-            width = Integer.parseInt(size_of_map[0]);
-            height = Integer.parseInt(size_of_map[1]);
-
-            item = new Tile[width][height]; //Initialize map
-        } else return;
-
-        //Iterate through file (The for loops may cause errors if the file doesn't match the given size)
-        for (int y = 0; y < height; ++y) {
-            str = br.readLine(); //Read in line
-            for (int x = 0; x < width; ++x) {
-                Types type; // For initializing individual tiles
-
-                switch (str.charAt(x)) { //assign from file index
-                    case 'F':
-                        type = Types.FOREST;
-                        break;
-                    case 'S':
-                        type = Types.SWAMP;
-                        break;
-                    case 'D':
-                        type = Types.DESERT;
-                        break;
-                    case 'W':
-                        type = Types.WATER;
-                        break;
-                    case 'M':
-                        type = Types.MOUNTAINS;
-                        break;
-                    case 'K':
-                        type = Types.SHOPKEEPER;
-                        break;
-                    case 'C':
-                        type = Types.CAVERNS;
-                        break;
-
-                    default: //okay intelliJ lol
-                        throw new IllegalStateException("Unexpected value: " + str.charAt(x));
-                }
-
-                //Initialize tile
-                item[x][y] = new Tile(type);
-            }
-        }
-    }
-
-
-     */
     // Public Methods
     Item()
     {
-        name = null;
-        description = null;
+        item = null;
         quantity = 0;
     }
 
 
     public Item(String type)
     {
-        name = type;
-        description = null;
+        item = null;
         quantity = 0;
     }
-/*
-    com.company.Item(String name)
+
+
+
+    public Item(Items type)
     {
-        input = new Scanner(System.in);
-        System.out.println("What do you want to name the " + name + " item?");
-
-        this.name = input.nextLine();
-
-        System.out.println("What do you want to name the description to be?");
-        this.description = input.nextLine();
-
-        quantity = 0;
+        item = type;
     }
-*/
-
 
     /*
-        Copies the venue that is passed in as an argument.
+        Copies the item that is passed in as an argument.
 
         It uses RTTI in the form of getClass() to determine
         what the values of the next reference and each of the objects in
@@ -122,8 +47,7 @@ public abstract class Item
     */
     Item(Item copy)
     {
-        name = copy.name;
-        description = copy.description;
+        item = copy.item;
         quantity = copy.quantity;
     }
 
@@ -150,56 +74,52 @@ public abstract class Item
 
 
 
-    /*
-    public void copyItem(Entertainment copy)
-    {
-    }
-     */
-
-
-
     public void copy(Item get)
     {
-        description = get.description;
+        item.description = get.item.description;
         quantity = get.quantity;
-        name = get.name;
+        item.name = get.item.name;
     }
 
 
 
     public int compareEquality(String check)
     {
-        if (name != null)
+        if (item.name != null)
         {
-            return name.compareToIgnoreCase(check);
+            return item.name.compareToIgnoreCase(check);
         }
         else
         {
             return -1;
         }
     }
+
 
 
     public int compareEquality(Item check)
     {
-        if (name != null)
+        if (item.name != null)
         {
-            return name.compareToIgnoreCase(check.name);
+            return item.name.compareToIgnoreCase(check.item.name);
         }
         else
         {
             return -1;
         }
     }
+
+
+
     /*
         Compares object's name variable to passed in string,
         ignoring the upper and lower case differences.
     */
     public boolean compareName(String check)
     {
-        if (name != null)
+        if (item.name != null)
         {
-            if (name.compareToIgnoreCase(check) >= 0)
+            if (item.name.compareToIgnoreCase(check) >= 0)
             {
                 return true;
             }
@@ -215,11 +135,12 @@ public abstract class Item
     }
 
 
+
     public boolean compareName(Item check)
     {
-        if (name != null)
+        if (item.name != null)
         {
-            if (name.compareToIgnoreCase(check.name) >= 0)
+            if (item.name.compareToIgnoreCase(check.item.name) >= 0)
             {
                 return true;
             }
@@ -238,14 +159,14 @@ public abstract class Item
 
     public void displayName()
     {
-        System.out.print(name);
+        System.out.print(item.name);
     }
 
 
 
     public void displayDescription()
     {
-        System.out.print(description);
+        System.out.print(item.description);
     }
 
 
@@ -255,8 +176,8 @@ public abstract class Item
     */
     public void nullify()
     {
-        name = null;
-        description = null;
+        item.name = null;
+        item.description = null;
         quantity = 0;
     }
 
@@ -274,12 +195,6 @@ public abstract class Item
         {
             return 2;
         }
-        /*
-        else if (this.getClass() == Entertainment.class)
-        {
-            return 3;
-        }
-         */
         else
         {
             return 0;
@@ -314,13 +229,6 @@ public abstract class Item
                 itemT = new Tool(temp);
                 success = true;
             }
-            /*
-            else if (temp.equalsIgnoreCase("Entertainment"))
-            {
-                itemT = new Entertainment(temp);
-                success = true;
-            }
-             */
             else
             {
                 System.out.println("That was not a valid choice. Please press \"t\" to try again," +
@@ -373,21 +281,18 @@ public abstract class Item
     public boolean display()
     {
         boolean success = true;
-        if (name != null)
+        if (item != null)
         {
-            if (description != null)
+            System.out.println("com.company.Item " + item.name + "'s description is " + item.description + ".");
+            System.out.print("There ");
+            if (quantity == 1)
+                System.out.print("is ");
+            else
             {
-                System.out.println("com.company.Item " + name + "'s description is " + description + ".");
-                System.out.print("There ");
-                if (quantity == 1)
-                    System.out.print("is ");
-                else
-                {
-                    System.out.print("are ");
-                }
-                System.out.println(quantity + " of them.");
-                success = true;
+                System.out.print("are ");
             }
+            System.out.println(quantity + " of them.");
+            success = true;
         }
         else
         {
@@ -399,14 +304,14 @@ public abstract class Item
 
     public String getName()
     {
-        return name;
+        return item.name;
     }
 
 
     public String getNameInit()
     {
-        if (name != null)
-       return Character.toString(name.charAt(0));
+        if (item != null)
+            return Character.toString(item.name.charAt(0));
         else
         {
             return "";
@@ -416,7 +321,7 @@ public abstract class Item
 
     public boolean isEmpty()
     {
-        if (name == null)
+        if (item == null)
         {
             return true;
         }

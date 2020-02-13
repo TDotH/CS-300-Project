@@ -24,6 +24,12 @@ public class Food extends Item
 
 
 
+    public Food(Items type)
+    {
+        super(type);
+    }
+
+
     Food(Food copy)
     {
         super(copy);
