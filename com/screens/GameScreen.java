@@ -17,11 +17,16 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowEvent;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.PrintWriter;
 
 import javax.swing.*;
 
 import com.statemachine.*;
 import com.map.Map;
+import com.map.Tile;
 import com.player.*;
 
 public class GameScreen implements IState {
@@ -52,27 +57,61 @@ public class GameScreen implements IState {
 		private Player player;
 		private Camera camera;
 		
+		//Config file path
+		private static final String CONFIG_FILE = "src/maps/config.ini";
+		
 		KeyDispatcher aKeyDispatcher = new KeyDispatcher();
 		
 		public MapScreenPanel( JFrame aFrame ) {
 			this.setBounds(0, 0, MAP_SCREEN_PANEL_WIDTH, aFrame.getContentPane().getSize().height );
 		
-			map = new Map();
-			try {
-				map.loadMap("src/maps/aFile.map");
-
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			
-			player = new Player( map.getStartX(), map.getStartY(), map.getWidth(), map.getHeight() );
-			camera = new Camera( this.getWidth(), this.getHeight(), map.getTileSize(), map.getStartX(), map.getStartY(), map.getWidth(), map.getHeight() );
+			//Load the config file
+			this.loadConfig();
 			
 			this.setBackground( Color.DARK_GRAY );
 			manager = KeyboardFocusManager.getCurrentKeyboardFocusManager();
 			manager.addKeyEventDispatcher( aKeyDispatcher );
 
+		}
+		
+		//Load config file and setup map, player, and camera
+		private void loadConfig() {
+			
+	    	try {
+	    		
+	    		String tempString;
+	    		
+				File file = new File( CONFIG_FILE ); //Read in file
+			    BufferedReader br = new BufferedReader(new FileReader(file)); //set up buffer reader
+
+			    //First line is map location
+			    tempString = br.readLine();
+				map = new Map();
+				try {
+					map.loadMap( tempString );
+
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+				//Second line is player's starting energy
+			    tempString = br.readLine();
+				try {
+					player = new Player( map.getStartX(), map.getStartY(), map.getWidth(), map.getHeight() );
+					camera = new Camera( this.getWidth(), this.getHeight(), map.getTileSize(), map.getStartX(), map.getStartY(), map.getWidth(), map.getHeight() );
+					player.setEnergy( Integer.parseInt( tempString ));
+
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+	    		br.close(); //Close the stream
+	    	} catch (Exception e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 		}
 		
 		private void closeManager() {
@@ -113,10 +152,12 @@ public class GameScreen implements IState {
 	            		else if ( paused == true ) {
 	            			gameMenu.closeMenu();
 	            		}
-	            	
 	            	}
-	            	if ( paused == false ) {
-	            		player.keyPressed(e);
+	            	else {
+		            	if ( paused == false ) {
+		            		player.keyPressed( e, map );
+		            		System.out.println("Energy remaining: " + player.getEnergy());
+		            	}
 	            	}
 	            } 
 	            else if (e.getID() == KeyEvent.KEY_TYPED) {
@@ -279,7 +320,6 @@ public class GameScreen implements IState {
 			g.drawString("Event log goes here", this.getWidth()/3, this.getHeight()/2 );
 			
 		}
-		
 	}
 	
 	//Holds the inventory

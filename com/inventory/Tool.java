@@ -6,7 +6,7 @@
    Proj: This file contains the Tool class.
 */
 
-package com.company;
+package com.inventory;
 
 import java.util.Scanner;
 

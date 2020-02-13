@@ -76,6 +76,7 @@ public class Frupal extends JPanel {
 		gGameMode.add("mainmenu", new MainMenu( gGameMode ));
 		gGameMode.add("mapeditor", new MapEditor( gGameMode ));
         gGameMode.add("gamescreen", new GameScreen( gGameMode ));
+        gGameMode.add("initscreen", new InitScreen( gGameMode ));
 
 	}	
 }

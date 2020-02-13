@@ -1,4 +1,4 @@
-package com.company;
+package com.inventory;
 
 /*
    Author: Mustafa Radheyyan

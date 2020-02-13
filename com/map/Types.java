@@ -27,8 +27,8 @@ public enum Types {
 		this.passable = passable;
 	}
 	
-	int getTileID() { return tileID; }
-	int getEnergyCost() { return energyCost; }
-	boolean getPassable() { return passable; }
+	public int getTileID() { return tileID; }
+	public int getEnergyCost() { return energyCost; }
+	public boolean getPassable() { return passable; }
 	
 }

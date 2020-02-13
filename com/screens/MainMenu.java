@@ -44,9 +44,10 @@ public class MainMenu extends JFrame implements IState{
 			this.setBounds( aFrame.getContentPane().getWidth()/2 - width/2, aFrame.getContentPane().getHeight()/2 - height/2 + offSetY, width, height);
 			this.setBorder( BorderFactory.createCompoundBorder( BorderFactory.createLineBorder(Color.black), BorderFactory.createEmptyBorder(15, 15, 15, 15 )));
 			
+			//this.setOpaque(true);
 			this.setBackground(Color.WHITE );
 			this.setLayout( new BoxLayout( this, BoxLayout.PAGE_AXIS ));
-			JButton playButton = new JButton("Play Game");
+			JButton playButton = new JButton("Start Game");
 			playButton.setMinimumSize( new Dimension( buttonWidth, buttonHeight ));
 			playButton.setMaximumSize( new Dimension( buttonWidth, buttonHeight ));
 			playButton.addActionListener(this);
@@ -93,7 +94,7 @@ public class MainMenu extends JFrame implements IState{
 						aStateMachine.change("mapeditor");
 						break;
 					case "gamescreen":
-						aStateMachine.change("gamescreen");
+						aStateMachine.change("initscreen");
 						break;
 					case "quit":
 						mainFrame.dispatchEvent( new WindowEvent( mainFrame, WindowEvent.WINDOW_CLOSING));

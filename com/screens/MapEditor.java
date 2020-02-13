@@ -7,6 +7,7 @@
 
 package com.screens;
 import com.map.*;
+import com.player.Objects;
 import com.player.Player;
 import com.statemachine.*;
 
@@ -42,6 +43,10 @@ public class MapEditor extends JFrame implements IState {
 	
 	//Current tile type to draw
 	Types currType = Types.DEFAULT;
+	Objects anObject;
+	
+	//Used to check if the player has saved recently
+	private boolean recentSave = false;
 	
 	//Used to figure out what is currently being drawn
 	enum Brushes {
@@ -93,6 +98,7 @@ public class MapEditor extends JFrame implements IState {
 		private boolean mapGenerated = false;
 		private boolean drawing = false;
 		private boolean playerSpawn = false;
+		;
 		
 		public MapPanel() {
 			
@@ -185,6 +191,8 @@ public class MapEditor extends JFrame implements IState {
 						int tempX = ( e.getX() - ( mapEditorWidth - mapWidth*TILE_SIZE )/2 ) / 50;
 						int tempY = ( e.getY() - ( mapEditorHeight - mapHeight*TILE_SIZE )/2 ) / 50;
 						
+						recentSave = false; 
+						
 						switch( aBrush ) {
 						
 							case TILES: 
@@ -207,7 +215,6 @@ public class MapEditor extends JFrame implements IState {
 									aPlayer = new Player();
 								}
 								aPlayer.setPos(tempX, tempY);
-								
 								break;
 								
 							default:
@@ -398,6 +405,7 @@ public class MapEditor extends JFrame implements IState {
 								try {
 									File aFile = new File( file.getName() );
 									mapPanel.saveMap( file.getPath() );
+									recentSave = true;
 								} catch (Exception e1) {
 									// TODO Auto-generated catch block
 									e1.printStackTrace();

@@ -9,17 +9,19 @@ package com.player;
 import java.awt.event.KeyEvent;
 import java.awt.Color;
 import java.awt.Graphics2D;
-import Tile.java;
-import Types.java;
+import com.map.*;
 
-public class Player {
+public class Player implements Objects {
 
     //integers that hold the current position coordinates, as well as the map boundaries
     private int posX, posY, upBoundX, upBoundY;
+    
+    //Player's energy
+    private int energy;
 
     //Energy and money; unused until items are ready
     //private int energy, money;
-
+    
     //Empty Constructor
     public Player() {}
 
@@ -28,6 +30,7 @@ public class Player {
 
         setPos( posX, posY );
         setBounds( maxX - 1, maxY - 1);
+        energy = 10000;
 
     }
 
@@ -43,86 +46,98 @@ public class Player {
         upBoundY = maxY;
     }
 
-    //Keyboard events from Frupal.java
     //returns an int greater than 0 (energy spent) if movement possible, 0 if obstacle is in the way,
     //-1 if shopkeeper tile is encountered, -2 if caverns (jewels, gameOver) are encountered
     //returns -3 if player tries to move out of bounds (no movement occurs)
-    public int keyPressed(KeyEvent e) {
-        Tile current_tile;
-        int energyUsed;
-        if(e.getKeyCode() == KeyEvent.VK_LEFT) {
-            if ((posX - 1) >= 0) {
-                current_tile = get_tile(posX - 1, posY);
-                energyUsed = determineEnergy(current_tile);
-                if(energyUsed > 0)
-                    --posX;
-                else
-                    return energyUsed;
-            }
-            else
-                return -3;
-        }
-        if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
-            if((posX + 1) <= upBoundX) {
-                current_tile = get_tile(posX + 1, posY);
-                energyUsed = determineEnergy(current_tile);
-                if(energyused > 0)
-                    ++posX;
-                else
-                    return energyUsed;
-            }
-            else
-                return -3;
-        }
-        if(e.getKeyCode() == KeyEvent.VK_UP) {
-            if((posY + 1) <= upBoundY) {
-                current_tile = get_tile(posX, posyY + 1);
-                energyUsed = determineEnergy(current_tile);
-                if(energyUsed > 0)
-                    ++posY;
-                else
-                    return energyUsed;
-            else
-                return -3;
-        }
-        if(e.getKeyCode() == KeyEvent.VK_DOWN) {
-            if ((posY - 1 >= 0)) {
-                current_tile = get_tile(posX, posY - 1);
-                energyUsed = determineEnergy(current_tile);
-                if(energyUsed > 0)
-                    --posY;
-                else
-                    return energyUsed;
-            else
-                return -3;
-        }
-    }
-
-    //Returns the amount of energy used to move
-    public int determineEnergy(Tile current_tile) {
-        switch (current_tile) {
-            case 1:
-                current_tile instanceof Types.FOREST;
-                return 1;
-            case 2:
-                current_tile instanceof Types.SWAMP;
-                return 2;
-            case 3:
-                current_tile instanceof Types.DESERT;
-                return 2;
-            case 4:
-                current_tile instanceof Types.WATER;
-                return 0;
-            case 5:
-                current_tile instanceof Types.MOUNTAINS;
-                return 0;
-            case 6:
-                current_tile instanceof Types.SHOPKEEPER;
-                return -1;
-            case 7:
-                current_tile instanceof Types.CAVERNS;
-                return -2;
-        }
+    public void keyPressed(KeyEvent e, Map map ) {
+    	
+    	switch ( e.getKeyCode() ) {
+    	
+    		case KeyEvent.VK_LEFT: 
+    			
+    			//Is the player at the bounds?
+                if ((posX - 1) >= 0) {
+                	
+                	//Get the type of the tile that will be moved to
+                	Types tileType = map.get_tile( posX - 1, posY ).getType();
+                	//Is the next tile passable?
+                	if ( tileType.getPassable() == true ) {
+                		//Move the player and take away from the player's energy count
+                		posX = posX - 1;
+                		energy -= tileType.getEnergyCost();
+                	}
+                	else {
+                		//Do nothing for now
+                	}
+                	
+                } else {
+                	//Do nothing
+                }
+                    break;
+			case KeyEvent.VK_RIGHT: 
+				
+	            if ((posX + 1) <= upBoundX) {
+                	
+                	//Get the type of the tile that will be moved to
+                	Types tileType = map.get_tile( posX + 1, posY ).getType();
+                	//Is the next tile passable?
+                	if ( tileType.getPassable() == true ) {
+                		//Move the player and take away from the player's energy count
+                		posX = posX + 1;
+                		energy -= tileType.getEnergyCost();
+                	}
+                	else {
+                		//Do nothing for now
+                	}
+                	
+                } else {
+                	//Do nothing
+	            }
+	            break;
+	            
+				case KeyEvent.VK_UP: 
+					
+		            if ((posY - 1) >= 0) {
+		            	
+		              	//Get the type of the tile that will be moved to
+	                	Types tileType = map.get_tile( posX, posY - 1 ).getType();
+	                	//Is the next tile passable?
+	                	if ( tileType.getPassable() == true ) {
+	                		//Move the player and take away from the player's energy count
+	                		posY = posY - 1;
+	                		energy -= tileType.getEnergyCost();
+	                	}
+	                	else {
+	                		//Do nothing for now
+	                	}
+	                	
+	                } else {
+	                	//Do nothing
+		            }
+		            break;
+		                
+					case KeyEvent.VK_DOWN: 
+			            if ((posY + 1 <= upBoundY )) {
+			            	
+			              	//Get the type of the tile that will be moved to
+		                	Types tileType = map.get_tile( posX, posY + 1 ).getType();
+		                	//Is the next tile passable?
+		                	if ( tileType.getPassable() == true ) {
+		                		//Move the player and take away from the player's energy count
+		                		posY = posY + 1;
+		                		energy -= tileType.getEnergyCost();
+		                	}
+		                	else {
+		                		//Do nothing for now
+		                	}
+		                	
+		                } else {
+		                	//Do nothing
+			            }
+			        break;
+	                default:
+	                	throw new IllegalStateException("Unexpected value!");
+	            }
     }
 
 
@@ -171,4 +186,9 @@ public class Player {
 
         return posY;
     }
+    
+    public int getEnergy() { return energy; }
+    
+    //Setters
+    public void setEnergy( int energy ) { this.energy = energy; }
 }
