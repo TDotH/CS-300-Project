@@ -6,8 +6,8 @@ public enum Items {
     POWERBAR(2, "PowerBar", "This nutritious bar gives you an extra 3 energy."), WEEDWHACKER(3, "WeedWhacker", "This tool can cut through bushes in no time."),
     JACKHAMMER(4, "Jack Hammer", "This tool can cut through rocks in no time"), CHAINSAW(5, "Chainsaw", "This tool can cut down trees in no time."),
     BOAT(6, "Boat", "This will get you over the water safely."), JEWEL(7, "Jewel", "The ultimate treasure, this is what you've been looking for all along."),
-    FISH(7, "Fish", "This tasty fish gives you an extra 1 energy"), GOLD(8, "Gold", "You have stumbled upon an ancient pirate's stash, enjoy."),
-    ROPE(9, "Rope", "This will allow you to scale a rocky cliff, or conversely, a difficult tree");
+    FISH(8, "Fish", "This tasty fish gives you an extra 1 energy"), GOLD(9, "Gold", "You have stumbled upon an ancient pirate's stash, enjoy."),
+    ROPE(10, "Rope", "This will allow you to scale a rocky cliff, or conversely, a difficult tree");
 
         int itemID;
         String name;

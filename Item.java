@@ -254,12 +254,15 @@ public abstract class Item
                     itemT = new Tool(Items.BOAT);
                     break;
                 case 7:
-                    itemT = new Food(Items.FISH);
+                    itemT = new Food(Items.JEWEL);
                     break;
                 case 8:
-                    itemT = new Food(Items.GOLD);
+                    itemT = new Food(Items.FISH);
                     break;
                 case 9:
+                    itemT = new Food(Items.GOLD);
+                    break;
+                case 10:
                     itemT = new Tool(Items.ROPE);
                     break;
                 default:
