@@ -14,22 +14,16 @@ public class Inventory
 {
     protected Scanner input = null;
     // Private Fields //
-    // The size of the CLL.
+    // The size of the array.
     // final private int ARRAY_SIZE = 5;
-    // A reference to the rear of the circular linked list.
+    // A reference to the head of the array.
     private Item [] heroInv;
-    // The name of the inventory
-    private String name;
     // The name of the location the inventory is in.
     private String location;
     // The maximum amount of items allowed in the inventory
     private int maxItems;
     // The count of each of the three types of items, and the number of items total.
     private double items, food, tools; //entertainment;
-    /*
-       The quotas of the venue types, each quota is a ratio out of a total of 1, the
-       lower the quota, the less frequent the venue type will show up in the inventory.
-    */
 
     // Public Methods
     /*
@@ -38,13 +32,11 @@ public class Inventory
     */
     Inventory()
     {
-        setName();
         setLocation();
         setMaximum();
         items = 0;
         food = 0;
         tools = 0;
-        //     entertainment = 0;
     }
 
 
@@ -67,30 +59,12 @@ public class Inventory
             {
                 inv[i] = new Tool(copy.heroInv[i]);
             }
-/*        else if (type == 3)
-        {
-                inv[i] = new Entertainment(copy.heroInv[i]);
-        }
- */
-        }
-
-        name = copy.name;
+       }
         location = copy.location;
         items = copy.items;
         food = copy.food;
         tools = copy.tools;
-//      entertainment = copy.entertainment;
         maxItems = copy.maxItems;
-    }
-
-
-
-    /*
-        Uses argument to set the name of the inventory.
-    */
-    public void setName(String name)
-    {
-        this.name = name;
     }
 
 
@@ -101,17 +75,6 @@ public class Inventory
     public void setLocation(String location)
     {
         this.location = location;
-    }
-
-
-    /*
-        Uses user input to set the name of the inventory.
-    */
-    public void setName()
-    {
-        System.out.println("What is the inventory's name?");
-        input = new Scanner(System.in);
-        name = input.nextLine();
     }
 
 
@@ -132,17 +95,12 @@ public class Inventory
     {
         return searchList(add);
     }
-
     /*
             Checks if the item is already in the inventory
 
             If it is in the inventory, then its quantity is increased and an
             error is returned.
      */
-    public int checkItem(String add)
-    {
-        return searchList(add);
-    }
 
 
 
@@ -151,23 +109,14 @@ public class Inventory
         int i;
         int found = -1;
 
-        i = 0;
-        while (i < maxItems && found == -1)
-        {
+        for (i = 0; i < maxItems; ++i) {
             if (heroInv[i] != null)
             {
-                if (heroInv[i].compareEquality(check) == 0)
+                if (heroInv[i].compareID(check))
                 {
                     found = i;
+                    break;
                 }
-                else
-                {
-                    ++i;
-                }
-            }
-            else
-            {
-                ++i;
             }
         }
         return found;
@@ -180,16 +129,11 @@ public class Inventory
         int i;
         int found = -1;
 
-        i = 0;
-        while (i < maxItems && found == -1)
-        {
+        for (i = 0; i < maxItems; ++i){
             if (heroInv[i] != null && heroInv[i].compareEquality(name) == 0)
             {
                 found = i;
-            }
-            else
-            {
-                ++i;
+                break;
             }
         }
         return found;
@@ -212,7 +156,6 @@ public class Inventory
             items = 0;
             tools = 0;
             food = 0;
-            //    entertainment = 0;
         }
         else
         {
@@ -231,8 +174,7 @@ public class Inventory
     {
         if (items >= maxItems)
         {
-            System.out.println("The " + name + " is at maximum capacity, we are no longer accepting new" +
-                    " items!");
+            System.out.println("Your inventory is at maximum capacity!");
             return false;
         }
         else
@@ -249,7 +191,7 @@ public class Inventory
         a location that is appropriately spaced away from the last
         venue of that type that is already in the inventory.
     */
-    public int setItem(Item add)
+    public int addItem(Item add)
     {
         boolean met = false;
         int type, i;
@@ -259,27 +201,18 @@ public class Inventory
         // If the maximum items has been exceeded, return -1.
         if (items >= maxItems)
         {
-            System.out.println("The " + name + " is at maximum capacity, we are no longer accepting new" +
-                    " venue applications!");
+            System.out.println("Your inventory is at maximum capacity!");
             success = -1;
         }
-        // If there are no items in the inventory yet, push the venue in.
+        // If there are no items in the inventory yet, push the item in.
         else if (items == 0)
         {
             heroInv = new Item[maxItems];
-            type = add.checkType();
-            if (type == 1)
-            {
-                heroInv[0] = new Food(add);
-            }
-            else
-            {
-                heroInv[0] = new Tool(add);
-            }
+            heroInv[0] = add;
             heroInv[0].incrementQuantity();
             ++items;
 
-            System.out.println("com.company.Item successfully added to the inventory.");
+            System.out.println(add.getName() + " successfully added to the inventory.");
             success = 1;
         }
         else
@@ -302,11 +235,11 @@ public class Inventory
                 {
                     heroInv[type].incrementQuantity();
                     success = 1;
-                    System.out.println("com.company.Item quantity successfully increased.");
+                    System.out.println("Item quantity successfully increased.");
                 }
                 else
                 {
-                    System.out.println("com.company.Item is already in the inventory. Not added.");
+                    System.out.println("Item is already in the inventory. Not added.");
                 }
             }
             else
@@ -323,21 +256,20 @@ public class Inventory
                         ++i;
                     }
                 }
-                type = add.checkType();
-                if (type == 1)
-                {
-                    heroInv[i] = new Food(add);
-                }
-                else
-                {
-                    heroInv[i] = new Tool(add);
-                }
+                heroInv[i] = add;
                 heroInv[i].incrementQuantity();
                 ++items;
-                System.out.println("com.company.Item successfully added to the inventory.");
+                System.out.println(add.getName() + " successfully added to the inventory.");
             }
         }
-        return success;
+        if (success == -1)
+        {
+            return success;
+        }
+        else
+        {
+            return add.checkType();
+        }
     }
 
 
@@ -366,7 +298,7 @@ public class Inventory
 
             if (value != -1)
             {
-                System.out.println("\ncom.company.Item found. Here are it's details:\n");
+                System.out.println("\nItem found. Here are it's details:\n");
                 heroInv[value].display();
                 System.out.println();
                 found = true;
@@ -414,7 +346,7 @@ public class Inventory
             {
                 heroInv[check] = null;
                 --items;
-                System.out.println("com.company.Item removed.");
+                System.out.println("Item removed.");
                 success = true;
             }
             else

@@ -15,21 +15,26 @@ public class Tool extends Item
     protected Scanner input=null;
     // Private Fields //
     // The kinds of tools sold at the tools venue
-    private String toolsSold;
+    private String strength;
 
     // Public Methods
     Tool()
     {
         super();
-        toolsSold = null;
+        strength = null;
     }
 
+
+    public Tool(Items type)
+    {
+        super(type);
+    }
 
 
     Tool(Tool copy)
     {
         super(copy);
-        toolsSold = copy.toolsSold;
+        strength = copy.strength;
     }
 
 
@@ -60,7 +65,7 @@ public class Tool extends Item
 
     public void copyItem(Tool copy)
     {
-        copy.toolsSold = toolsSold;
+        copy.strength = strength;
     }
 
 
@@ -82,7 +87,7 @@ public class Tool extends Item
     public void nullify()
     {
         super.nullify();
-        toolsSold = null;
+        strength = null;
     }
 
 
@@ -103,10 +108,7 @@ public class Tool extends Item
     {
         if (super.display())
         {
-            if (toolsSold != null)
-            {
-                // System.out.println("The tools sold at this venue are: " + toolsSold);
-            }
+            System.out.println("The strength of this tool is: " + strength);
             return true;
         }
         else
