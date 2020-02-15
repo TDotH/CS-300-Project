@@ -13,6 +13,7 @@ import java.util.Scanner;
 public abstract class Item
 {
     private Items item;
+    private int x, y;
     protected Scanner input = null;
     // Private Fields //
     private int quantity;
@@ -22,6 +23,30 @@ public abstract class Item
     {
         item = null;
         quantity = 0;
+    }
+
+
+    public void setX(int x)
+    {
+        this.x = x;
+    }
+
+
+    public void setY(int y)
+    {
+        this.y = y;
+    }
+
+
+    public int getX()
+    {
+        return x;
+    }
+
+
+    public int getY()
+    {
+        return y;
     }
 
 
@@ -72,6 +97,11 @@ public abstract class Item
     {
     }
 
+
+    public void setItem(Items item)
+    {
+        this.item = item;
+    }
 
 
     public void copy(Item get)
@@ -202,6 +232,13 @@ public abstract class Item
     public int checkType()
     {
         return item.itemID;
+    }
+
+
+    public void copyPos(Item item)
+    {
+        x = item.x;
+        y = item.y;
     }
 
 
