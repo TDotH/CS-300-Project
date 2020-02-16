@@ -16,12 +16,15 @@ import java.awt.*;
 //Contains the type in an int and tests with the enums from the tiles.java file
 public class Tile {
     private Types type; //Type of tile
-   // private int imageID = -1 ; //Which tile from the tile set to use
+	boolean visited; //Ritvik here. Created this to keep track of visited tiles to render
+
+	// private int imageID = -1 ; //Which tile from the tile set to use
     
 
     //Constructor
     Tile(Types type) {
         this.type = type;
+        this.visited = false;
     }
 
     public void draw(Graphics2D g2d, int line_width, int posX, int posY ) { //Image tileSet ) { <-- ignore for now
@@ -68,12 +71,13 @@ public class Tile {
     
     //Type getter
     public Types getType( ) { return this.type; }
-    public int getTileID() { return this.type.getTileID(); };
+    public int getTileID() { return this.type.getTileID(); }
     
     //Type setter
-    public void setType( Types type ) {
-    	this.type = type;
-    }
+    public void setType( Types type ) { this.type = type; }
+
+	public boolean getVisited() { return visited; }
+	public void setVisited(boolean beenThere) { visited = beenThere; }
     
     //public void setImageID( int imageID ) { this.imageID = imageID; }
 

@@ -181,10 +181,10 @@ public class Map {
     	
     }
     
-    //Draws from a center point
+    //Draws from a center point (Ritvik will implement the conditional shader here)
     public void draw(Graphics2D g, int centerPosX, int centerPosY ) {
     	
-    	for ( int x = 0; x < width; x++ ) { 
+    	for ( int x = 0; x < width; x++ ) {
     		for ( int y = 0; y < height; y++) {
     			map[x][y].draw(g, LINE_WIDTH, centerPosX + LINE_WIDTH * x, centerPosY + LINE_WIDTH * y ); // tileset );
     		}
@@ -209,10 +209,12 @@ public class Map {
         	if ( x >= 0 && x < width ) {
 	            for (int y = camera.getCameraPosY() - camera.gettileMaxHeight()/2; y <= camera.getCameraPosY() + camera.gettileMaxHeight()/2; ++y) {
 	            	if ( y >= 0 && y < height ) {
-	            		tempPosX =  LINE_WIDTH * ( i );
-	            		tempPosY = LINE_WIDTH * ( j );
-		                map[x][y].draw(g, LINE_WIDTH, tempPosX, tempPosY ); //, tileset );
-		                j++;
+	            		tempPosX = LINE_WIDTH * (i);
+	            		tempPosY = LINE_WIDTH * (j);
+	            		if((x == playerPosX + 1 || x == playerPosX - 1) && (y == playerPosY + 1 || y == playerPosY - 1) || map[x][y].getVisited()) {
+							map[x][y].draw(g, LINE_WIDTH, tempPosX, tempPosY); //, tileset );
+							j++;
+						}
 	            	}
 	            }
 	        	j = 0;

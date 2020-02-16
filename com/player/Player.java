@@ -64,6 +64,7 @@ public class Player implements Objects {
                 	if ( tileType.getPassable() == true ) {
                 		//Move the player and take away from the player's energy count
                 		posX = posX - 1;
+						map.get_tile(posX, posY).setVisited(true);
                 		energy -= tileType.getEnergyCost();
                 	}
                 	else {
@@ -84,6 +85,7 @@ public class Player implements Objects {
                 	if ( tileType.getPassable() == true ) {
                 		//Move the player and take away from the player's energy count
                 		posX = posX + 1;
+                		map.get_tile(posX, posY).setVisited(true);
                 		energy -= tileType.getEnergyCost();
                 	}
                 	else {
@@ -105,7 +107,8 @@ public class Player implements Objects {
 	                	if ( tileType.getPassable() == true ) {
 	                		//Move the player and take away from the player's energy count
 	                		posY = posY - 1;
-	                		energy -= tileType.getEnergyCost();
+	                		map.get_tile(posX, posY).setVisited(true);
+							energy -= tileType.getEnergyCost();
 	                	}
 	                	else {
 	                		//Do nothing for now
@@ -125,7 +128,8 @@ public class Player implements Objects {
 		                	if ( tileType.getPassable() == true ) {
 		                		//Move the player and take away from the player's energy count
 		                		posY = posY + 1;
-		                		energy -= tileType.getEnergyCost();
+		                		map.get_tile(posX, posY).setVisited(true);
+								energy -= tileType.getEnergyCost();
 		                	}
 		                	else {
 		                		//Do nothing for now
