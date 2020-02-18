@@ -344,7 +344,7 @@ public class Inventory extends JPanel
 
 
     /*
-        This method resets the CLL.
+        This method resets the array.
     */
     public boolean removeItems()
     {
@@ -523,14 +523,10 @@ public class Inventory extends JPanel
 
 
     /*
-        This method is a wrapper method to remove a single venue from
-        the inventory, using input to determine the venue to be removed.
+        This method is a wrapper method to remove a single item from
+        the inventory, using input to determine the item to be removed.
 
-        It will call both the method to remove the venue from the
-        CLL of arrays as well as the 2-3 tree.
-
-        Afterwards, the venue count will be decremented, and by a larger
-        amount than 1 if there was a head node of similar data removed.
+        Afterwards, the item count will be decremented.
     */
     public boolean removeItem()
     {
@@ -566,6 +562,43 @@ public class Inventory extends JPanel
         return success;
     }
 
+
+  /*
+        This method is a wrapper method to remove a single item from
+        the inventory, using the item name to determine the venue to be removed.
+
+        Afterwards, the item count will be decremented.
+        
+        You can call it by putting in the name of the enum item, Items.ItemName as the arg.
+    */
+   public boolean removeItem(Items item)
+    {
+        int check = 0;
+        boolean success = false;
+
+        if (items == 0)
+        {
+            System.out.println("Your inventory is empty.");
+        }
+        else
+        {
+            // This method will search the array for the venue to be deleted.
+            check = searchList(item.name);
+
+            if (check >= 0)
+            {
+                heroInv[check].setItem(Items.DEFAULT);
+                --items;
+                System.out.println("Item removed.");
+                success = true;
+            }
+            else
+            {
+                System.out.println("There are no items with that name in the inventory.");
+            }
+        }
+        return success;
+    }
 
 
     /*
