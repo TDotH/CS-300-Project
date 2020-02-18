@@ -324,7 +324,23 @@ public class Inventory extends JPanel
         return found;
     }
 
+    public int searchList(int check)
+    {
+        int i;
+        int found = -1;
 
+        for (i = 0; i < MAX_ITEMS; ++i) {
+            if (heroInv[i] != null)
+            {
+                if (heroInv[i].compareID(check))
+                {
+                    found = i;
+                    break;
+                }
+            }
+        }
+        return found;
+    }
 
     public int searchList(String name)
     {
@@ -600,7 +616,34 @@ public class Inventory extends JPanel
         return success;
     }
 
+   public boolean removeItem(int itemID)
+    {
+        int check = 0;
+        boolean success = false;
 
+        if (items == 0)
+        {
+            System.out.println("Your inventory is empty.");
+        }
+        else
+        {
+            // This method will search the array for the venue to be deleted.
+            check = searchList(itemID);
+
+            if (check >= 0)
+            {
+                heroInv[check].setItem(Items.DEFAULT);
+                --items;
+                System.out.println("Item removed.");
+                success = true;
+            }
+            else
+            {
+                System.out.println("There are no items with that name in the inventory.");
+            }
+        }
+        return success;
+    }
     /*
         This method is a wrapper method to display all of the
         items in the inventory CLL.
