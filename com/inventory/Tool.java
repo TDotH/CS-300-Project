@@ -61,8 +61,6 @@ public class Tool extends Item
       */
     }
 
-
-
     public void copyItem(Tool copy)
     {
         copy.strength = strength;
