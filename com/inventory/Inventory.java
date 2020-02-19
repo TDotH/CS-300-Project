@@ -36,6 +36,104 @@ public class Inventory extends JPanel
  //   private int MAX_ITEMS;
     // The count of each of the three types of items, and the number of items total.
     private double items, food, tools; //entertainment;
+/*
+    public static void main( String[] args ) throws Exception  {
+        inventory = new Inventory();
+        JFrame frame = new JFrame("Inventory");
+        frame.add(inventory);
+        frame.setSize(WIDTH_SIZE, HEIGHT_SIZE);
+        frame.setVisible(true);
+        frame.setResizable(false);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        Scanner input = new Scanner(System.in);
+        // An inventory object that will contain the items and the circular linked list of arrays.
+        // An Tool object used to invoke the item class methods because that class is abstract.
+        Tool add = new Tool();
+        // The variable for the menu choices.
+        char choice;
+        /*
+          Quit is for quitting the application, full is for indicating that
+          the maximum number of items has been reached.
+        */
+        boolean quit = false, full = false;
+
+        do {
+            // Menu Interface Loop
+            System.out.print("\nWhat would you like to do?\n\n");
+            // If the inventory is full don't allow adding a new item
+            if (!full)
+            {
+                System.out.print("(A)dd an item, ");
+            }
+            System.out.println("(D)isplay the inventory in order, A(l)phabetize inventory," +
+                    " (S)earch for an item, (R)emove an item, (X)remove all items or (q)uit.\n");
+
+            choice = input.next().charAt(0);
+
+            switch (choice) {
+                case 'A':
+                case 'a':
+                    // If the inventory is full and doesn't allow adding a new item
+                    if (!full)
+                    {
+                        if (add.applyItem(inventory) == -1)
+                        {
+                            full = true;
+                        }
+                        else
+                        {
+                            inventory.repaint();
+                        }
+                    }
+                    break;
+                case 'D':
+                case 'd':
+                    if (inventory.display())
+                    {
+                        inventory.repaint();
+                    }
+                    break;
+                case 'L':
+                case 'l':
+                    if (inventory.Alphabetize())
+                    {
+                        inventory.repaint();
+                    }
+                    break;
+                case 'R':
+                case 'r':
+                    // If the inventory is full and an item was removed successfully
+                    if (inventory.removeItem() && full)
+                    {
+                        full = false;
+                    }
+                    inventory.repaint();
+                    break;
+                case 'S':
+                case 's':
+                    inventory.search();
+                    break;
+                case 'X':
+                case 'x':
+                    if (inventory.removeItems())
+                    {
+                        inventory.repaint();
+                    }
+                    full = false;
+                    break;
+                case 'Q':
+                case 'q':
+                    System.out.println("Are you sure you want to quit?");
+                    choice = input.next().charAt(0);
+                    if (choice == 'y')
+                    {
+                        quit = true;
+                    }
+                    break;
+            }
+        } while (!quit);
+    }
+*/
 
     public static void main( String[] args ) throws Exception  {
         inventory = new Inventory();
@@ -164,11 +262,11 @@ public class Inventory extends JPanel
        g2d.setFont(new Font("TimesRoman", Font.PLAIN, 40));
        g2d.setColor(Color.BLACK);
        for (i = 0; i < MAX_ITEMS; ++i) {
-           g2d.drawRect(heroInv[i].getX(), heroInv[i].getY(), SLOT_SIZE, SLOT_SIZE);
+           g2d.drawRect(heroInv[i].getPosX(), heroInv[i].getPosY(), SLOT_SIZE, SLOT_SIZE);
        }
         g2d.setColor(Color.BLUE);
         for (i = 0; i < MAX_ITEMS; ++i) {
-            g2d.drawString(heroInv[i].getNameInit(), heroInv[i].getX() + 25, heroInv[i].getY() + 50);
+            g2d.drawString(heroInv[i].getNameInit(), heroInv[i].getPosX() + 25, heroInv[i].getPosY() + 50);
         }
     }
 
@@ -188,8 +286,9 @@ public class Inventory extends JPanel
                 {
                     x = i * line_width + WIDTH_OFFSET;
                     y = j * line_width + 5;
-                    heroInv[(i * max) + j].setX(x);
-                    heroInv[(i * max) + j].setY(y);
+                    heroInv[(i * max) + j].setPosX(x);
+                    heroInv[(i * max) + j].setPosY(y);
+
                     g2d.drawRect(x, y, line_width, line_width);
                 }
             }
@@ -211,8 +310,9 @@ public class Inventory extends JPanel
                 {
                     x = i * line_width + WIDTH_OFFSET;
                     y = j * line_width + 5;
-                    heroInv[(i * max) + j].setX(x);
-                    heroInv[(i * max) + j].setY(y);
+                    heroInv[(i * max) + j].setPosX(x);
+                    heroInv[(i * max) + j].setPosY(y);
+
                     g2d.drawRect(x, y, line_width, line_width);
                 }
             }
@@ -220,8 +320,10 @@ public class Inventory extends JPanel
             while (count != remainder) {
                 x = i * line_width + WIDTH_OFFSET;
                 y = j * line_width + 5;
-                heroInv[j + (max * i)].setX(x);
-                heroInv[j + (max * i)].setY(y);
+
+                heroInv[j + (max * i)].setPosX(x);
+                heroInv[j + (max * i)].setPosY(y);
+
                 g2d.drawRect(x, y, line_width, line_width);
                 ++j;
                 ++count;

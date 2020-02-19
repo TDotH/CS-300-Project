@@ -42,7 +42,7 @@ public class MainMenu extends JFrame implements IState{
 		public MenuPanel( JFrame aFrame ) {
 			
 			this.setBounds( aFrame.getContentPane().getWidth()/2 - width/2, aFrame.getContentPane().getHeight()/2 - height/2 + offSetY, width, height);
-			this.setBorder( BorderFactory.createCompoundBorder( BorderFactory.createLineBorder(Color.black), BorderFactory.createEmptyBorder(15, 15, 15, 15 )));
+			this.setBorder( BorderFactory.createCompoundBorder( BorderFactory.createLineBorder(Color.black), BorderFactory.createEmptyBorder( 15, 15, 15, 15 )));
 			
 			//this.setOpaque(true);
 			this.setBackground(Color.WHITE );
