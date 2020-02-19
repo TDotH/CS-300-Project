@@ -8,234 +8,32 @@
 
 package com.inventory;
 
-import javax.swing.*;
-import java.awt.*;
 import java.util.Scanner;
 
-public class Inventory extends JPanel
+public class Inventory
 {
-    public static Inventory inventory;
-    private static JFrame frame;
-    Scanner input = new Scanner(System.in);
+    protected Scanner input = null;
     // Private Fields //
     // The size of the array.
     // final private int ARRAY_SIZE = 5;
     // A reference to the head of the array.
-    static final int MAX_ITEMS = 6;
-    static final int ITEMS_SQRT = (int) Math.ceil(Math.sqrt(MAX_ITEMS));
-    static final int WIDTH_SIZE = 336;
-    static final int WIDTH_OFFSET = WIDTH_SIZE / 26;
-    static final int HEIGHT_SIZE = 312;
-  //  static final double OFFSET = Math.round(HEIGHT_SIZE / Math.pow(ITEMS_SQRT, ITEMS_SQRT));
-    static final int SLOT_SIZE = Math.round((Integer.min(WIDTH_SIZE, HEIGHT_SIZE) - (Integer.min(WIDTH_SIZE, HEIGHT_SIZE) / 5)) / ITEMS_SQRT);// (int) OFFSET;
-    private Item [] heroInv = new Item[MAX_ITEMS];
+    private Item [] heroInv;
     // The name of the location the inventory is in.
     private String location;
-    private Boolean InventorySet = false;
     // The maximum amount of items allowed in the inventory
- //   private int MAX_ITEMS;
+    private int maxItems;
     // The count of each of the three types of items, and the number of items total.
     private double items, food, tools; //entertainment;
-/*
-    public static void main( String[] args ) throws Exception  {
-        inventory = new Inventory();
-        JFrame frame = new JFrame("Inventory");
-        frame.add(inventory);
-        frame.setSize(WIDTH_SIZE, HEIGHT_SIZE);
-        frame.setVisible(true);
-        frame.setResizable(false);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        Scanner input = new Scanner(System.in);
-        // An inventory object that will contain the items and the circular linked list of arrays.
-        // An Tool object used to invoke the item class methods because that class is abstract.
-        Tool add = new Tool();
-        // The variable for the menu choices.
-        char choice;
-        /*
-          Quit is for quitting the application, full is for indicating that
-          the maximum number of items has been reached.
-        */
-        boolean quit = false, full = false;
-
-        do {
-            // Menu Interface Loop
-            System.out.print("\nWhat would you like to do?\n\n");
-            // If the inventory is full don't allow adding a new item
-            if (!full)
-            {
-                System.out.print("(A)dd an item, ");
-            }
-            System.out.println("(D)isplay the inventory in order, A(l)phabetize inventory," +
-                    " (S)earch for an item, (R)emove an item, (X)remove all items or (q)uit.\n");
-
-            choice = input.next().charAt(0);
-
-            switch (choice) {
-                case 'A':
-                case 'a':
-                    // If the inventory is full and doesn't allow adding a new item
-                    if (!full)
-                    {
-                        if (add.applyItem(inventory) == -1)
-                        {
-                            full = true;
-                        }
-                        else
-                        {
-                            inventory.repaint();
-                        }
-                    }
-                    break;
-                case 'D':
-                case 'd':
-                    if (inventory.display())
-                    {
-                        inventory.repaint();
-                    }
-                    break;
-                case 'L':
-                case 'l':
-                    if (inventory.Alphabetize())
-                    {
-                        inventory.repaint();
-                    }
-                    break;
-                case 'R':
-                case 'r':
-                    // If the inventory is full and an item was removed successfully
-                    if (inventory.removeItem() && full)
-                    {
-                        full = false;
-                    }
-                    inventory.repaint();
-                    break;
-                case 'S':
-                case 's':
-                    inventory.search();
-                    break;
-                case 'X':
-                case 'x':
-                    if (inventory.removeItems())
-                    {
-                        inventory.repaint();
-                    }
-                    full = false;
-                    break;
-                case 'Q':
-                case 'q':
-                    System.out.println("Are you sure you want to quit?");
-                    choice = input.next().charAt(0);
-                    if (choice == 'y')
-                    {
-                        quit = true;
-                    }
-                    break;
-            }
-        } while (!quit);
-    }
-*/
 
     // Public Methods
     /*
        Calls on four methods to set their variables using user input,
        sets the rest to 0 and null.
     */
-
-    public void paint(Graphics g) {
-        super.paint(g);
-        Graphics2D g2d =(Graphics2D) g;
-        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-                RenderingHints.VALUE_ANTIALIAS_ON);
-        if (!InventorySet)
-        {
-            inventory.draw(g2d, SLOT_SIZE); //inventory.getPosX(), inventory.getPosY());
-            InventorySet = true;
-        }
-        else
-        {
-            inventory.draw(g2d);
-        }
-    }
-
-
-    public void draw(Graphics2D g2d)
-    {
-       int i;
-       g2d.setFont(new Font("TimesRoman", Font.PLAIN, 40));
-       g2d.setColor(Color.BLACK);
-       for (i = 0; i < MAX_ITEMS; ++i) {
-           g2d.drawRect(heroInv[i].getPosX(), heroInv[i].getPosY(), SLOT_SIZE, SLOT_SIZE);
-       }
-        g2d.setColor(Color.BLUE);
-        for (i = 0; i < MAX_ITEMS; ++i) {
-            g2d.drawString(heroInv[i].getNameInit(), heroInv[i].getPosX() + 25, heroInv[i].getPosY() + 50);
-        }
-    }
-
-
-    public void draw(Graphics2D g2d, int line_width)
-    {
-        int i, j, x, y, power, stop, count = 0, remainder = 0;
-        int max = (int) Math.round(Math.sqrt(MAX_ITEMS));
-        power = max * max;
-        g2d.setColor(Color.BLACK);
-
-        if (power == MAX_ITEMS)
-        {
-            for (i = 0; i < max; ++i)
-            {
-                for (j = 0; j < max; ++j)
-                {
-                    x = i * line_width + WIDTH_OFFSET;
-                    y = j * line_width + 5;
-                    heroInv[(i * max) + j].setPosX(x);
-                    heroInv[(i * max) + j].setPosY(y);
-                    g2d.drawRect(x, y, line_width, line_width);
-                }
-            }
-        }
-        else
-        {
-            if (power > MAX_ITEMS)
-            {
-                remainder = MAX_ITEMS % max;
-                stop = max - 1;
-            }
-            else
-            {
-                remainder = MAX_ITEMS - (power);
-                stop = max;
-            }
-            for(i = 0; i < stop; ++i) {
-                for (j = 0; j < max; ++j)
-                {
-                    x = i * line_width + WIDTH_OFFSET;
-                    y = j * line_width + 5;
-                    heroInv[(i * max) + j].setPosX(x);
-                    heroInv[(i * max) + j].setPosY(y);
-                    g2d.drawRect(x, y, line_width, line_width);
-                }
-            }
-            j = 0;
-            while (count != remainder) {
-                x = i * line_width + WIDTH_OFFSET;
-                y = j * line_width + 5;
-                heroInv[j + (max * i)].setPosX(x);
-                heroInv[j + (max * i)].setPosY(y);
-                g2d.drawRect(x, y, line_width, line_width);
-                ++j;
-                ++count;
-            }
-        }
-    }
-
     Inventory()
     {
-        //  setLocation();
-        //   setMaximum();
-        for (int i = 0; i < MAX_ITEMS; ++i) {
-            heroInv[i] = new Tool(Items.DEFAULT);
-        }
+        setLocation();
+        setMaximum();
         items = 0;
         food = 0;
         tools = 0;
@@ -249,9 +47,9 @@ public class Inventory extends JPanel
     Inventory(Inventory copy)
     {
         int type, i;
-        Item [] inv = new Item[MAX_ITEMS];
+        Item [] inv = new Item[maxItems];
 
-        for (i = 0; i < MAX_ITEMS; ++i) {
+        for (i = 0; i < maxItems; ++i) {
             type = copy.heroInv[i].checkType();
             if (type == 1)
             {
@@ -266,7 +64,7 @@ public class Inventory extends JPanel
         items = copy.items;
         food = copy.food;
         tools = copy.tools;
-       // MAX_ITEMS = copy.MAX_ITEMS;
+        maxItems = copy.maxItems;
     }
 
 
@@ -283,13 +81,13 @@ public class Inventory extends JPanel
 
     /*
         Uses user input to set the location of the inventory.
+    */
     public void setLocation()
     {
         System.out.println("Where is the inventory located?");
         input = new Scanner(System.in);
         location = input.nextLine();
     }
-    */
 
 
 
@@ -311,14 +109,23 @@ public class Inventory extends JPanel
         int i;
         int found = -1;
 
-        for (i = 0; i < MAX_ITEMS; ++i) {
+        i = 0;
+        while (i < maxItems && found == -1)
+        {
             if (heroInv[i] != null)
             {
-                if (heroInv[i].compareID(check))
+                if (heroInv[i].compareEquality(check) == 0)
                 {
                     found = i;
-                    break;
                 }
+                else
+                {
+                    ++i;
+                }
+            }
+            else
+            {
+                ++i;
             }
         }
         return found;
@@ -331,11 +138,16 @@ public class Inventory extends JPanel
         int i;
         int found = -1;
 
-        for (i = 0; i < MAX_ITEMS; ++i){
+        i = 0;
+        while (i < maxItems && found == -1)
+        {
             if (heroInv[i] != null && heroInv[i].compareEquality(name) == 0)
             {
                 found = i;
-                break;
+            }
+            else
+            {
+                ++i;
             }
         }
         return found;
@@ -346,24 +158,23 @@ public class Inventory extends JPanel
     /*
         This method resets the CLL.
     */
-    public boolean removeItems()
+    public void removeAll()
     {
         if (items > 0)
         {
             System.out.println("All items were removed");
             int i;
-            for (i = 0; i < MAX_ITEMS; ++i) {
-                heroInv[i].setItem(Items.DEFAULT);
+            for (i = 0; i < maxItems; ++i) {
+                heroInv[i] = null;
             }
             items = 0;
             tools = 0;
             food = 0;
-            return true;
+            //    entertainment = 0;
         }
         else
         {
             System.out.println("Your inventory is empty.");
-            return false;
         }
     }
 
@@ -376,9 +187,10 @@ public class Inventory extends JPanel
     */
     public boolean checkStatus()
     {
-        if (items >= MAX_ITEMS)
+        if (items >= maxItems)
         {
-            System.out.println("Your inventory is at maximum capacity!");
+            System.out.println("The inventory is at maximum capacity, we are no longer accepting new" +
+                    " items!");
             return false;
         }
         else
@@ -395,33 +207,39 @@ public class Inventory extends JPanel
         a location that is appropriately spaced away from the last
         venue of that type that is already in the inventory.
     */
-    public int addItem(Item add)
+    public int setItem(Item add)
     {
         boolean met = false;
         int type, i;
         int success = 0;
-        Item temp2;
         String temp;
 
         // If the maximum items has been exceeded, return -1.
-        if (items >= MAX_ITEMS)
+        if (items >= maxItems)
         {
-            System.out.println("Your inventory is at maximum capacity!");
+            System.out.println("The inventory is at maximum capacity, we are no longer accepting new" +
+                    " items!");
             success = -1;
         }
         // If there are no items in the inventory yet, push the item in.
-        /*
         else if (items == 0)
         {
-          //  heroInv = new Item[MAX_ITEMS];
-            heroInv[0] = add;
+            heroInv = new Item[maxItems];
+            type = add.checkType();
+            if (type == 1)
+            {
+                heroInv[0] = new Food(add);
+            }
+            else
+            {
+                heroInv[0] = new Tool(add);
+            }
             heroInv[0].incrementQuantity();
             ++items;
 
-            System.out.println(add.getName() + " successfully added to the inventory.");
+            System.out.println("com.company.Item successfully added to the inventory.");
             success = 1;
         }
-         */
         else
         {
             // Check if the item type is already in the inventory.
@@ -452,9 +270,9 @@ public class Inventory extends JPanel
             else
             {
                 i = 0;
-                while (!met && i < MAX_ITEMS)
+                while (!met && i < maxItems)
                 {
-                    if (heroInv[i].checkType() == 0)
+                    if (heroInv[i] == null)
                     {
                         met = true;
                     }
@@ -463,22 +281,21 @@ public class Inventory extends JPanel
                         ++i;
                     }
                 }
-                temp2 = heroInv[i];
-                heroInv[i] = add;
-                heroInv[i].copyPos(temp2);
+                type = add.checkType();
+                if (type == 1)
+                {
+                    heroInv[i] = new Food(add);
+                }
+                else
+                {
+                    heroInv[i] = new Tool(add);
+                }
                 heroInv[i].incrementQuantity();
                 ++items;
-                System.out.println(add.getName() + " successfully added to the inventory.");
+                System.out.println("Item successfully added to the inventory.");
             }
         }
-        if (success == -1)
-        {
-            return success;
-        }
-        else
-        {
-            return add.checkType();
-        }
+        return success;
     }
 
 
@@ -507,7 +324,7 @@ public class Inventory extends JPanel
 
             if (value != -1)
             {
-                System.out.println("\nItem found. Here are it's details:\n");
+                System.out.println("\ncom.company.Item found. Here are it's details:\n");
                 heroInv[value].display();
                 System.out.println();
                 found = true;
@@ -553,9 +370,9 @@ public class Inventory extends JPanel
 
             if (check >= 0)
             {
-                heroInv[check].setItem(Items.DEFAULT);
+                heroInv[check] = null;
                 --items;
-                System.out.println("Item removed.");
+                System.out.println("com.company.Item removed.");
                 success = true;
             }
             else
@@ -572,31 +389,29 @@ public class Inventory extends JPanel
         This method is a wrapper method to display all of the
         items in the inventory CLL.
     */
-    public boolean display()
+    public void display()
     {
         int i;
 
         if (items > 0)
         {
-            for (i = 0; i < MAX_ITEMS; ++i) {
-                if (heroInv[i].checkType() != 0)
+            for (i = 0; i < maxItems; ++i) {
+                if (heroInv[i] != null)
                 {
                     heroInv[i].display();
                     System.out.println();
                 }
             }
-            return true;
         }
         else
         {
             System.out.println("The inventory is empty.");
-            return false;
         }
     }
 
 
 
-    public boolean Alphabetize()
+    public void Alphabetize()
     {
         int offset, offset1, offset2, lo1, lo2, hi1, hi2, i, j, index;
         Item [] arranged1;
@@ -605,19 +420,17 @@ public class Inventory extends JPanel
         if (items == 0)
         {
             System.out.println("Your inventory is empty.");
-            return false;
         }
         else if (items == 1)
         {
             System.out.println("The inventory is already sorted!");
-            return true;
         }
         else
         {
-            offset = MAX_ITEMS / 2;
+            offset = maxItems / 2;
 
             lo1 = 0;
-            if (MAX_ITEMS % 2 == 0)
+            if (maxItems % 2 == 0)
             {
                 hi1 = lo1 + offset - 1;
             }
@@ -626,7 +439,7 @@ public class Inventory extends JPanel
                 hi1 = lo1 + offset;
             }
             lo2 = hi1 + 1;
-            hi2 = MAX_ITEMS - 1;
+            hi2 = maxItems - 1;
 
             offset1 = (hi1 - lo1) + 1;
             offset2 = (hi2 - lo2) + 1;
@@ -687,14 +500,13 @@ public class Inventory extends JPanel
                 }
                 ++j;
             }
-            if (index < MAX_ITEMS)
+            if (index < maxItems)
             {
-                for (i = index; i < MAX_ITEMS; ++i) {
+                for (i = index; i < maxItems; ++i) {
                     heroInv[i] = null;
                 }
             }
         }
-        return true;
     }
 
 
@@ -797,6 +609,7 @@ public class Inventory extends JPanel
     // Private Methods
     /*
         Uses input to set the maximum number of items.
+    */
     private void setMaximum()
     {
         input = new Scanner(System.in);
@@ -805,14 +618,13 @@ public class Inventory extends JPanel
             System.out.println("What is the maximum number of items allowed?");
             if (input.hasNextInt())
             {
-                MAX_ITEMS = input.nextInt();
+                maxItems = input.nextInt();
             }
             else
             {
                 System.out.println("Please type an integer value.");
                 input.next();
             }
-        } while (MAX_ITEMS <= 0);
+        } while (maxItems <= 0);
     }
-    */
 }

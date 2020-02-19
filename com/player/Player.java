@@ -1,5 +1,10 @@
 package com.player;
-import com.inventory.*;
+
+/*TODO
+ * -Add energy and money
+ * -Add inventory
+ * -Add a way for the player to know what tile they've stepped on?
+ */
 
 import java.awt.event.KeyEvent;
 import java.awt.Color;
@@ -11,21 +16,11 @@ public class Player implements Objects {
     //integers that hold the current position coordinates, as well as the map boundaries
     private int posX, posY, upBoundX, upBoundY;
     
-    //Inventory Constraints
-    static final int MAX_ITEMS = 6;
-    private Item [] heroInv = new Item[MAX_ITEMS];
-    
     //Player's energy
     private int energy;
 
     //Energy and money; unused until items are ready
-    //private int money;
-    
-    //Win Flag (player has the jewel)
-    boolean winFlag;
-    
-    //Lose Flage (player ran out of energy)
-    boolean loseFlag;
+    //private int energy, money;
     
     //Empty Constructor
     public Player() {}
@@ -35,8 +30,8 @@ public class Player implements Objects {
 
         setPos( posX, posY );
         setBounds( maxX - 1, maxY - 1);
-        winFlag = false;
-        loseFlag = false;
+        energy = 10000;
+
     }
 
     //sets position coordinates to specified arguments
@@ -63,13 +58,13 @@ public class Player implements Objects {
     			//Is the player at the bounds?
                 if ((posX - 1) >= 0) {
                 	
-                	//Get the the tile that will be moved to
-                	Tile tile = map.get_tile( posX - 1, posY );
+                	//Get the type of the tile that will be moved to
+                	Types tileType = map.get_tile( posX - 1, posY ).getType();
                 	//Is the next tile passable?
-                	if ( tile.getType().getPassable() == true ) {
-                		//Move the player and check the tile for energy loss, items/obstacles/shopkeep
+                	if ( tileType.getPassable() == true ) {
+                		//Move the player and take away from the player's energy count
                 		posX = posX - 1;
-                		checkTile( tile );
+                		energy -= tileType.getEnergyCost();
                 	}
                 	else {
                 		//Do nothing for now
@@ -83,13 +78,13 @@ public class Player implements Objects {
 				
 	            if ((posX + 1) <= upBoundX) {
                 	
-	               	//Get the the tile that will be moved to
-                	Tile tile = map.get_tile( posX + 1, posY );
+                	//Get the type of the tile that will be moved to
+                	Types tileType = map.get_tile( posX + 1, posY ).getType();
                 	//Is the next tile passable?
-                	if ( tile.getType().getPassable() == true ) {
-                		//Move the player and check the tile for energy loss, items/obstacles/shopkeep
+                	if ( tileType.getPassable() == true ) {
+                		//Move the player and take away from the player's energy count
                 		posX = posX + 1;
-                		checkTile( tile );
+                		energy -= tileType.getEnergyCost();
                 	}
                 	else {
                 		//Do nothing for now
@@ -104,13 +99,13 @@ public class Player implements Objects {
 					
 		            if ((posY - 1) >= 0) {
 		            	
-		               	//Get the the tile that will be moved to
-	                	Tile tile = map.get_tile( posX, posY - 1 );
+		              	//Get the type of the tile that will be moved to
+	                	Types tileType = map.get_tile( posX, posY - 1 ).getType();
 	                	//Is the next tile passable?
-	                	if ( tile.getType().getPassable() == true ) {
-	                		//Move the player and check the tile for energy loss, items/obstacles/shopkeep
+	                	if ( tileType.getPassable() == true ) {
+	                		//Move the player and take away from the player's energy count
 	                		posY = posY - 1;
-	                		checkTile( tile );
+	                		energy -= tileType.getEnergyCost();
 	                	}
 	                	else {
 	                		//Do nothing for now
@@ -124,13 +119,13 @@ public class Player implements Objects {
 					case KeyEvent.VK_DOWN: 
 			            if ((posY + 1 <= upBoundY )) {
 			            	
-			               	//Get the the tile that will be moved to
-		                	Tile tile = map.get_tile( posX, posY + 1 );
+			              	//Get the type of the tile that will be moved to
+		                	Types tileType = map.get_tile( posX, posY + 1 ).getType();
 		                	//Is the next tile passable?
-		                	if ( tile.getType().getPassable() == true ) {
-		                		//Move the player and check the tile for energy loss, items/obstacles/shopkeep
+		                	if ( tileType.getPassable() == true ) {
+		                		//Move the player and take away from the player's energy count
 		                		posY = posY + 1;
-		                		checkTile( tile );
+		                		energy -= tileType.getEnergyCost();
 		                	}
 		                	else {
 		                		//Do nothing for now
@@ -145,42 +140,7 @@ public class Player implements Objects {
 	            }
     }
 
-    //Does all the tile checking, takes away from players energy depending on stuff
-    private void checkTile( Tile tile ) {
-    	
-    	//Is there something there?
-    	if ( tile.getObject() != null ) {
-    		
-    		//The object is an item
-    		if ( tile.getObject() instanceof Item ) {
-    			
-    			//The item picked up happens to be the jewel
-    			if ( tile.getObject() instanceof Jewel ) {
-    				//System.out.println("Winner!");
-    				winFlag = true;
-    			}
-    			
-    			//Add the item to the inventory
-    			heroInv[0] = (Item)tile.getObject();
-    			
-    			//The tile no longer has the item
-    			tile.setObject( null );
-    			
-    		}
-    		
-    		
-    	} else { //Just take the default amount of energy away
-    		
-    		energy -= tile.getType().getEnergyCost();
-    	}
-    	
-    	//Check if the player has any energy left
-    	if ( energy <= 0 ) {
-    		loseFlag = true;
-    	}
-    	
-    }
-    
+
     //Draws the player according to the given tile size and relative to the camera; offsets movement by tile size
     public void draw( Graphics2D g, int tile_size, Camera camera ) {
 
@@ -228,8 +188,6 @@ public class Player implements Objects {
     }
     
     public int getEnergy() { return energy; }
-    public boolean getWinFlag() { return winFlag; }
-    public boolean getLoseFlag() { return loseFlag; }
     
     //Setters
     public void setEnergy( int energy ) { this.energy = energy; }
