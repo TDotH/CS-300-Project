@@ -401,10 +401,8 @@ public class MapEditor extends JFrame implements IState {
 			if ( "generate".equals( e.getActionCommand() ) ) {
 				mapPanel.generateMap( mapSizeSlider.getValue(), mapSizeSlider.getValue() );
 
-			}
-			
+			}	
 		}
-		
 	}
 	
 	//Deals with picking what the player will draw; is a tabbed pane to switch between tiles, items, and obstacles
@@ -453,7 +451,6 @@ public class MapEditor extends JFrame implements IState {
 			}
 			
 			//Generate a button to place one-off items (just the player for now
-			//JPanel objectsPanel = new JPanel( new FlowLayout( FlowLayout.CENTER, 5, 5 ));
 			JPanel objectsPanel = new JPanel( new GridLayout( 3, 3 ));
 			for ( Items item : complementOf( EnumSet.of( Items.DEFAULT )) ) { //Don't include the default item
 				
@@ -507,13 +504,12 @@ public class MapEditor extends JFrame implements IState {
 			this.setPreferredSize( new Dimension( 200, 150 ));
 			this.setMaximumSize( new Dimension( 200, 200 ));
 			this.setMinimumSize(new Dimension( 200, 200 ));
-			this.setBorder( BorderFactory.createCompoundBorder( BorderFactory.createLineBorder(Color.black), BorderFactory.createEmptyBorder(5, 5, 10, 10 )));
+			this.setBorder( BorderFactory.createCompoundBorder( BorderFactory.createLineBorder(Color.black), BorderFactory.createEmptyBorder(10, 10, 10, 10 )));
 			this.setLayout( new BorderLayout() );
 			
 			textArea = new JTextArea( 5, 5 );
 			textArea.setLineWrap( true );
 			textArea.setWrapStyleWord( true );
-			//JScrollPane scrollPane = new JScrollPane( textArea );
 			textArea.setPreferredSize( new Dimension( 100, 300 ) );
 			textArea.setMaximumSize( new Dimension( 100, 300 ) );
 			textArea.setMinimumSize(new Dimension( 100, 300 )  );

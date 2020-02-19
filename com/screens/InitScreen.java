@@ -8,7 +8,9 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
@@ -28,7 +30,7 @@ public class InitScreen implements IState {
 	
 	//Used for default settings
 	private static final String DEFAULT_MAP = "src/maps/default_map.map";
-	private static final int    DEFAULT_ENERGY = 50;
+	private static final int    DEFAULT_ENERGY = 20;
 	
 	public InitScreen ( StateMachine aStateMachine ) {
 		this.aStateMachine = aStateMachine;
@@ -58,6 +60,8 @@ public class InitScreen implements IState {
 			quickButton.setActionCommand("quick");
 			
 			customButton = new JButton( "Custom Game" );
+			customButton.addActionListener(this);
+			customButton.setActionCommand("create");
 			
 			returnButton = new JButton( "Main Menu" );
 			returnButton.addActionListener(this);
@@ -68,8 +72,6 @@ public class InitScreen implements IState {
 			this.add( returnButton );
 			
 		}
-		
-
 		
 		//Creates a default file for the game to load
 		private void defaultSetup() {
@@ -101,8 +103,8 @@ public class InitScreen implements IState {
 			customButton.setEnabled( false );
 			returnButton.setEnabled( false );
 			
-			//Call the customization panel to the front
-			customPanel.openPanel();
+			this.setVisible( false );
+			
 		}
 		
 		public void openPanel() {
@@ -114,6 +116,8 @@ public class InitScreen implements IState {
 			
 			//Move panel to the front
 			aLayeredPane.moveToFront( this );
+			
+			this.setVisible( true );
 		}
 		
 		@Override
@@ -125,6 +129,8 @@ public class InitScreen implements IState {
 				break;
 			case "create":
 				this.closePanel();
+				//Call the customization panel to the front
+				customPanel.openPanel();
 				break;
 			case "menu":
 				aStateMachine.change("mainmenu");
@@ -136,8 +142,10 @@ public class InitScreen implements IState {
 	}
 	
 	//Used to create custom games
-	class CustomPanel extends JPanel implements ActionListener {
+	class CustomPanel extends JPanel {
 
+		final String MAPS_PATH = "src/maps";
+		
 		//Panel size
 		private int width = 200;
 		private int height = 300;
@@ -145,34 +153,102 @@ public class InitScreen implements IState {
 		
 		private JButton playButton;
 		private JButton returnButton;
+		JSlider energySlider;
+		JComboBox mapList;
+		
+		String selectedMap;
+		int energy;
+		final int MAX_ENERGY = 99;
 		
 		public CustomPanel ( JFrame aFrame ) {
+			
 			this.setBounds( new Rectangle( (aFrame.getContentPane().getWidth() - width) / 2, ( aFrame.getContentPane().getHeight() - height)/2 + offSetY, width , height ));
 			this.setBackground( Color.WHITE );
 			
 			//Buttons
 			playButton = new JButton( "Play Game!" );
-			playButton.addActionListener(this);
-			playButton.setActionCommand("quick");
+			playButton.addActionListener( new ActionListener() {
+				public void actionPerformed( ActionEvent e ) {
+					customSetup();
+				}
+			});
 			
 			returnButton = new JButton( "Return" );
-			returnButton.addActionListener(this);
-			returnButton.setActionCommand("return");
+			returnButton.addActionListener( new ActionListener() {
+				public void actionPerformed( ActionEvent e ) {
+					closePanel();
+					startPanel.openPanel();
+				}
+			});
+			
+			selectedMap = "default_map.map";
+			
+			//Pull Down Menu to pick map from maps folder
+			File file = new File( MAPS_PATH );
+			String[] maps = file.list(  new MapFilter() );
+			mapList = new JComboBox( maps );
+			//mapList.setSelectedIndex( 2 );
+			mapList.setSelectedItem( selectedMap );
+			mapList.setEditable( false );
+			mapList.addActionListener( new ActionListener() {
+				public void actionPerformed( ActionEvent e ) {
+					
+					JComboBox cb = (JComboBox)e.getSource();
+					selectedMap = (String)cb.getSelectedItem();
+				}
+			});
+			//mapList.addActionListener(this);
+			
+			//Slider creation to set player energy
+			JLabel energyLabel = new JLabel( "Player Energy", JLabel.CENTER );
+			energyLabel.setAlignmentX( Component.CENTER_ALIGNMENT );
+			energySlider = new JSlider( JSlider.HORIZONTAL, 1, MAX_ENERGY, 5);
+			energySlider.setMajorTickSpacing(10);
+			energySlider.setMinorTickSpacing(1);
+			energySlider.setPaintTicks(true);
+			energySlider.setPaintLabels(true);
 			
 			this.add( playButton );
+			this.add( mapList );
+			this.add( energyLabel );
+			this.add( energySlider );
+			this.add( Box.createVerticalGlue() );
 			this.add( returnButton );
+			
+			//Disable everything first
+			playButton.setEnabled( false );
+			returnButton.setEnabled( false );
+			mapList.setEnabled( false );
+			energySlider.setEnabled( false );
+			
+			this.setVisible( false );
 			
 		}
 		
 		public void openPanel() {
 			
-			//Turn on the buttons
+			this.setVisible( true );
+			
+			//Turn on everything
+			playButton.setEnabled( true );
+			returnButton.setEnabled( true );
+			mapList.setEnabled( true );
+			energySlider.setEnabled( true );
+			
+			//Move the panel to the front
+			aLayeredPane.moveToFront( this );
+			
 		}
 		
 		private void closePanel() {
 		
 			//Turn off everything
+			playButton.setEnabled( false );
+			returnButton.setEnabled( false );
+			mapList.setEnabled( false );
+			energySlider.setEnabled( false );
 			
+			this.setVisible( false );
 		}
 		
 		//Setup config file according to player inputs
@@ -180,11 +256,11 @@ public class InitScreen implements IState {
 	    	try {
 	    		PrintWriter aWriter = new PrintWriter( CONFIG_FILE ); //Open file
 	    		
-	    		//Write the default map
-	    		aWriter.println( DEFAULT_MAP );
+	    		//Write the wanted map
+	    		aWriter.println( MAPS_PATH + "/" + selectedMap );
 	    		
-	    		//Write how much energy the player should start with
-	    		aWriter.println( String.valueOf( DEFAULT_ENERGY ));
+	    		//Write how much energy the user wants to start with
+	    		aWriter.println( String.valueOf( String.valueOf( energySlider.getValue() ) ));
 	    		aWriter.close();
 	    		
 	    		//Change to the game screen if everything worked out
@@ -197,55 +273,47 @@ public class InitScreen implements IState {
 			
 		}
 		
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			// TODO Auto-generated method stub
-			switch ( e.getActionCommand() ) {
-			case "play":
-				this.customSetup();
-				break;
-			case "return":
-				this.closePanel();
-				break;
-			default:
-				throw new IllegalStateException("Unexpected value: " + String.valueOf( e.getActionCommand()));
-			}
-		}
-		
-		
-		
 		//Create a custom file filter
-		public class MapFilter extends FileFilter {
+		public class MapFilter implements FilenameFilter {
 			
+			/*
 			public String getDescription() {
 				return "Map Files (*.map)";
 			}
-
 			public boolean accept(File file) {
 				//If the file extension is .map
 				if (file.getName().endsWith(".map")) {
 					return true;
 				}
 				return false;
+			}*/
+			@Override
+			public boolean accept(File file, String name) {
+				if (name.endsWith(".map")) {
+					return true;
+				}
+				return false;
 			}
 		}
+	
 	}
+	
 	
 	public void run( JFrame aFrame ) {
 		
 		this.aFrame = aFrame;
 		//Make sure that the game is cleared
 		aFrame.repaint();
-		StartPanel startPanel = new StartPanel( aFrame );
+		startPanel = new StartPanel( aFrame );
+		customPanel = new CustomPanel( aFrame );
 		
 		aLayeredPane = new JLayeredPane();
 		aLayeredPane.setBounds(0, 0, aFrame.getContentPane().getSize().width , aFrame.getContentPane().getSize().height);
 		
 		aLayeredPane.add( startPanel, 0 );
-		
+		aLayeredPane.add( customPanel, 1 );
 		
 		aFrame.add( aLayeredPane );
-		
 		
 		aFrame.revalidate();
 		aFrame.repaint();
