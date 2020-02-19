@@ -1,8 +1,5 @@
 package com.inventory;
 
-import java.awt.Color;
-import java.awt.Graphics2D;
-
 /*
    Author: Mustafa Radheyyan
    Course: CS300
@@ -13,12 +10,9 @@ import java.awt.Graphics2D;
 
 import java.util.Scanner;
 
-import com.player.Camera;
-
-public abstract class Item implements Objects
+public abstract class Item
 {
     private Items item;
-    private int posX, posY; // Item position
     protected Scanner input = null;
     // Private Fields //
     private int quantity;
@@ -31,46 +25,17 @@ public abstract class Item implements Objects
     }
 
 
-    public void setPosX(int posX)
-    {
-        this.posX = posX;
-    }
-
-
-    public void setPosY(int posY)
-    {
-        this.posY = posY;
-    }
-
-
-    public int getPosX()
-    {
-        return posX;
-    }
-
-
-    public int getPosY()
-    {
-        return posY;
-    }
-
     public Item(String type)
     {
         item = null;
         quantity = 0;
     }
 
+
+
     public Item(Items type)
     {
         item = type;
-    }
-    
-    //Constructor that takes the item type and the item position (on the map)
-    public Item( Items type, int posX, int posY ) {
-    	
-    	item = type;
-    	this.posX = posX;
-    	this.posY = posY;
     }
 
     /*
@@ -108,31 +73,12 @@ public abstract class Item implements Objects
     }
 
 
-    public void setItem(Items item)
-    {
-        this.item = item;
-    }
-
 
     public void copy(Item get)
     {
         item.description = get.item.description;
         quantity = get.quantity;
         item.name = get.item.name;
-    }
-
-
-
-    public boolean compareID(int check)
-    {
-        return item.itemID == check;
-    }
-
-
-
-    public boolean compareID(Item check)
-    {
-        return item.itemID == check.item.itemID;
     }
 
 
@@ -149,6 +95,8 @@ public abstract class Item implements Objects
         }
     }
 
+
+
     public int compareEquality(Item check)
     {
         if (item.name != null)
@@ -160,6 +108,7 @@ public abstract class Item implements Objects
             return -1;
         }
     }
+
 
 
     /*
@@ -184,7 +133,9 @@ public abstract class Item implements Objects
             return false;
         }
     }
-    
+
+
+
     public boolean compareName(Item check)
     {
         if (item.name != null)
@@ -204,15 +155,21 @@ public abstract class Item implements Objects
         }
     }
 
+
+
     public void displayName()
     {
         System.out.print(item.name);
     }
 
+
+
     public void displayDescription()
     {
         System.out.print(item.description);
     }
+
+
 
     /*
         Sets the data members to null.
@@ -230,85 +187,62 @@ public abstract class Item implements Objects
     */
     public int checkType()
     {
-        return item.itemID;
+        if (this.getClass() == Food.class)
+        {
+            return 1;
+        }
+        else if (this.getClass() == Tool.class)
+        {
+            return 2;
+        }
+        else
+        {
+            return 0;
+        }
     }
 
 
-    public void copyPos(Item item)
-    {
-        posX = item.posX;
-        posY = item.posY;
-    }
 
     /*
         Asks the user for information regarding what kind of venue they want to create.
+
         Checks the string they typed and matches it with a venue type. Then it creates
         a new venue of that type.
     */
-    /*
     public Item setItem() throws Exception {
-        int temp = 0;
-        String temp2;
+        String temp;
         Item itemT = null;
-        boolean success, quit = false;
+        boolean success = false, quit = false;
         input = new Scanner(System.in);
 
         do {
-            success = true;
-            System.out.println("What kind of item do you want to add? (type number)");
-            for (Items dir : Items.values()) {
-                System.out.println(dir.itemID + " " + dir.name);
-            }
-            if (input.hasNextInt())
+            System.out.println("What kind of item do you want to create (com.company.Food or Tool?)");//, or Entertainment? (Case sensitive)");
+            temp = input.nextLine();
+            if (temp.equalsIgnoreCase("com.company.Food"))
             {
-                temp = input.nextInt();
+                itemT = new Food(temp);
+                success = true;
+            }
+            else if (temp.equalsIgnoreCase("Tool"))
+
+            {
+                itemT = new Tool(temp);
+                success = true;
             }
             else
             {
-               input.next();
+                System.out.println("That was not a valid choice. Please press \"t\" to try again," +
+                        "or if you would like to quit then type \"q\"");
+                temp = input.nextLine();
+                if (temp.equalsIgnoreCase("q"))
+                {
+                    quit = true;
+                }
             }
-            switch(temp)
-            {
-                case 1:
-                    itemT = new Tool(Items.BINOCULARS);
-                    break;
-                case 2:
-                    itemT = new Food(Items.POWERBAR);
-                    break;
-                case 3:
-                    itemT = new Tool(Items.WEEDWHACKER);
-                    break;
-                case 4:
-                    itemT = new Tool(Items.JACKHAMMER);
-                    break;
-                case 5:
-                    itemT = new Tool(Items.CHAINSAW);
-                    break;
-                case 6:
-                    itemT = new Tool(Items.BOAT);
-                    break;
-                case 7:
-                    itemT = new Food(Items.JEWEL);
-                    break;
-                case 8:
-                    itemT = new Food(Items.FISH);
-                    break;
-                case 9:
-                    itemT = new Food(Items.GOLD);
-                    break;
-                case 10:
-                    itemT = new Tool(Items.ROPE);
-                    break;
-                default:
-                    success = false;
-            }
-            if (!success)
-            {
-                System.out.println("That was not a valid choice. Please try again.");
-            }
-        } while (!success);
+        } while (!success && !quit);
+
         return itemT;
-    }*/
+    }
 
 
 
@@ -319,7 +253,6 @@ public abstract class Item implements Objects
         It uses user input to set the venue, and then
         applies the venue to the festival.
     */
-    /*
     public int applyItem(Inventory dest) throws Exception {
         Item temp;
         int success;
@@ -333,7 +266,7 @@ public abstract class Item implements Objects
             temp = setItem();
             if (temp != null)
             {
-                success = dest.addItem(temp);
+                success = dest.setItem(temp);
             }
             else
             {
@@ -341,17 +274,16 @@ public abstract class Item implements Objects
             }
         }
         return success;
-    }*/
+    }
 
-/*
+
 
     public boolean display()
     {
         boolean success = true;
-
         if (item != null)
         {
-            System.out.println("Item " + item.name + "'s description is " + item.description + ".");
+            System.out.println("com.company.Item " + item.name + "'s description is " + item.description + ".");
             System.out.print("There ");
             if (quantity == 1)
                 System.out.print("is ");
@@ -360,14 +292,14 @@ public abstract class Item implements Objects
                 System.out.print("are ");
             }
             System.out.println(quantity + " of them.");
+            success = true;
         }
         else
         {
             success = false;
         }
         return success;
-    }*/
-
+    }
 
 
     public String getName()
@@ -389,7 +321,14 @@ public abstract class Item implements Objects
 
     public boolean isEmpty()
     {
-        return item == null;
+        if (item == null)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
 
 
@@ -399,20 +338,5 @@ public abstract class Item implements Objects
         ++quantity;
     }
 
-    //Draws at the given location from the center position
-    public void draw( Graphics2D g, int tile_size, int centerPosX, int centerPosY ) {
 
-    	int itemSz = (tile_size/2);
-    	int offSetX = (tile_size/4);
-    	int offSetY = (tile_size/4);
-
-    	g.setColor(Color.PINK);
-
-    	//Set the player's position
-    	int tempPosX = centerPosX + tile_size * ( this.posX ) + offSetX;
-    	int tempPosY = centerPosY + tile_size * ( this.posY ) + offSetY;
-
-    	g.fillRect( centerPosX + offSetX, centerPosY + offSetY, itemSz, itemSz );
-
-    }
 }

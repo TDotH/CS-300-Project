@@ -22,26 +22,20 @@
 
 package com.map;
 
-
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Toolkit;
 import java.io.*;
-import java.util.ArrayList;
-import com.inventory.*;
 
 import javax.imageio.ImageIO;
 
 import com.player.*;
 
 public class Map {
-	
-	private ArrayList<Item> mapItems = new ArrayList<Item>(); //Used to keep track of item locations (since items hold their own coordinates)
-	//private ArrayList<Obstacle> mapObstacles = new ArrayList<Obstacle>(); //Container for the obstacles
+
     private Tile[][] map; //Container for the map/tiles
     private int width, height; //Width and height of the map
     private int startX, startY; //Start coordinates for the player
-    private Jewel jewel; //Makes getting the jewel for the cheat button much easier
     
     //Controls size of tiles
     private static int LINE_WIDTH = 48;
@@ -62,8 +56,8 @@ public class Map {
     	
     }
     
-    //Construct a blank map with the given width and height, and type
-    public Map( int width, int height, Types type ) {
+    //Construct a blank map with the given width and height
+    public Map( int width, int height ) {
     	
     	this.width = width;
     	this.height = height;
@@ -73,7 +67,7 @@ public class Map {
     	// Initialize tiles
     	for ( int x = 0; x < width; x++ ) { 
     		for ( int y = 0; y < height; y++) {
-    			map[x][y] = new Tile( type );
+    			map[x][y] = new Tile( Types.DEFAULT );
     		}
     	} 	
     }
@@ -82,26 +76,25 @@ public class Map {
     public void loadMap(String filename) throws Exception {
         File file = new File(filename); //Read in file
         BufferedReader br = new BufferedReader(new FileReader(file)); //set up buffer reader
-        //tileset = Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("src/images/tileset.png"));
+       // tileset = Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("src/images/tileset.png"));
         
         String str; //Holds the data from file
-        
-        //Get map size on the first line
         if ((str = br.readLine()) != null) { //Check for first line
             String[] size_of_map = str.split(","); //Split string
-            
+
+            //Get map size
             width = Integer.parseInt(size_of_map[0]);
             height = Integer.parseInt(size_of_map[1]);
 
             map = new Tile[width][height]; //Initialize map
         } else { br.close(); }
         
-        //Get player spawn coordinates on the second line
         if ((str = br.readLine()) != null) { //Check for the second line
-            String[] playerSpawn = str.split(","); //Split string
+            String[] size_of_map = str.split(","); //Split string
 
-            startX = Integer.parseInt(playerSpawn[0]);
-            startY = Integer.parseInt(playerSpawn[1]);
+            //Get player spawn coordinates
+            startX = Integer.parseInt(size_of_map[0]);
+            startY = Integer.parseInt(size_of_map[1]);
 
         } else { br.close(); }
         
@@ -110,14 +103,15 @@ public class Map {
             str = br.readLine(); //Read in line
             for (int x = 0; x < width; ++x) {
                 Types type; // For initializing individual tiles
-                //int tempInt = -1;
-                switch ( Integer.parseInt( String.valueOf(str.charAt(x))) ) { //assign from file index
+                int tempInt = -1;
+                
+                switch ( Integer.parseInt( String.valueOf(str.charAt(x)))) { //assign from file index
 	                case 0:
 	                	type = Types.DEFAULT;
 	                	break;
 	                case 1:
 	                    type = Types.FOREST;
-	                    //tempInt = 0;
+	                    tempInt = 0;
 	                    break;
 	                case 2:
 	                    type = Types.SWAMP;
@@ -127,7 +121,7 @@ public class Map {
 	                    break;
 	                case 4:
 	                    type = Types.WATER;
-	                    //tempInt = 12;
+	                    tempInt = 12;
 	                    break;
 	                case 5:
 	                    type = Types.MOUNTAINS;
@@ -147,34 +141,6 @@ public class Map {
                 //map[x][y].setImageID(tempInt);
             }
         }
-        //Load items on second to last line
-        if ((str = br.readLine()) != null) { //Check for first line
-        	
-            String[] itemLocations = str.split(";"); //First split individual items
-            
-            //Iterate through array to create each item
-            for ( int i = 0; i < itemLocations.length; i++ ) {
-            	String[] item = itemLocations[i].split(","); //Second split to get item type and location
-            		//Get the items position on the map
-            		int tempPosX = Integer.parseInt( item[1] );
-            		int tempPosY = Integer.parseInt( item[2] );
-            	
-            	   switch ( Integer.parseInt( item[0] )) { //Check item type
-	                case 7: //Item is a jewel
-	                	jewel = new Jewel( tempPosX, tempPosY );
-	                	map[tempPosX][tempPosY].setObject( jewel ); //Add the item to map
-	                	//mapItems.add( jewel ); //Add to the array list for easier saving later
-	                	break;
-
-                   default: //okay intelliJ lol
-                       throw new IllegalStateException("Unexpected value");
-               }
-            }
-            
-        } else { br.close(); }
-        
-        //Load obstacles on last line
-        
     }
 
     //Saves the current map with format (src/maps/(filename).map)
@@ -202,27 +168,10 @@ public class Map {
     			for ( int x = 0; x < width; x++ ) {
     				
     				tempString = tempString.concat( ( String.valueOf( String.valueOf(map[x][y].getTileID() ))));
-    				
-    				//If there is an item on this tile, push to the map array
-    				if ( map[x][y].getObject() != null ) {
-    					//Is the object an item?
-    					if ( map[x][y].getObject() instanceof Item ) {
-    						
-    						mapItems.add( (Item) map[x][y].getObject() );
-    					} 
-    				}
     			}
     			
     			aWriter.println(tempString);
     		}
-    		
-    		//Clear the string
-    		tempString = "";
-    		//Add any potential items 
-    		for ( Item items : mapItems ) {
-    			tempString = tempString.concat( String.valueOf( items.checkType() ) + "," + String.valueOf( items.getPosX() ) + "," + String.valueOf( items.getPosY() ) +";");
-    		}
-    		aWriter.println( tempString );
     		
     		aWriter.close();
     	} catch (Exception e1) {
@@ -250,50 +199,26 @@ public class Map {
     	 * If so just render the same part of the map
     	 */
     	
-    	//Camera bounds [Min, Max]
-    	int[] cameraBoundX = {camera.getCameraPosX() - camera.gettileMaxWidth()/2, camera.getCameraPosX() + camera.gettileMaxWidth()/2};
-    	int[] cameraBoundY = {camera.getCameraPosY() - camera.gettileMaxHeight()/2, camera.getCameraPosY() + camera.gettileMaxHeight()/2};
-    	
-    	final int MIN = 0;
-    	final int MAX = 1;
-    	
     	//Used to render render coordinates relative to the camera
     	int tempPosX, tempPosY;
     	
-    	//Used to make the map draw from (0,0) out
-    	int xDraw = 0;
-    	int yDraw = 0;
+    	int i = 0;
+    	int j = 0;
     	
-    	//Draw tiles first
-        for (int x = cameraBoundX[MIN]; x <= cameraBoundX[MAX]; ++x) {
+        for (int x = camera.getCameraPosX() - camera.gettileMaxWidth()/2; x <= camera.getCameraPosX() + camera.gettileMaxWidth()/2; ++x) {
         	if ( x >= 0 && x < width ) {
-	            for (int y = cameraBoundY[MIN]; y <= cameraBoundY[MAX]; ++y) {
+	            for (int y = camera.getCameraPosY() - camera.gettileMaxHeight()/2; y <= camera.getCameraPosY() + camera.gettileMaxHeight()/2; ++y) {
 	            	if ( y >= 0 && y < height ) {
-	            		tempPosX =  LINE_WIDTH * ( xDraw );
-	            		tempPosY = LINE_WIDTH * ( yDraw );
+	            		tempPosX =  LINE_WIDTH * ( i );
+	            		tempPosY = LINE_WIDTH * ( j );
 		                map[x][y].draw(g, LINE_WIDTH, tempPosX, tempPosY ); //, tileset );
-		                yDraw++;
+		                j++;
 	            	}
 	            }
-	            yDraw = 0;
-	        	xDraw++;
+	        	j = 0;
+	        	i++;
         	}
         }
-        
-        /*
-        
-        /*Draw items second 
-         * TODO: Figure out how to cull items
-         */
-        /*
-        for ( Item anItem : mapItems ) {
-        	
-        	//Just draw the for now
-        	anItem.draw(g, LINE_WIDTH, 0, 0 );
-        }*/
-        
-        //Draw obstacles third
-        
     }
 
     //Tile getter
@@ -332,8 +257,6 @@ public class Map {
     public int getStartX() { return startX; }
     public int getStartY() { return startY; }
     public int getTileSize() { return LINE_WIDTH; }
-    public int getJewelX() { return jewel.getPosX(); }
-    public int getJewelY() { return jewel.getPosY(); }
     
     //Setters
     public void setStartX( int startX ) { this.startX = startX; }
