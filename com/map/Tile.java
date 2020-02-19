@@ -12,18 +12,16 @@ package com.map;
 */
 
 import java.awt.*;
-import com.inventory.*;
 
 //Contains the type in an int and tests with the enums from the tiles.java file
 public class Tile {
     private Types type; //Type of tile
    // private int imageID = -1 ; //Which tile from the tile set to use
-    private Objects object; //Holds a potential object (like the shopkeeper, an item, or an obstacle); 
+    
 
     //Constructor
     Tile(Types type) {
         this.type = type;
-        object = null;
     }
 
     public void draw(Graphics2D g2d, int line_width, int posX, int posY ) { //Image tileSet ) { <-- ignore for now
@@ -65,27 +63,17 @@ public class Tile {
 	        //Draw rectangle (for the grid)
 	        g2d.setColor(Color.BLACK);
 	        g2d.drawRect(posX ,posY,line_width,line_width);
-	        
-	        //Is there an object to draw?
-	        if ( object != null ) {
-	        	object.draw( g2d, line_width, posX, posY );
-	        }
     	//}
     }
     
-    // Getters
+    //Type getter
     public Types getType( ) { return this.type; }
     public int getTileID() { return this.type.getTileID(); };
-    public Object getObject() { return this.object; }
-    
     
     //Type setter
     public void setType( Types type ) {
     	this.type = type;
     }
-    
-    //Object setter;
-    public void setObject( Objects object ) { this.object = object; }
     
     //public void setImageID( int imageID ) { this.imageID = imageID; }
 
