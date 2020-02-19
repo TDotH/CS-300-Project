@@ -19,8 +19,11 @@ public class InitScreen implements IState {
 
 	private StateMachine aStateMachine;
 	private JFrame aFrame;
-	private JLayeredPane gamePanes;
+	private JLayeredPane aLayeredPane;
+	private StartPanel startPanel;
+	private CustomPanel customPanel;
 	
+	//File that the config will be saved to
 	private static final String CONFIG_FILE = "src/maps/config.ini";
 	
 	//Used for default settings
@@ -40,18 +43,23 @@ public class InitScreen implements IState {
 		
 		private int offSetY = 50;
 		
+		//Buttons
+		private JButton quickButton;
+		private JButton customButton;
+		private JButton returnButton;
+		
 		public StartPanel ( JFrame aFrame ) {
 			
 			this.setBounds( new Rectangle( (aFrame.getContentPane().getWidth() - width) / 2, ( aFrame.getContentPane().getHeight() - height)/2 + offSetY, width , height ));
 			this.setBackground( Color.WHITE );
 			
-			JButton quickButton = new JButton( "Quick Play" );
+			quickButton = new JButton( "Quick Play" );
 			quickButton.addActionListener(this);
 			quickButton.setActionCommand("quick");
 			
-			JButton customButton = new JButton( "Custom Game" );
+			customButton = new JButton( "Custom Game" );
 			
-			JButton returnButton = new JButton( "Main Menu" );
+			returnButton = new JButton( "Main Menu" );
 			returnButton.addActionListener(this);
 			returnButton.setActionCommand("menu");
 			
@@ -61,21 +69,7 @@ public class InitScreen implements IState {
 			
 		}
 		
-		//Create a custom file filter
-		public class MapFilter extends FileFilter {
-			
-			public String getDescription() {
-				return "Map Files (*.map)";
-			}
 
-			public boolean accept(File file) {
-				//If the file extension is .map
-				if (file.getName().endsWith(".map")) {
-					return true;
-				}
-				return false;
-			}
-		}
 		
 		//Creates a default file for the game to load
 		private void defaultSetup() {
@@ -100,9 +94,26 @@ public class InitScreen implements IState {
 		}
 		
 		//Allow the player to make a custom game
-		private void openCustomPanel() {
+		private void closePanel() {
 			
 			//Turn off all the buttons 
+			quickButton.setEnabled( false );
+			customButton.setEnabled( false );
+			returnButton.setEnabled( false );
+			
+			//Call the customization panel to the front
+			customPanel.openPanel();
+		}
+		
+		public void openPanel() {
+			
+			//Turn on all buttons
+			quickButton.setEnabled( true );
+			customButton.setEnabled( true );
+			returnButton.setEnabled( true );
+			
+			//Move panel to the front
+			aLayeredPane.moveToFront( this );
 		}
 		
 		@Override
@@ -110,10 +121,10 @@ public class InitScreen implements IState {
 			// TODO Auto-generated method stub
 			switch ( e.getActionCommand() ) {
 			case "quick":
-				defaultSetup();
+				this.defaultSetup();
 				break;
 			case "create":
-				openCustomPanel();
+				this.closePanel();
 				break;
 			case "menu":
 				aStateMachine.change("mainmenu");
@@ -125,37 +136,99 @@ public class InitScreen implements IState {
 	}
 	
 	//Used to create custom games
-	class customPanel extends JPanel implements ActionListener {
+	class CustomPanel extends JPanel implements ActionListener {
 
 		//Panel size
 		private int width = 200;
 		private int height = 300;
-		
 		private int offSetY = 50;
 		
-		public customPanel ( JFrame aFrame ) {
+		private JButton playButton;
+		private JButton returnButton;
+		
+		public CustomPanel ( JFrame aFrame ) {
 			this.setBounds( new Rectangle( (aFrame.getContentPane().getWidth() - width) / 2, ( aFrame.getContentPane().getHeight() - height)/2 + offSetY, width , height ));
+			this.setBackground( Color.WHITE );
 			
+			//Buttons
+			playButton = new JButton( "Play Game!" );
+			playButton.addActionListener(this);
+			playButton.setActionCommand("quick");
+			
+			returnButton = new JButton( "Return" );
+			returnButton.addActionListener(this);
+			returnButton.setActionCommand("return");
+			
+			this.add( playButton );
+			this.add( returnButton );
 			
 		}
 		
 		public void openPanel() {
 			
+			//Turn on the buttons
 		}
 		
-		public void closePanel() {
+		private void closePanel() {
+		
+			//Turn off everything
+			
+		}
+		
+		//Setup config file according to player inputs
+		private void customSetup() {
+	    	try {
+	    		PrintWriter aWriter = new PrintWriter( CONFIG_FILE ); //Open file
+	    		
+	    		//Write the default map
+	    		aWriter.println( DEFAULT_MAP );
+	    		
+	    		//Write how much energy the player should start with
+	    		aWriter.println( String.valueOf( DEFAULT_ENERGY ));
+	    		aWriter.close();
+	    		
+	    		//Change to the game screen if everything worked out
+	    		aStateMachine.change("gamescreen");
+	    		
+	    	} catch (Exception e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 			
 		}
 		
 		@Override
-		public void actionPerformed(ActionEvent arg0) {
+		public void actionPerformed(ActionEvent e) {
 			// TODO Auto-generated method stub
-			
+			switch ( e.getActionCommand() ) {
+			case "play":
+				this.customSetup();
+				break;
+			case "return":
+				this.closePanel();
+				break;
+			default:
+				throw new IllegalStateException("Unexpected value: " + String.valueOf( e.getActionCommand()));
+			}
 		}
 		
 		
 		
-		
+		//Create a custom file filter
+		public class MapFilter extends FileFilter {
+			
+			public String getDescription() {
+				return "Map Files (*.map)";
+			}
+
+			public boolean accept(File file) {
+				//If the file extension is .map
+				if (file.getName().endsWith(".map")) {
+					return true;
+				}
+				return false;
+			}
+		}
 	}
 	
 	public void run( JFrame aFrame ) {
@@ -165,9 +238,13 @@ public class InitScreen implements IState {
 		aFrame.repaint();
 		StartPanel startPanel = new StartPanel( aFrame );
 		
-		gamePanes = new JLayeredPane();
-		gamePanes.setBounds(0, 0, aFrame.getContentPane().getSize().width , aFrame.getContentPane().getSize().height);
-		aFrame.add( startPanel );
+		aLayeredPane = new JLayeredPane();
+		aLayeredPane.setBounds(0, 0, aFrame.getContentPane().getSize().width , aFrame.getContentPane().getSize().height);
+		
+		aLayeredPane.add( startPanel, 0 );
+		
+		
+		aFrame.add( aLayeredPane );
 		
 		
 		aFrame.revalidate();

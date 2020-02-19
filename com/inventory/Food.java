@@ -1,5 +1,4 @@
-package com.inventory;
-/*
+package com.inventory;/*
    Author: Mustafa Radheyyan
    Course: CS300
    Date: 1/18/2020

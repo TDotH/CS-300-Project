@@ -13,6 +13,7 @@ import java.util.Scanner;
 public abstract class Item
 {
     private Items item;
+    private int x, y;
     protected Scanner input = null;
     // Private Fields //
     private int quantity;
@@ -22,6 +23,30 @@ public abstract class Item
     {
         item = null;
         quantity = 0;
+    }
+
+
+    public void setX(int x)
+    {
+        this.x = x;
+    }
+
+
+    public void setY(int y)
+    {
+        this.y = y;
+    }
+
+
+    public int getX()
+    {
+        return x;
+    }
+
+
+    public int getY()
+    {
+        return y;
     }
 
 
@@ -73,12 +98,31 @@ public abstract class Item
     }
 
 
+    public void setItem(Items item)
+    {
+        this.item = item;
+    }
+
 
     public void copy(Item get)
     {
         item.description = get.item.description;
         quantity = get.quantity;
         item.name = get.item.name;
+    }
+
+
+
+    public boolean compareID(int check)
+    {
+        return item.itemID == check;
+    }
+
+
+
+    public boolean compareID(Item check)
+    {
+        return item.itemID == check.item.itemID;
     }
 
 
@@ -187,18 +231,14 @@ public abstract class Item
     */
     public int checkType()
     {
-        if (this.getClass() == Food.class)
-        {
-            return 1;
-        }
-        else if (this.getClass() == Tool.class)
-        {
-            return 2;
-        }
-        else
-        {
-            return 0;
-        }
+        return item.itemID;
+    }
+
+
+    public void copyPos(Item item)
+    {
+        x = item.x;
+        y = item.y;
     }
 
 
@@ -210,37 +250,66 @@ public abstract class Item
         a new venue of that type.
     */
     public Item setItem() throws Exception {
-        String temp;
+        int temp = 0;
+        String temp2;
         Item itemT = null;
-        boolean success = false, quit = false;
+        boolean success, quit = false;
         input = new Scanner(System.in);
 
         do {
-            System.out.println("What kind of item do you want to create (com.company.Food or Tool?)");//, or Entertainment? (Case sensitive)");
-            temp = input.nextLine();
-            if (temp.equalsIgnoreCase("com.company.Food"))
-            {
-                itemT = new Food(temp);
-                success = true;
+            success = true;
+            System.out.println("What kind of item do you want to add? (type number)");
+            for (Items dir : Items.values()) {
+                System.out.println(dir.itemID + " " + dir.name);
             }
-            else if (temp.equalsIgnoreCase("Tool"))
-
+            if (input.hasNextInt())
             {
-                itemT = new Tool(temp);
-                success = true;
+                temp = input.nextInt();
             }
             else
             {
-                System.out.println("That was not a valid choice. Please press \"t\" to try again," +
-                        "or if you would like to quit then type \"q\"");
-                temp = input.nextLine();
-                if (temp.equalsIgnoreCase("q"))
-                {
-                    quit = true;
-                }
+               input.next();
             }
-        } while (!success && !quit);
-
+            switch(temp)
+            {
+                case 1:
+                    itemT = new Tool(Items.BINOCULARS);
+                    break;
+                case 2:
+                    itemT = new Food(Items.POWERBAR);
+                    break;
+                case 3:
+                    itemT = new Tool(Items.WEEDWHACKER);
+                    break;
+                case 4:
+                    itemT = new Tool(Items.JACKHAMMER);
+                    break;
+                case 5:
+                    itemT = new Tool(Items.CHAINSAW);
+                    break;
+                case 6:
+                    itemT = new Tool(Items.BOAT);
+                    break;
+                case 7:
+                    itemT = new Food(Items.JEWEL);
+                    break;
+                case 8:
+                    itemT = new Food(Items.FISH);
+                    break;
+                case 9:
+                    itemT = new Food(Items.GOLD);
+                    break;
+                case 10:
+                    itemT = new Tool(Items.ROPE);
+                    break;
+                default:
+                    success = false;
+            }
+            if (!success)
+            {
+                System.out.println("That was not a valid choice. Please try again.");
+            }
+        } while (!success);
         return itemT;
     }
 
@@ -266,7 +335,7 @@ public abstract class Item
             temp = setItem();
             if (temp != null)
             {
-                success = dest.setItem(temp);
+                success = dest.addItem(temp);
             }
             else
             {
@@ -281,9 +350,10 @@ public abstract class Item
     public boolean display()
     {
         boolean success = true;
+
         if (item != null)
         {
-            System.out.println("com.company.Item " + item.name + "'s description is " + item.description + ".");
+            System.out.println("Item " + item.name + "'s description is " + item.description + ".");
             System.out.print("There ");
             if (quantity == 1)
                 System.out.print("is ");
@@ -292,7 +362,6 @@ public abstract class Item
                 System.out.print("are ");
             }
             System.out.println(quantity + " of them.");
-            success = true;
         }
         else
         {
@@ -300,6 +369,7 @@ public abstract class Item
         }
         return success;
     }
+
 
 
     public String getName()
@@ -321,14 +391,7 @@ public abstract class Item
 
     public boolean isEmpty()
     {
-        if (item == null)
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
+        return item == null;
     }
 
 
