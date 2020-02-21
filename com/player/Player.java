@@ -154,14 +154,17 @@ public class Player implements Objects {
     		//The object is an item
     		if ( tile.getObject() instanceof Item ) {
     			
+    			//Since the object is an item treat it as such
+    			Item tempItem = (Item)tile.getObject();
+    			
     			//The item picked up happens to be the jewel
-    			if ( tile.getObject() instanceof Jewel ) {
+    			if ( tempItem.getItem() == Items.JEWEL ) {
     				//System.out.println("Winner!");
     				winFlag = true;
     			}
     			
     			//Add the item to the inventory
-    			heroInv[0] = (Item)tile.getObject();
+    			heroInv[0] = tempItem;
     			
     			//The tile no longer has the item
     			tile.setObject( null );

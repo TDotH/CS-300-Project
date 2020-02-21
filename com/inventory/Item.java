@@ -13,9 +13,7 @@ import java.awt.Graphics2D;
 
 import java.util.Scanner;
 
-import com.player.Camera;
-
-public abstract class Item implements Objects
+public class Item implements Objects
 {
     private Items item;
     private int posX, posY; // Item position
@@ -88,7 +86,7 @@ public abstract class Item implements Objects
     /*
        This method is abstract, and is implemented by the derived classes.
     */
-    abstract void method();
+    //abstract void method();
 
 
 
@@ -230,6 +228,8 @@ public abstract class Item implements Objects
     {
         return item.itemID;
     }
+    
+    public Items getItem() { return item; }
 
     public void copyPos(Item item)
     {
@@ -404,11 +404,11 @@ public abstract class Item implements Objects
     	int offSetX = (tile_size/4);
     	int offSetY = (tile_size/4);
 
-    	g.setColor(Color.PINK);
+    	g.setColor(new Color(127, 0, 255,255));
 
     	//Set the player's position
-    	int tempPosX = centerPosX + tile_size * ( this.posX ) + offSetX;
-    	int tempPosY = centerPosY + tile_size * ( this.posY ) + offSetY;
+    	//int tempPosX = centerPosX + tile_size * ( this.posX ) + offSetX;
+    	//int tempPosY = centerPosY + tile_size * ( this.posY ) + offSetY;
 
     	g.fillRect( centerPosX + offSetX, centerPosY + offSetY, itemSz, itemSz );
 

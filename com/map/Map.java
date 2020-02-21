@@ -41,7 +41,7 @@ public class Map {
     private Tile[][] map; //Container for the map/tiles
     private int width, height; //Width and height of the map
     private int startX, startY; //Start coordinates for the player
-    private Jewel jewel; //Makes getting the jewel for the cheat button much easier
+    private Item jewel; //Makes getting the jewel for the cheat button much easier
     
     //Controls size of tiles
     private static int LINE_WIDTH = 48;
@@ -159,9 +159,9 @@ public class Map {
             		int tempPosX = Integer.parseInt( item[1] );
             		int tempPosY = Integer.parseInt( item[2] );
             	
-            	   switch ( Integer.parseInt( item[0] )) { //Check item type
+            	   switch ( Integer.parseInt( item[0] )) { //Check item type through item ids
 	                case 7: //Item is a jewel
-	                	jewel = new Jewel( tempPosX, tempPosY );
+	                	jewel = new Item( Items.JEWEL, tempPosX, tempPosY );
 	                	map[tempPosX][tempPosY].setObject( jewel ); //Add the item to map
 	                	//mapItems.add( jewel ); //Add to the array list for easier saving later
 	                	break;
