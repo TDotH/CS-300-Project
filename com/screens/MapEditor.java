@@ -6,8 +6,8 @@
  */
 
 package com.screens;
+import com.inventory.*;
 import com.map.*;
-import com.player.Objects;
 import com.player.Player;
 import com.statemachine.*;
 
@@ -16,6 +16,9 @@ import java.io.File;
 import javax.swing.filechooser.FileFilter;
 import java.awt.*;
 import javax.swing.*;
+
+import java.util.EnumSet;
+import static java.util.EnumSet.complementOf;
 
 public class MapEditor extends JFrame implements IState {
 	
@@ -42,16 +45,16 @@ public class MapEditor extends JFrame implements IState {
 	KeyDispatcher aKeyDispatcher = new KeyDispatcher();
 	
 	//Current tile type to draw
-	Types currType = Types.DEFAULT;
-	Objects anObject;
+	Types currType = Types.FOREST;
+	Items currItem;
 	
 	//Used to check if the player has saved recently
-	private boolean recentSave = false;
+	private boolean recentSave;
 	
 	//Used to figure out what is currently being drawn
 	enum Brushes {
 		TILES,
-		PLAYER
+		OBJECTS
 	}
 	
 	//Set so Java doesn't scream at you
@@ -60,14 +63,6 @@ public class MapEditor extends JFrame implements IState {
 	public MapEditor( StateMachine aStateMachine ) {
 		this.aStateMachine = aStateMachine;
 	}
-	
-	/*
-	//Empty constructor
-	public MapEditor() {}
-	
-	public void setStateMachine ( StateMachine aStateMachine ) {
-		this.aStateMachine = aStateMachine;
-	}*/
 	
 	//Panel that holds all other gui Panels
 	class TileGuiPanel extends JPanel  {
@@ -88,7 +83,8 @@ public class MapEditor extends JFrame implements IState {
 	class MapPanel extends JPanel implements MouseListener, MouseMotionListener{
 		
 		Map map;
-		Player aPlayer = null;
+		Player aPlayer; //Needed for every map
+		Jewel aJewel; //Needed for every map
 		int mapWidth;
 		int mapHeight;
 		
@@ -97,11 +93,15 @@ public class MapEditor extends JFrame implements IState {
 		
 		private boolean mapGenerated = false;
 		private boolean drawing = false;
+		
+		//Used so that the player can only place on of each
 		private boolean playerSpawn = false;
-		;
+		private boolean jewelSpawn = false;
 		
 		public MapPanel() {
 			
+			aPlayer = null;
+			aJewel = null;
 			mapEditorWidth = frame.getContentPane().getWidth() - GUI_WIDTH;
 			mapEditorHeight = frame.getContentPane().getHeight();
 			this.setBounds(MAP_EDITOR_POSX, MAP_EDITOR_POSY, mapEditorWidth, mapEditorHeight);
@@ -113,10 +113,25 @@ public class MapEditor extends JFrame implements IState {
 		//Creates a map of a given size and height
 		public void generateMap( int width, int height ) {
 			
-			this.mapWidth = width;
-			this.mapHeight = height;
-			map = new Map( width, height );
-			mapGenerated = true;
+			if ( recentSaveChecker() == true ) {
+				final Types type = Types.FOREST; //Default tile setting, used to make sure that the player can always move no matter the map generated
+				this.mapWidth = width;
+				this.mapHeight = height;
+				map = new Map( width, height, type );
+				
+				//Reset jewel and player just in case the player loads a map the generates a new one
+				if ( aPlayer != null ) {
+					aPlayer = null;
+					playerSpawn = false;
+				}
+				
+				if ( aJewel != null ) {
+					aJewel = null;
+					jewelSpawn = false;
+				}
+				
+				mapGenerated = true;
+			}
 		}
 		
 		//Loads a map with the given filename
@@ -126,6 +141,23 @@ public class MapEditor extends JFrame implements IState {
 			map.loadMap(fileName);
 			this.mapWidth = map.getWidth();
 			this.mapHeight = map.getHeight();
+			
+			//Set player position 
+			if ( aPlayer == null ) {
+				aPlayer = new Player();
+				playerSpawn = true;
+			}
+			aPlayer.setPos( map.getStartX(), map.getStartY());
+			
+			//Set jewel position
+			if ( aJewel == null ) {
+				aJewel = new Jewel( map.getJewelX(), map.getJewelY() );
+				jewelSpawn = true;
+			} else { //In case there is already a jewel
+				aJewel.setPosX( map.getJewelX() );
+				aJewel.setPosY( map.getJewelY() );
+			}
+			
 			mapGenerated = true;
 		}
 		
@@ -156,6 +188,7 @@ public class MapEditor extends JFrame implements IState {
 		//Getters
 		public boolean getMapFlag() { return mapGenerated; }
 		public boolean getPlayerSpawnFlag() { return playerSpawn; }
+		public boolean getJewelSpawnFlag() { return jewelSpawn; }
 
 		@Override
 		public void mouseClicked(MouseEvent e) {
@@ -188,8 +221,8 @@ public class MapEditor extends JFrame implements IState {
 					if ( e.getY() > (mapEditorHeight - ( mapHeight*TILE_SIZE ))/2 && e.getY() < (mapEditorHeight + ( mapHeight*TILE_SIZE ))/2) {
 						
 						//Get Mouse position on the map
-						int tempX = ( e.getX() - ( mapEditorWidth - mapWidth*TILE_SIZE )/2 ) / 50;
-						int tempY = ( e.getY() - ( mapEditorHeight - mapHeight*TILE_SIZE )/2 ) / 50;
+						int tempX = ( e.getX() - ( mapEditorWidth - mapWidth*TILE_SIZE )/2 ) / TILE_SIZE;
+						int tempY = ( e.getY() - ( mapEditorHeight - mapHeight*TILE_SIZE )/2 ) /TILE_SIZE;
 						
 						recentSave = false; 
 						
@@ -201,20 +234,62 @@ public class MapEditor extends JFrame implements IState {
 								map.set_tile_at( currType, tempX, tempY );
 				
 								break;
-							case PLAYER:
+							case OBJECTS:
 								
-								//Set player spawn flag
-								playerSpawn = true;
-								
-								//Set spawn on map
-								map.setStartX( tempX );
-								map.setStartY( tempY );
-								
-								//Create a player and set his coordinates
-								if ( aPlayer == null ) {
-									aPlayer = new Player();
+								//Check if this object is being place on an impassable tile
+								if ( map.get_tile( tempX, tempY ).getType().getPassable() == true ) {
+									
+									//Brush types
+									switch( currItem ) {
+									
+										case PLAYER:
+											
+												//Check if there is something on the tile already
+												checkTile( map.get_tile( tempX, tempY ), tempX, tempY );
+												//Set player spawn flag
+												playerSpawn = true;
+												
+												//Set spawn on map
+												map.setStartX( tempX );
+												map.setStartY( tempY );
+												
+												//Create a player and set his coordinates
+												if ( aPlayer == null ) {
+													aPlayer = new Player();
+												}
+												aPlayer.setPos( tempX, tempY );
+												
+											break;
+											
+										case JEWEL:
+											
+											//Check if there is something on the tile already
+											checkTile( map.get_tile( tempX, tempY ), tempX, tempY );
+											
+											//Check if there is a jewel placed already
+											if ( aJewel != null ) {
+												
+												map.get_tile( aJewel.getPosX() , aJewel.getPosY() ).setObject( null ); //Set the jewel's current location on the map to null
+												//Set the jewel's new position
+												aJewel.setPosX( tempX ); 
+												aJewel.setPosY( tempY );
+												map.get_tile(tempX, tempY).setObject( aJewel ); // Place the jewel's new location on the map
+												
+											} else { // Nope
+												
+												jewelSpawn = true; //Set the spawn flag
+												aJewel = new Jewel( tempX, tempY ); //Make a new jewel to keep track of coordinates
+												map.get_tile(tempX, tempY).setObject( aJewel ); // Place the jewel on the map
+												
+											}				
+											
+											break;
+											
+										default:
+									}
+								} else { //Throw an error about placing the player here
+									JOptionPane.showMessageDialog(frame, "Can't place the " + currItem.getName() + " on an impassable tile!", "Placement Warning", JOptionPane.WARNING_MESSAGE);
 								}
-								aPlayer.setPos(tempX, tempY);
 								break;
 								
 							default:
@@ -222,6 +297,35 @@ public class MapEditor extends JFrame implements IState {
 						}
 					}
 				}
+			}
+		}
+		
+		/* Checks the tile to ensure that objects don't overlap on the same tile
+		 * If there is an object already there, then deletes tile
+		 * Also resets playerSpawn and JewelSpawn flags if they happen to get deleted
+		 */
+		private void checkTile( Tile aTile, int tempX, int tempY ) {
+		
+			if ( aPlayer != null ) {
+			//Check if this is the player's position
+				if ( ( ( aPlayer.getPosX() == tempX ) && ( aPlayer.getPosY() == tempY ) ) ) {
+					
+					//Reset the flag
+					playerSpawn = false;
+					//Delete the player
+					aPlayer = null;
+				}
+			} 
+			if ( aTile.getObject() != null ) { //Is there an object on the tile?
+				
+				//Does this object happen to be the jewel?
+				if ( aTile.getObject() instanceof Jewel ) {
+					
+					jewelSpawn = false; //Reset the jewel flag
+					aJewel = null; // Delete the jewel
+				}
+				
+				aTile.setObject( null ); // Delete the object
 			}
 		}
 
@@ -262,7 +366,7 @@ public class MapEditor extends JFrame implements IState {
 	//Deals with map generation
 	class MapGenPanel extends JPanel implements ActionListener {
 		
-		//Slider used to set map size (from 0x0 to MAP_MAX_SIZExMAP_MAX_SIZE
+		//Slider used to set map size (from 0x0 to MAP_MAX_SIZExMAP_MAX_SIZE)
 		JSlider mapSizeSlider;
 		
 		public MapGenPanel() {
@@ -306,17 +410,40 @@ public class MapEditor extends JFrame implements IState {
 	//Deals with picking what the player will draw; is a tabbed pane to switch between tiles, items, and obstacles
 	class DrawPickerPanel extends JTabbedPane implements ActionListener {
 		
-		public DrawPickerPanel() {
+		public DrawPickerPanel( DescriptionPanel descriptionPanel ) {
 			
 			//Generate buttons for each tile type
-			//JPanel tilesPanel = new JPanel( new FlowLayout( FlowLayout.CENTER, 5, 5 ));
-			JPanel tilesPanel = new JPanel( new GridLayout(3,3));
-			for ( Types type : Types.values() ) {
+			JPanel tilesPanel = new JPanel( new GridLayout( 3,3 ));
+			for ( Types type : complementOf( EnumSet.of( Types.DEFAULT )) ) { //Don't include the default tile
 				
 				JButton b = new JButton( String.valueOf(type) );
+				b.setToolTipText( type.getName() );
 				b.setPreferredSize( new Dimension( 40, 40 ));
 				b.addActionListener( new ActionListener() {
 					public void actionPerformed( ActionEvent e ) {
+						
+						//Clear the description box
+						descriptionPanel.clearText();
+						
+						//Name
+						String tempStr = String.valueOf( "A " + type.getName() + " tile" );
+						descriptionPanel.addText( tempStr );
+						
+						//Passable?
+						tempStr = "Passable: ";
+						if ( type.getPassable() == true ) {
+							
+							tempStr = tempStr.concat( "Yes" );
+						} else {
+							tempStr = tempStr.concat( "No" );
+						}
+						descriptionPanel.addText( tempStr );
+						
+						//If it's passable then tell how much energy will be used
+						if ( type.getPassable()  == true ) {
+							tempStr = String.valueOf( "Energy Cost: " + String.valueOf( type.getEnergyCost() ) );
+							descriptionPanel.addText( tempStr );
+						}
 						
 						currType = type;
 						aBrush = Brushes.TILES;
@@ -326,15 +453,33 @@ public class MapEditor extends JFrame implements IState {
 			}
 			
 			//Generate a button to place one-off items (just the player for now
-			JPanel objectsPanel = new JPanel( new FlowLayout( FlowLayout.CENTER, 5, 5 ));
-			JButton b = new JButton("Player");
-			b.setPreferredSize( new Dimension( 40, 40 ));
-			b.addActionListener( new ActionListener() {
-				public void actionPerformed( ActionEvent e ) {
-					aBrush = Brushes.PLAYER;
-				}
-			});
-			objectsPanel.add(b);
+			//JPanel objectsPanel = new JPanel( new FlowLayout( FlowLayout.CENTER, 5, 5 ));
+			JPanel objectsPanel = new JPanel( new GridLayout( 3, 3 ));
+			for ( Items item : complementOf( EnumSet.of( Items.DEFAULT )) ) { //Don't include the default item
+				
+				JButton b = new JButton( String.valueOf( item ) );
+				b.setToolTipText( item.getName() );
+				b.setPreferredSize( new Dimension( 40, 40 ));
+				b.addActionListener( new ActionListener() {
+					public void actionPerformed( ActionEvent e ) {
+						
+						//Clear the description box
+						descriptionPanel.clearText();
+						
+						//Name of the item
+						String tempStr = item.getName();
+						descriptionPanel.addText( tempStr );
+						
+						//Flavor text
+						tempStr = item.getDescription();
+						descriptionPanel.addText( tempStr );
+						
+						currItem = item;
+						aBrush = Brushes.OBJECTS;
+					}
+				});
+				objectsPanel.add(b);
+			}
 			
 			this.addTab("Tiles", tilesPanel );
 			this.addTab("Objects", objectsPanel);
@@ -349,6 +494,42 @@ public class MapEditor extends JFrame implements IState {
 		public void actionPerformed(ActionEvent e) {
 			// TODO Auto-generated method stub
 			
+		}
+	}
+	
+	//Deals with the text display
+	class DescriptionPanel extends JPanel {
+		
+		private JTextArea textArea;
+		
+		public DescriptionPanel() {
+			
+			this.setPreferredSize( new Dimension( 200, 150 ));
+			this.setMaximumSize( new Dimension( 200, 200 ));
+			this.setMinimumSize(new Dimension( 200, 200 ));
+			this.setBorder( BorderFactory.createCompoundBorder( BorderFactory.createLineBorder(Color.black), BorderFactory.createEmptyBorder(5, 5, 10, 10 )));
+			this.setLayout( new BorderLayout() );
+			
+			textArea = new JTextArea( 5, 5 );
+			textArea.setLineWrap( true );
+			textArea.setWrapStyleWord( true );
+			//JScrollPane scrollPane = new JScrollPane( textArea );
+			textArea.setPreferredSize( new Dimension( 100, 300 ) );
+			textArea.setMaximumSize( new Dimension( 100, 300 ) );
+			textArea.setMinimumSize(new Dimension( 100, 300 )  );
+			textArea.setEditable( false );
+			textArea.setBorder( BorderFactory.createCompoundBorder( BorderFactory.createLineBorder(Color.black), BorderFactory.createEmptyBorder(5, 5, 10, 10 )));
+			
+			this.add( textArea, BorderLayout.CENTER );
+		}
+		
+		public void clearText() {
+			textArea.setText( null );
+		}
+		
+		public void addText( String text ) {
+			
+			textArea.append( text + "\n");
 		}
 	}
 	
@@ -387,69 +568,88 @@ public class MapEditor extends JFrame implements IState {
 				//Save button was pressed
 				case "save":
 					//Is there a map to save?
-					if ( mapPanel.getMapFlag() == true ) {
-						//Is there a player spawn point?
-						if ( mapPanel.getPlayerSpawnFlag() == true ) {
-							//Create a file chooser and set filters
-							JFileChooser fc = new JFileChooser("src/maps");
-							fc.setDialogTitle("Save map");
-							fc.addChoosableFileFilter(  new MapFilter() );
-							fc.setSelectedFile( new File("aFile.map"));
-							fc.setFileFilter( new MapFilter() );
-							int returnVal = fc.showSaveDialog( frame );
+					if ( mapPanel.getMapFlag() == false ) {
+						JOptionPane.showMessageDialog(frame, "No current map to be saved!", "Save Warning", JOptionPane.WARNING_MESSAGE);
+						
+					} else if ( mapPanel.getPlayerSpawnFlag() == false ) { //Is the player spawn set?
+						JOptionPane.showMessageDialog(frame, "No point placed for the player to spawn at!", "Save Warning", JOptionPane.WARNING_MESSAGE);
+						
+					} else if ( mapPanel.getJewelSpawnFlag() == false ) { //Is there a jewel on the map?
+						JOptionPane.showMessageDialog(frame, "No jewel placed for the player to pick up!", "Save Warning", JOptionPane.WARNING_MESSAGE);
+						
+					} else { //Looks like you're good to save!
+						//Create a file chooser and set filters
+						JFileChooser fc = new JFileChooser("src/maps");
+						fc.setDialogTitle("Save map");
+						fc.addChoosableFileFilter(  new MapFilter() );
+						fc.setSelectedFile( new File("aFile.map"));
+						fc.setFileFilter( new MapFilter() );
+						int returnVal = fc.showSaveDialog( frame );
+						
+						//If the player picks a file to save
+						if ( returnVal == JFileChooser.APPROVE_OPTION ) {
 							
-							//If the player picks a file to save
-							if ( returnVal == JFileChooser.APPROVE_OPTION ) {
-								
-								File file = fc.getSelectedFile();
-								try {
-									File aFile = new File( file.getName() );
-									mapPanel.saveMap( file.getPath() );
-									recentSave = true;
-								} catch (Exception e1) {
-									// TODO Auto-generated catch block
-									e1.printStackTrace();
-								}
-								
+							File file = fc.getSelectedFile();
+							try {
+								File aFile = new File( file.getName() );
+								mapPanel.saveMap( file.getPath() );
+								recentSave = true;
+							} catch (Exception e1) {
+								// TODO Auto-generated catch block
+								e1.printStackTrace();
 							}
 						}
-						else { //There isn't a spawn point for the player!
-							JOptionPane.showMessageDialog(frame, "No point placed for the player to spawn at!", "Save Warning", JOptionPane.WARNING_MESSAGE);
-						}
-					} else { //Show warning if no map is generated
-						
-						JOptionPane.showMessageDialog(frame, "No current map to be saved!", "Save Warning", JOptionPane.WARNING_MESSAGE);
 					}
-					break;
 					
+					break;
 				//Load button was pressed	
 				case "load":
-					//Create a file chooser and set filters
-					JFileChooser fc = new JFileChooser("src/maps");
-					fc.setDialogTitle("Save map");
-					fc.addChoosableFileFilter(  new MapFilter() );
-					fc.setFileFilter( new MapFilter() );
-					int returnVal = fc.showOpenDialog( frame );
 					
-					if ( returnVal == JFileChooser.APPROVE_OPTION ) {
-						File file = fc.getSelectedFile();
-						try {
-							mapPanel.loadMap( file.getPath() );
-						} catch (Exception e1) {
-							// TODO Auto-generated catch block
-							e1.printStackTrace();
+					if ( recentSaveChecker() == true ) {
+						//Create a file chooser and set filters
+						JFileChooser fc = new JFileChooser("src/maps");
+						fc.setDialogTitle("Save map");
+						fc.addChoosableFileFilter(  new MapFilter() );
+						fc.setFileFilter( new MapFilter() );
+						int returnVal = fc.showOpenDialog( frame );
+						
+						if ( returnVal == JFileChooser.APPROVE_OPTION ) {
+							File file = fc.getSelectedFile();
+							try {
+								mapPanel.loadMap( file.getPath() );
+							} catch (Exception e1) {
+								// TODO Auto-generated catch block
+								e1.printStackTrace();
+							}
 						}
 					}
 					break;
 					
 				//Exit button was pressed
 				case "exit":
-					aStateMachine.change("mainmenu");
+					if ( recentSaveChecker() == true ) {
+						aStateMachine.change("mainmenu");
+					}
 					break;
 					
 				default:
 					throw new IllegalStateException("Unexpected value: " + String.valueOf( e.getActionCommand()));
 			}
+		}
+	}
+	
+	//Checks if the user has saved recently, if not, open a dialog asking if they want to continue
+	private boolean recentSaveChecker() {
+		
+		if ( recentSave == true ) {
+			return true;
+		} else {
+			int choice = JOptionPane.showConfirmDialog(frame, "Unsaved changes will be lost! Are you sure you wish to continue?", "Save warning", JOptionPane.YES_NO_OPTION);
+			if ( choice == JOptionPane.YES_OPTION ) {
+				return true;
+			} else {
+				return false;
+			} 
 		}
 	}
 	
@@ -468,13 +668,16 @@ public class MapEditor extends JFrame implements IState {
 		//Main gui panel, look above for individual panel purposes
 		TileGuiPanel tileGuiPanel = new TileGuiPanel();
 		MapGenPanel mapGenPanel = new MapGenPanel();
-		DrawPickerPanel drawPickerPanel = new DrawPickerPanel();
+		DescriptionPanel descriptionPanel = new DescriptionPanel();
+		DrawPickerPanel drawPickerPanel = new DrawPickerPanel( descriptionPanel );
 		FileManagerPanel fileManagerPanel = new FileManagerPanel();
+		
 		
 		//Add all the panels together
 		tileGuiPanel.add( mapGenPanel );
 		tileGuiPanel.setBorder( BorderFactory.createEmptyBorder( 10, 0, 10, 0 ));
 		tileGuiPanel.add(drawPickerPanel, BorderLayout.CENTER);
+		tileGuiPanel.add( descriptionPanel, BorderLayout.CENTER );
 		tileGuiPanel.add( Box.createVerticalGlue() ); //Utilizes extra space to put this at the bottom of the ui
 		tileGuiPanel.add( fileManagerPanel, BorderLayout.PAGE_END );
 
@@ -522,10 +725,12 @@ public class MapEditor extends JFrame implements IState {
 	@Override
 	public void onEnter( JFrame aFrame ) {
 		
+		recentSave = true; // Player just entered this screen so there isn't anything to save
 		this.run( aFrame );
 		
 	}
 
+	
 	@Override
 	public void onExit() {
 		manager.removeKeyEventDispatcher(aKeyDispatcher);

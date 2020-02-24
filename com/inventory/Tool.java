@@ -61,8 +61,6 @@ public class Tool extends Item
       */
     }
 
-
-
     public void copyItem(Tool copy)
     {
         copy.strength = strength;
@@ -92,18 +90,18 @@ public class Tool extends Item
 
 
 
-    /*
+   /*
         Overloaded/overridden method that just calls the base classes version of the method.
-    */
+
     public int applyItem(Inventory dest) throws Exception {
         return super.applyItem(dest);
     }
-
+*/
 
 
     /*
         If the base class's display was false, then don't call this class's
-    */
+
     public boolean display()
     {
         if (super.display())
@@ -116,4 +114,5 @@ public class Tool extends Item
             return false;
         }
     }
+    */
 }

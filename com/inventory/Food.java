@@ -1,5 +1,4 @@
-package com.inventory;
-/*
+package com.inventory;/*
    Author: Mustafa Radheyyan
    Course: CS300
    Date: 1/18/2020
@@ -104,16 +103,17 @@ public class Food extends Item
 
     /*
         Overloaded/overridden method that just calls the base classes version of the method.
-    */
+
     public int applyItem(Inventory dest) throws Exception {
         return super.applyItem(dest);
     }
+    */
 
 
 
     /*
         If the base class's display was false, then don't call this class's
-    */
+
     public boolean display()
     {
         if (super.display())
@@ -131,4 +131,6 @@ public class Food extends Item
         }
         return true;
     }
+
+     */
 }

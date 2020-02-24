@@ -6,24 +6,24 @@ package com.map;
     Tile class for the game. Feel free to change this as much as we need
 
     TODO:
-     -Add visit flag
      -Add movment speed requirements
      -Maybe make this an abstract base class
 */
 
 import java.awt.*;
+import com.inventory.*;
 
 //Contains the type in an int and tests with the enums from the tiles.java file
 public class Tile {
     private Types type; //Type of tile
-	boolean visited; //Ritvik here. Created this to keep track of visited tiles to render
-
-	// private int imageID = -1 ; //Which tile from the tile set to use
-    
+   // private int imageID = -1 ; //Which tile from the tile set to use
+    private Objects object; //Holds a potential object (like the shopkeeper, an item, or an obstacle);
+	private boolean visited;
 
     //Constructor
     Tile(Types type) {
         this.type = type;
+        object = null;
         this.visited = false;
     }
 
@@ -66,18 +66,28 @@ public class Tile {
 	        //Draw rectangle (for the grid)
 	        g2d.setColor(Color.BLACK);
 	        g2d.drawRect(posX ,posY,line_width,line_width);
+	        
+	        //Is there an object to draw?
+	        if ( object != null ) {
+	        	object.draw( g2d, line_width, posX, posY );
+	        }
     	//}
     }
     
-    //Type getter
+    // Getters
     public Types getType( ) { return this.type; }
-    public int getTileID() { return this.type.getTileID(); }
+    public int getTileID() { return this.type.getTileID(); };
+    public Object getObject() { return this.object; }
+    public void setVisited() { this.visited = true; }
+    public boolean getVisited() { return this.visited; }
     
     //Type setter
-    public void setType( Types type ) { this.type = type; }
-
-	public boolean getVisited() { return visited; }
-	public void setVisited(boolean beenThere) { visited = beenThere; }
+    public void setType( Types type ) {
+    	this.type = type;
+    }
+    
+    //Object setter;
+    public void setObject( Objects object ) { this.object = object; }
     
     //public void setImageID( int imageID ) { this.imageID = imageID; }
 
