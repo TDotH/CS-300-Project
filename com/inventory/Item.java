@@ -1,5 +1,8 @@
 package com.inventory;
 
+import java.awt.Color;
+import java.awt.Graphics2D;
+
 /*
    Author: Mustafa Radheyyan
    Course: CS300
@@ -10,10 +13,12 @@ package com.inventory;
 
 import java.util.Scanner;
 
-public abstract class Item
+import com.player.Camera;
+
+public abstract class Item implements Objects
 {
     private Items item;
-    private int x, y;
+    private int posX, posY; // Item position
     protected Scanner input = null;
     // Private Fields //
     private int quantity;
@@ -26,29 +31,28 @@ public abstract class Item
     }
 
 
-    public void setX(int x)
+    public void setPosX(int posX)
     {
-        this.x = x;
+        this.posX = posX;
     }
 
 
-    public void setY(int y)
+    public void setPosY(int posY)
     {
-        this.y = y;
+        this.posY = posY;
     }
 
 
-    public int getX()
+    public int getPosX()
     {
-        return x;
+        return posX;
     }
 
 
-    public int getY()
+    public int getPosY()
     {
-        return y;
+        return posY;
     }
-
 
     public Item(String type)
     {
@@ -56,11 +60,17 @@ public abstract class Item
         quantity = 0;
     }
 
-
-
     public Item(Items type)
     {
         item = type;
+    }
+    
+    //Constructor that takes the item type and the item position (on the map)
+    public Item( Items type, int posX, int posY ) {
+    	
+    	item = type;
+    	this.posX = posX;
+    	this.posY = posY;
     }
 
     /*
@@ -139,8 +149,6 @@ public abstract class Item
         }
     }
 
-
-
     public int compareEquality(Item check)
     {
         if (item.name != null)
@@ -152,7 +160,6 @@ public abstract class Item
             return -1;
         }
     }
-
 
 
     /*
@@ -177,9 +184,7 @@ public abstract class Item
             return false;
         }
     }
-
-
-
+    
     public boolean compareName(Item check)
     {
         if (item.name != null)
@@ -199,21 +204,15 @@ public abstract class Item
         }
     }
 
-
-
     public void displayName()
     {
         System.out.print(item.name);
     }
 
-
-
     public void displayDescription()
     {
         System.out.print(item.description);
     }
-
-
 
     /*
         Sets the data members to null.
@@ -237,18 +236,16 @@ public abstract class Item
 
     public void copyPos(Item item)
     {
-        x = item.x;
-        y = item.y;
+        posX = item.posX;
+        posY = item.posY;
     }
-
-
 
     /*
         Asks the user for information regarding what kind of venue they want to create.
-
         Checks the string they typed and matches it with a venue type. Then it creates
         a new venue of that type.
     */
+    /*
     public Item setItem() throws Exception {
         int temp = 0;
         String temp2;
@@ -311,7 +308,7 @@ public abstract class Item
             }
         } while (!success);
         return itemT;
-    }
+    }*/
 
 
 
@@ -322,6 +319,7 @@ public abstract class Item
         It uses user input to set the venue, and then
         applies the venue to the festival.
     */
+    /*
     public int applyItem(Inventory dest) throws Exception {
         Item temp;
         int success;
@@ -343,9 +341,9 @@ public abstract class Item
             }
         }
         return success;
-    }
+    }*/
 
-
+/*
 
     public boolean display()
     {
@@ -368,7 +366,7 @@ public abstract class Item
             success = false;
         }
         return success;
-    }
+    }*/
 
 
 
@@ -401,5 +399,20 @@ public abstract class Item
         ++quantity;
     }
 
+    //Draws at the given location from the center position
+    public void draw( Graphics2D g, int tile_size, int centerPosX, int centerPosY ) {
 
+    	int itemSz = (tile_size/2);
+    	int offSetX = (tile_size/4);
+    	int offSetY = (tile_size/4);
+
+    	g.setColor(Color.PINK);
+
+    	//Set the player's position
+    	int tempPosX = centerPosX + tile_size * ( this.posX ) + offSetX;
+    	int tempPosY = centerPosY + tile_size * ( this.posY ) + offSetY;
+
+    	g.fillRect( centerPosX + offSetX, centerPosY + offSetY, itemSz, itemSz );
+
+    }
 }
