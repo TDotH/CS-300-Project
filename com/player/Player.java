@@ -146,7 +146,7 @@ public class Player implements Objects {
     }
 
     //Does all the tile checking, takes away from players energy depending on stuff
-    private void checkTile( Tile tile ) {
+    public void checkTile( Tile tile ) {
     	
     	//Is there something there?
     	if ( tile.getObject() != null ) {
@@ -156,16 +156,8 @@ public class Player implements Objects {
     			
     			//Since the object is an item treat it as such
     			Item tempItem = (Item)tile.getObject();
-    			
-    			//The item picked up happens to be the jewel
-    			if ( tempItem.getItem() == Items.JEWEL ) {
-    				//System.out.println("Winner!");
-    				winFlag = true;
-    			}
-    			
-    			//Add the item to the inventory
-    			heroInv[0] = tempItem;
-    			
+    			addItem( tempItem );
+
     			//The tile no longer has the item
     			tile.setObject( null );
     			
@@ -180,6 +172,26 @@ public class Player implements Objects {
     	//Check if the player has any energy left
     	if ( energy <= 0 ) {
     		loseFlag = true;
+    	}
+    }
+    
+    //Does item checking and adds it to the inventory
+    public void addItem( Item item ) {
+    	
+    	//Another check since this can be accessed outside of player
+    	if ( item != null ) {
+    		
+    		//The item picked up happens to be the jewel
+    		if ( item.getItem() == Items.JEWEL ) {
+    			//System.out.println("Winner!");
+    			winFlag = true;
+    		}
+    		
+    		//Add the item to the inventory
+    		heroInv[0] = item;
+    	}
+    	else {
+    		System.out.println("Error! Null item passed!");
     	}
     	
     }
@@ -230,9 +242,9 @@ public class Player implements Objects {
         return posY;
     }
     
-    public int getEnergy() { return energy; }
-    public boolean getWinFlag() { return winFlag; }
-    public boolean getLoseFlag() { return loseFlag; }
+    final public int getEnergy() { return energy; }
+    final public boolean getWinFlag() { return winFlag; }
+    final public boolean getLoseFlag() { return loseFlag; }
     
     //Setters
     public void setEnergy( int energy ) { this.energy = energy; }

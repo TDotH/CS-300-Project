@@ -334,9 +334,11 @@ public class Map {
     public int getTileSize() { return LINE_WIDTH; }
     public int getJewelX() { return jewel.getPosX(); }
     public int getJewelY() { return jewel.getPosY(); }
+    public Item getJewel() { return jewel; };
     
     //Setters
     public void setStartX( int startX ) { this.startX = startX; }
     public void setStartY( int startY ) { this.startY = startY; }
+    
 
 }

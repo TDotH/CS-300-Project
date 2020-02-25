@@ -45,6 +45,9 @@ public class InitScreen implements IState {
 		
 		private int offSetY = 50;
 		
+		private int buttonWidth = 125;
+		private int buttonHeight = 75;
+		
 		//Buttons
 		private JButton quickButton;
 		private JButton customButton;
@@ -53,23 +56,39 @@ public class InitScreen implements IState {
 		public StartPanel ( JFrame aFrame ) {
 			
 			this.setBounds( new Rectangle( (aFrame.getContentPane().getWidth() - width) / 2, ( aFrame.getContentPane().getHeight() - height)/2 + offSetY, width , height ));
+			this.setBorder( BorderFactory.createCompoundBorder( BorderFactory.createLineBorder(Color.black), BorderFactory.createEmptyBorder( 15, 15, 15, 15 )));
 			this.setBackground( Color.WHITE );
+			this.setLayout( new BoxLayout( this, BoxLayout.PAGE_AXIS ));
 			
 			quickButton = new JButton( "Quick Play" );
 			quickButton.addActionListener(this);
+			quickButton.setMinimumSize( new Dimension( buttonWidth, buttonHeight ));
+			quickButton.setMaximumSize( new Dimension( buttonWidth, buttonHeight ));
+			quickButton.setPreferredSize( new Dimension( buttonWidth, buttonHeight ));
+			quickButton.setAlignmentX( Component.CENTER_ALIGNMENT );
 			quickButton.setActionCommand("quick");
 			
 			customButton = new JButton( "Custom Game" );
 			customButton.addActionListener(this);
+			customButton.setMinimumSize( new Dimension( buttonWidth, buttonHeight ));
+			customButton.setMaximumSize( new Dimension( buttonWidth, buttonHeight ));
+			customButton.setPreferredSize( new Dimension( buttonWidth, buttonHeight ));
+			customButton.setAlignmentX( Component.CENTER_ALIGNMENT );
 			customButton.setActionCommand("create");
 			
 			returnButton = new JButton( "Main Menu" );
 			returnButton.addActionListener(this);
+			returnButton.setMinimumSize( new Dimension( buttonWidth, buttonHeight ));
+			returnButton.setMaximumSize( new Dimension( buttonWidth, buttonHeight ));
+			returnButton.setPreferredSize( new Dimension( buttonWidth, buttonHeight ));
+			returnButton.setAlignmentX( Component.CENTER_ALIGNMENT );
 			returnButton.setActionCommand("menu");
 			
-			this.add( quickButton );
-			this.add( customButton );
-			this.add( returnButton );
+			this.add( quickButton, BorderLayout.PAGE_START  );
+			this.add( Box.createVerticalGlue() );
+			this.add( customButton, BorderLayout.CENTER  );
+			this.add( Box.createVerticalGlue() );
+			this.add( returnButton, BorderLayout.PAGE_END  );
 			
 		}
 		
@@ -151,6 +170,9 @@ public class InitScreen implements IState {
 		private int height = 300;
 		private int offSetY = 50;
 		
+		private int buttonWidth = 125;
+		private int buttonHeight = 25;
+		
 		private JButton playButton;
 		private JButton returnButton;
 		JSlider energySlider;
@@ -163,10 +185,16 @@ public class InitScreen implements IState {
 		public CustomPanel ( JFrame aFrame ) {
 			
 			this.setBounds( new Rectangle( (aFrame.getContentPane().getWidth() - width) / 2, ( aFrame.getContentPane().getHeight() - height)/2 + offSetY, width , height ));
+			this.setBorder( BorderFactory.createCompoundBorder( BorderFactory.createLineBorder(Color.black), BorderFactory.createEmptyBorder( 15, 15, 15, 15 )));
 			this.setBackground( Color.WHITE );
+			this.setLayout( new BoxLayout( this, BoxLayout.PAGE_AXIS ));
 			
 			//Buttons
 			playButton = new JButton( "Play Game!" );
+			playButton.setMinimumSize( new Dimension( buttonWidth, buttonHeight ));
+			playButton.setMaximumSize( new Dimension( buttonWidth, buttonHeight ));
+			playButton.setPreferredSize( new Dimension( buttonWidth, buttonHeight ));
+			playButton.setAlignmentX( Component.CENTER_ALIGNMENT );
 			playButton.addActionListener( new ActionListener() {
 				public void actionPerformed( ActionEvent e ) {
 					customSetup();
@@ -174,6 +202,10 @@ public class InitScreen implements IState {
 			});
 			
 			returnButton = new JButton( "Return" );
+			returnButton.setMinimumSize( new Dimension( buttonWidth, buttonHeight ));
+			returnButton.setMaximumSize( new Dimension( buttonWidth, buttonHeight ));
+			returnButton.setPreferredSize( new Dimension( buttonWidth, buttonHeight ));
+			returnButton.setAlignmentX( Component.CENTER_ALIGNMENT );
 			returnButton.addActionListener( new ActionListener() {
 				public void actionPerformed( ActionEvent e ) {
 					closePanel();
@@ -184,12 +216,18 @@ public class InitScreen implements IState {
 			selectedMap = "default_map.map";
 			
 			//Pull Down Menu to pick map from maps folder
+			JLabel mapLabel = new JLabel( "Map Selector", JLabel.CENTER );
+			mapLabel.setAlignmentX( Component.CENTER_ALIGNMENT );
 			File file = new File( MAPS_PATH );
 			String[] maps = file.list(  new MapFilter() );
 			mapList = new JComboBox( maps );
+			mapList.setAlignmentX( Component.CENTER_ALIGNMENT );
 			//mapList.setSelectedIndex( 2 );
 			mapList.setSelectedItem( selectedMap );
 			mapList.setEditable( false );
+			mapList.setPreferredSize( new Dimension(125, 25));
+			mapList.setMinimumSize( new Dimension( 125, 25 ));
+			mapList.setMaximumSize( new Dimension( 125, 25 ));
 			mapList.addActionListener( new ActionListener() {
 				public void actionPerformed( ActionEvent e ) {
 					
@@ -201,19 +239,22 @@ public class InitScreen implements IState {
 			
 			//Slider creation to set player energy
 			JLabel energyLabel = new JLabel( "Player Energy", JLabel.CENTER );
+			
 			energyLabel.setAlignmentX( Component.CENTER_ALIGNMENT );
 			energySlider = new JSlider( JSlider.HORIZONTAL, 1, MAX_ENERGY, 5);
-			energySlider.setMajorTickSpacing(10);
+			energySlider.setMajorTickSpacing(11);
 			energySlider.setMinorTickSpacing(1);
 			energySlider.setPaintTicks(true);
 			energySlider.setPaintLabels(true);
+			energySlider.setAlignmentX( Component.CENTER_ALIGNMENT );
 			
-			this.add( playButton );
-			this.add( mapList );
-			this.add( energyLabel );
-			this.add( energySlider );
+			this.add( playButton, BorderLayout.PAGE_START );
+			this.add( mapLabel, BorderLayout.CENTER);
+			this.add( mapList, BorderLayout.CENTER );
+			this.add( energyLabel, BorderLayout.CENTER );
+			this.add( energySlider, BorderLayout.CENTER );
 			this.add( Box.createVerticalGlue() );
-			this.add( returnButton );
+			this.add( returnButton, BorderLayout.PAGE_END );
 			
 			//Disable everything first
 			playButton.setEnabled( false );
@@ -276,17 +317,6 @@ public class InitScreen implements IState {
 		//Create a custom file filter
 		public class MapFilter implements FilenameFilter {
 			
-			/*
-			public String getDescription() {
-				return "Map Files (*.map)";
-			}
-			public boolean accept(File file) {
-				//If the file extension is .map
-				if (file.getName().endsWith(".map")) {
-					return true;
-				}
-				return false;
-			}*/
 			@Override
 			public boolean accept(File file, String name) {
 				if (name.endsWith(".map")) {
