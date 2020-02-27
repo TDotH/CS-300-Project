@@ -73,6 +73,9 @@ public class Map {
     	// Initialize tiles
     	for ( int x = 0; x < width; x++ ) { 
     		for ( int y = 0; y < height; y++) {
+    			if(x == startX && y == startY) {
+    				map[x][y].setVisited();
+				}
     			map[x][y] = new Tile( type );
     		}
     	} 	
@@ -275,9 +278,11 @@ public class Map {
 						if(map[x][y].getVisited()) {
 							map[x][y].draw(g, LINE_WIDTH, tempPosX, tempPosY); //, tileset );
 						}
-	            		if(x == playerPosX + 1 || x == playerPosX - 1 || y == playerPosY + 1 || y == playerPosY - 1) {
-							map[x][y].draw(g, LINE_WIDTH, tempPosX, tempPosY); //, tileset );
-							yDraw++;
+						yDraw++;
+						if(x < 0 || x > MAX || y < 0 || y > MAX) {
+							if((x == playerPosX + 1 || x == playerPosX - 1 || x == playerPosX) && (y == playerPosY + 1 || y == playerPosY - 1 || y == playerPosY)) {
+								map[x][y].draw(g, LINE_WIDTH, tempPosX, tempPosY); //, tileset );
+							}
 						}
 	            	}
 	            }

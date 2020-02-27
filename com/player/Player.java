@@ -69,7 +69,7 @@ public class Player implements Objects {
                 	if ( tile.getType().getPassable() == true ) {
                 		//Move the player and check the tile for energy loss, items/obstacles/shopkeep
                 		posX = posX - 1;
-                		map.get_tile(posX - 1, posY).setVisited();
+                		map.get_tile(posX, posY).setVisited();
                 		checkTile( tile );
                 	}
                 	else {
@@ -90,7 +90,7 @@ public class Player implements Objects {
                 	if ( tile.getType().getPassable() == true ) {
                 		//Move the player and check the tile for energy loss, items/obstacles/shopkeep
                 		posX = posX + 1;
-						map.get_tile(posX + 1, posY).setVisited();
+						map.get_tile(posX, posY).setVisited();
                 		checkTile( tile );
                 	}
                 	else {
@@ -112,7 +112,7 @@ public class Player implements Objects {
 	                	if ( tile.getType().getPassable() == true ) {
 	                		//Move the player and check the tile for energy loss, items/obstacles/shopkeep
 	                		posY = posY - 1;
-							map.get_tile(posX, posY - 1).setVisited();
+							map.get_tile(posX, posY).setVisited();
 	                		checkTile( tile );
 	                	}
 	                	else {
@@ -133,7 +133,7 @@ public class Player implements Objects {
 		                	if ( tile.getType().getPassable() == true ) {
 		                		//Move the player and check the tile for energy loss, items/obstacles/shopkeep
 		                		posY = posY + 1;
-								map.get_tile(posX , posY + 1).setVisited();
+								map.get_tile(posX , posY).setVisited();
 		                		checkTile( tile );
 		                	}
 		                	else {
