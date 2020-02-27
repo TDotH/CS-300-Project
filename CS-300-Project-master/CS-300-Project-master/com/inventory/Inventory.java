@@ -54,7 +54,7 @@ public class Inventory extends JPanel
         /*
           Quit is for quitting the application, full is for indicating that
           the maximum number of items has been reached.
-        */
+
         boolean quit = false, full = false;
 
         do {
@@ -67,7 +67,8 @@ public class Inventory extends JPanel
             }
             System.out.println("(D)isplay the inventory in order, A(l)phabetize inventory," +
                     " (S)earch for an item, (R)emove an item, (X)remove all items or (q)uit.\n");
-
+*/
+/*
             choice = input.next().charAt(0);
 
             switch (choice) {
@@ -324,23 +325,7 @@ public class Inventory extends JPanel
         return found;
     }
 
-    public int searchList(int check)
-    {
-        int i;
-        int found = -1;
 
-        for (i = 0; i < MAX_ITEMS; ++i) {
-            if (heroInv[i] != null)
-            {
-                if (heroInv[i].compareID(check))
-                {
-                    found = i;
-                    break;
-                }
-            }
-        }
-        return found;
-    }
 
     public int searchList(String name)
     {
@@ -360,7 +345,7 @@ public class Inventory extends JPanel
 
 
     /*
-        This method resets the array.
+        This method resets the CLL.
     */
     public boolean removeItems()
     {
@@ -498,11 +483,11 @@ public class Inventory extends JPanel
     }
 
 
-
+/*
     /*
         This method is a wrapper method to find items with matching name from
         the inventory, using input to determine the venue to be displayed.
-    */
+
     public boolean search()
     {
         String tempName;
@@ -535,14 +520,18 @@ public class Inventory extends JPanel
         }
         return found;
     }
-
+*/
 
 
     /*
-        This method is a wrapper method to remove a single item from
-        the inventory, using input to determine the item to be removed.
+        This method is a wrapper method to remove a single venue from
+        the inventory, using input to determine the venue to be removed.
 
-        Afterwards, the item count will be decremented.
+        It will call both the method to remove the venue from the
+        CLL of arrays as well as the 2-3 tree.
+
+        Afterwards, the venue count will be decremented, and by a larger
+        amount than 1 if there was a head node of similar data removed.
     */
     public boolean removeItem()
     {
@@ -579,75 +568,11 @@ public class Inventory extends JPanel
     }
 
 
-  /*
-        This method is a wrapper method to remove a single item from
-        the inventory, using the item name to determine the venue to be removed.
 
-        Afterwards, the item count will be decremented.
-        
-        You can call it by putting in the name of the enum item, Items.ItemName as the arg.
-    */
-   public boolean removeItem(Items item)
-    {
-        int check = 0;
-        boolean success = false;
-
-        if (items == 0)
-        {
-            System.out.println("Your inventory is empty.");
-        }
-        else
-        {
-            // This method will search the array for the venue to be deleted.
-            check = searchList(item.name);
-
-            if (check >= 0)
-            {
-                heroInv[check].setItem(Items.DEFAULT);
-                --items;
-                System.out.println("Item removed.");
-                success = true;
-            }
-            else
-            {
-                System.out.println("There are no items with that name in the inventory.");
-            }
-        }
-        return success;
-    }
-
-   public boolean removeItem(int itemID)
-    {
-        int check = 0;
-        boolean success = false;
-
-        if (items == 0)
-        {
-            System.out.println("Your inventory is empty.");
-        }
-        else
-        {
-            // This method will search the array for the venue to be deleted.
-            check = searchList(itemID);
-
-            if (check >= 0)
-            {
-                heroInv[check].setItem(Items.DEFAULT);
-                --items;
-                System.out.println("Item removed.");
-                success = true;
-            }
-            else
-            {
-                System.out.println("There are no items with that name in the inventory.");
-            }
-        }
-        return success;
-    }
     /*
         This method is a wrapper method to display all of the
         items in the inventory CLL.
-    */
+
     public boolean display()
     {
         int i;
@@ -669,7 +594,7 @@ public class Inventory extends JPanel
             return false;
         }
     }
-
+*/
 
 
     public boolean Alphabetize()
