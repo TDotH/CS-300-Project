@@ -229,7 +229,7 @@ public class Item implements Objects
     {
         return item.itemID;
     }
-    
+
     public Items getItem() { return item; }
 
     public void copyPos(Item item)
@@ -414,24 +414,24 @@ public class Item implements Objects
     	g2d.fillRect( centerPosX + offSetX, centerPosY + offSetY, itemSz, itemSz );
 
     }
-    
+
     //Draw with images
     public void draw( Graphics2D g2d, int tile_size, int centerPosX, int centerPosY, Image itemset ) {
 
     	int itemSz = (tile_size/2);
     	int offSet = (tile_size/16);
-    	
+
     	int imageSz = 16;
 
     	if ( itemset != null ) {
-        	g2d.drawImage(itemset, centerPosX + offSet , centerPosY + offSet , centerPosX + tile_size - offSet , centerPosY + tile_size - offSet, 
+        	g2d.drawImage(itemset, centerPosX + offSet , centerPosY + offSet , centerPosX + tile_size - offSet , centerPosY + tile_size - offSet,
         			item.imagePosX * imageSz, item.imagePosY * imageSz, imageSz + item.imagePosX * imageSz, imageSz + item.imagePosY * imageSz, null);
     	} else {
     		g2d.setColor(new Color(127, 0, 255,255));
     		g2d.fillRect( centerPosX + offSet, centerPosY + offSet, itemSz, itemSz );
     	}
 
-    	
+
     	//Set the item's
     	//int tempPosX = centerPosX + tile_size * ( this.posX ) + offSetX;
     	//int tempPosY = centerPosY + tile_size * ( this.posY ) + offSetY;
