@@ -29,6 +29,8 @@ import java.awt.Toolkit;
 import java.io.*;
 import java.util.ArrayList;
 import com.inventory.*;
+import com.obstacles.Obstacle;
+import com.obstacles.Obstacles;
 
 import javax.imageio.ImageIO;
 
@@ -37,29 +39,24 @@ import com.player.*;
 public class Map {
 	
 	private ArrayList<Item> mapItems = new ArrayList<Item>(); //Used to keep track of item locations (since items hold their own coordinates)
-	//private ArrayList<Obstacle> mapObstacles = new ArrayList<Obstacle>(); //Container for the obstacles
+	private ArrayList<Obstacle> mapObstacles = new ArrayList<Obstacle>(); //Container for the obstacles
     private Tile[][] map; //Container for the map/tiles
     private int width, height; //Width and height of the map
     private int startX, startY; //Start coordinates for the player
-    private Jewel jewel; //Makes getting the jewel for the cheat button much easier
+    private Item jewel; //Makes getting the jewel for the cheat button much easier
     
     //Controls size of tiles
     private static int LINE_WIDTH = 48;
     
-    //The tileset to be used
-    private Image tileset = null;
+    //The tilesets to be used
+    //private Image tileset = null;
+    private Image itemset = null;
+    private Image obstacleset = null;
     
     //Blank Constructor
     public Map() {
-    	//Ignore for now
-    	//tileset = Toolkit.getDefaultToolkit().getImage(("src/images/tileset.png"));
-    	/*try {
-    		tileset = ImageIO.read(getClass().getClassLoader().getResourceAsStream("resources/images/tileset.png"));
-    	}
-    	catch (IOException ex) {
-    		System.out.println("Error! Tileset can't be loaded!");
-    	}*/
     	
+    	loadTilesets();
     }
     
     //Construct a blank map with the given width and height, and type
@@ -69,6 +66,8 @@ public class Map {
     	this.height = height;
     	
     	map = new Tile[width][height]; //Initialize map
+    	
+    	loadTilesets();
     			
     	// Initialize tiles
     	for ( int x = 0; x < width; x++ ) { 
@@ -76,6 +75,34 @@ public class Map {
     			map[x][y] = new Tile( type );
     		}
     	} 	
+    }
+    
+    private void loadTilesets() {
+    	
+    	//Load the item tileset
+    	try {
+    		itemset = ImageIO.read(getClass().getClassLoader().getResourceAsStream("resources/images/itemset.png"));
+    	}
+    	catch (IOException ex) {
+    		System.out.println("Error! Itemset can't be loaded!");
+    	}
+    	
+    	//Load the obstacle tileset
+    	try {
+    		obstacleset = ImageIO.read(getClass().getClassLoader().getResourceAsStream("resources/images/obstacleset.png"));
+    	}
+    	catch (IOException ex) {
+    		System.out.println("Error! Itemset can't be loaded!");
+    	}
+    	
+    	//Ignore for now
+    	//tileset = Toolkit.getDefaultToolkit().getImage(("src/images/tileset.png"));
+    	/*try {
+    		tileset = ImageIO.read(getClass().getClassLoader().getResourceAsStream("resources/images/tileset.png"));
+    	}
+    	catch (IOException ex) {
+    		System.out.println("Error! Tileset can't be loaded!");
+    	}*/
     }
 
     //Loads a map with the given filename of format (src/maps/(filename).map)
@@ -159,22 +186,60 @@ public class Map {
             		int tempPosX = Integer.parseInt( item[1] );
             		int tempPosY = Integer.parseInt( item[2] );
             	
-            	   switch ( Integer.parseInt( item[0] )) { //Check item type
-	                case 7: //Item is a jewel
-	                	jewel = new Jewel( tempPosX, tempPosY );
-	                	map[tempPosX][tempPosY].setObject( jewel ); //Add the item to map
-	                	//mapItems.add( jewel ); //Add to the array list for easier saving later
-	                	break;
-
-                   default: //okay intelliJ lol
-                       throw new IllegalStateException("Unexpected value");
-               }
+            		int tempID = Integer.parseInt( item[0] );
+            		Item tempItem = null;
+            		//Iterate through items to find the item with the specific id
+            		for( Items aItem : Items.values() ) {
+            			
+            			if( aItem.getItemID() == tempID ) {
+            				tempItem = new Item( aItem, tempPosX, tempPosY );
+            			}
+            		}
+            		
+            		if ( tempItem != null ) {
+            			
+            			if ( tempItem.getItem() == Items.JEWEL ) {
+            				jewel = tempItem;
+            			}
+            			
+        				//mapItems.add( tempItem );
+        				map[tempPosX][tempPosY].setObject(tempItem);
+            		}
             }
             
         } else { br.close(); }
         
         //Load obstacles on last line
-        
+        if ((str = br.readLine()) != null) { //Check for first line
+        	
+            String[] obstacleLocations = str.split(";"); //First split individual obstacles
+            
+            //Iterate through array to create each item
+            for ( int i = 0; i < obstacleLocations.length; i++ ) {
+            	String[] obstacle = obstacleLocations[i].split(","); //Second split to get obstacle type and location
+            		//Get the items position on the map
+            		int tempPosX = Integer.parseInt( obstacle[1] );
+            		int tempPosY = Integer.parseInt( obstacle[2] );
+            	
+            		int tempID = Integer.parseInt( obstacle[0] );
+            		Obstacle tempObstacle = null;
+            		//Iterate through items to find the item with the specific id
+            		for( Obstacles aObstacle : Obstacles.values() ) {
+            			
+            			if( aObstacle.getObstacleID() == tempID ) {
+            				tempObstacle = new Obstacle( aObstacle, tempPosX, tempPosY );
+            			}
+            		}
+            		
+            		if ( tempObstacle!= null ) {
+            			
+        				//mapObstacles.add( tempObstacle );
+        				map[tempPosX][tempPosY].setObject(tempObstacle);
+            		}
+
+            }
+            
+        } else { br.close(); }
     }
 
     //Saves the current map with format (src/maps/(filename).map)
@@ -209,11 +274,18 @@ public class Map {
     					if ( map[x][y].getObject() instanceof Item ) {
     						
     						mapItems.add( (Item) map[x][y].getObject() );
-    					} 
+    					}
+    					//Is the object an obstacle?
+    					if ( map[x][y].getObject() instanceof Obstacle ) {
+    						
+    						mapObstacles.add( (Obstacle) map[x][y].getObject() );
+    					}
     				}
     			}
     			
-    			aWriter.println(tempString);
+        		if ( tempString.length() != 0 ) {
+        			aWriter.println( tempString );
+        		}
     		}
     		
     		//Clear the string
@@ -222,7 +294,20 @@ public class Map {
     		for ( Item items : mapItems ) {
     			tempString = tempString.concat( String.valueOf( items.checkType() ) + "," + String.valueOf( items.getPosX() ) + "," + String.valueOf( items.getPosY() ) +";");
     		}
-    		aWriter.println( tempString );
+    		if ( tempString.length() != 0 ) {
+    			aWriter.println( tempString );
+    		}
+    		
+    		//Clear the string
+    		tempString = "";
+    		//Add any potential obstacles
+    		for ( Obstacle obstacles : mapObstacles ) {
+    			tempString = tempString.concat( String.valueOf( obstacles.checkType() ) + "," + String.valueOf( obstacles.getPosX() ) + "," + String.valueOf( obstacles.getPosY() ) +";");
+    		}
+    		
+    		if ( tempString.length() != 0 ) {
+    			aWriter.println( tempString );
+    		}
     		
     		aWriter.close();
     	} catch (Exception e1) {
@@ -237,7 +322,13 @@ public class Map {
     	
     	for ( int x = 0; x < width; x++ ) { 
     		for ( int y = 0; y < height; y++) {
-    			map[x][y].draw(g, LINE_WIDTH, centerPosX + LINE_WIDTH * x, centerPosY + LINE_WIDTH * y ); // tileset );
+    			
+        		if ( ( itemset != null ) && ( obstacleset != null )  ) { //Draw with images
+        			map[x][y].draw(g, LINE_WIDTH, centerPosX + LINE_WIDTH * x, centerPosY + LINE_WIDTH * y, itemset, obstacleset ); //, tileset );
+        		}
+        		else { //Draw with colored blocks
+        			map[x][y].draw(g, LINE_WIDTH, centerPosX + LINE_WIDTH * x, centerPosY + LINE_WIDTH * y );
+        		}
     		}
     	}    	
     }
@@ -271,7 +362,13 @@ public class Map {
 	            	if ( y >= 0 && y < height ) {
 	            		tempPosX =  LINE_WIDTH * ( xDraw );
 	            		tempPosY = LINE_WIDTH * ( yDraw );
-		                map[x][y].draw(g, LINE_WIDTH, tempPosX, tempPosY ); //, tileset );
+	            		
+	            		if ( ( itemset != null ) && ( obstacleset != null )  ) { //Draw with images
+	            			map[x][y].draw(g, LINE_WIDTH, tempPosX, tempPosY, itemset, obstacleset ); //, tileset );
+	            		}
+	            		else { //Draw with colored blocks
+	            			map[x][y].draw(g, LINE_WIDTH, tempPosX, tempPosY ); 
+	            		}
 		                yDraw++;
 	            	}
 	            }
@@ -334,9 +431,10 @@ public class Map {
     public int getTileSize() { return LINE_WIDTH; }
     public int getJewelX() { return jewel.getPosX(); }
     public int getJewelY() { return jewel.getPosY(); }
+    public Item getJewel() { return jewel; };
     
     //Setters
     public void setStartX( int startX ) { this.startX = startX; }
     public void setStartY( int startY ) { this.startY = startY; }
-
+    
 }

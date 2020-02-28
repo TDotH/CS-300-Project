@@ -135,6 +135,104 @@ public class Inventory extends JPanel
     }
 */
 
+    public static void main( String[] args ) throws Exception  {
+        inventory = new Inventory();
+        JFrame frame = new JFrame("Inventory");
+        frame.add(inventory);
+        frame.setSize(WIDTH_SIZE, HEIGHT_SIZE);
+        frame.setVisible(true);
+        frame.setResizable(false);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        Scanner input = new Scanner(System.in);
+        // An inventory object that will contain the items and the circular linked list of arrays.
+        // An Tool object used to invoke the item class methods because that class is abstract.
+        Tool add = new Tool();
+        // The variable for the menu choices.
+        char choice;
+        /*
+          Quit is for quitting the application, full is for indicating that
+          the maximum number of items has been reached.
+        */
+        boolean quit = false, full = false;
+
+        do {
+            // Menu Interface Loop
+            System.out.print("\nWhat would you like to do?\n\n");
+            // If the inventory is full don't allow adding a new item
+            if (!full)
+            {
+                System.out.print("(A)dd an item, ");
+            }
+            System.out.println("(D)isplay the inventory in order, A(l)phabetize inventory," +
+                    " (S)earch for an item, (R)emove an item, (X)remove all items or (q)uit.\n");
+
+            choice = input.next().charAt(0);
+
+            switch (choice) {
+                case 'A':
+                case 'a':
+                    // If the inventory is full and doesn't allow adding a new item
+                    if (!full)
+                    {
+                        if (add.applyItem(inventory) == -1)
+                        {
+                            full = true;
+                        }
+                        else
+                        {
+                            inventory.repaint();
+                        }
+                    }
+                    break;
+                case 'D':
+                case 'd':
+                    if (inventory.display())
+                    {
+                        inventory.repaint();
+                    }
+                    break;
+                case 'L':
+                case 'l':
+                    if (inventory.Alphabetize())
+                    {
+                        inventory.repaint();
+                    }
+                    break;
+                case 'R':
+                case 'r':
+                    // If the inventory is full and an item was removed successfully
+                    if (inventory.removeItem() && full)
+                    {
+                        full = false;
+                    }
+                    inventory.repaint();
+                    break;
+                case 'S':
+                case 's':
+                    inventory.search();
+                    break;
+                case 'X':
+                case 'x':
+                    if (inventory.removeItems())
+                    {
+                        inventory.repaint();
+                    }
+                    full = false;
+                    break;
+                case 'Q':
+                case 'q':
+                    System.out.println("Are you sure you want to quit?");
+                    choice = input.next().charAt(0);
+                    if (choice == 'y')
+                    {
+                        quit = true;
+                    }
+                    break;
+            }
+        } while (!quit);
+    }
+
+
     // Public Methods
     /*
        Calls on four methods to set their variables using user input,
@@ -190,6 +288,7 @@ public class Inventory extends JPanel
                     y = j * line_width + 5;
                     heroInv[(i * max) + j].setPosX(x);
                     heroInv[(i * max) + j].setPosY(y);
+
                     g2d.drawRect(x, y, line_width, line_width);
                 }
             }
@@ -213,6 +312,7 @@ public class Inventory extends JPanel
                     y = j * line_width + 5;
                     heroInv[(i * max) + j].setPosX(x);
                     heroInv[(i * max) + j].setPosY(y);
+
                     g2d.drawRect(x, y, line_width, line_width);
                 }
             }
@@ -220,8 +320,10 @@ public class Inventory extends JPanel
             while (count != remainder) {
                 x = i * line_width + WIDTH_OFFSET;
                 y = j * line_width + 5;
+
                 heroInv[j + (max * i)].setPosX(x);
                 heroInv[j + (max * i)].setPosY(y);
+
                 g2d.drawRect(x, y, line_width, line_width);
                 ++j;
                 ++count;
@@ -324,23 +426,7 @@ public class Inventory extends JPanel
         return found;
     }
 
-    public int searchList(int check)
-    {
-        int i;
-        int found = -1;
 
-        for (i = 0; i < MAX_ITEMS; ++i) {
-            if (heroInv[i] != null)
-            {
-                if (heroInv[i].compareID(check))
-                {
-                    found = i;
-                    break;
-                }
-            }
-        }
-        return found;
-    }
 
     public int searchList(String name)
     {
@@ -360,7 +446,7 @@ public class Inventory extends JPanel
 
 
     /*
-        This method resets the array.
+        This method resets the CLL.
     */
     public boolean removeItems()
     {
@@ -539,10 +625,14 @@ public class Inventory extends JPanel
 
 
     /*
-        This method is a wrapper method to remove a single item from
-        the inventory, using input to determine the item to be removed.
+        This method is a wrapper method to remove a single venue from
+        the inventory, using input to determine the venue to be removed.
 
-        Afterwards, the item count will be decremented.
+        It will call both the method to remove the venue from the
+        CLL of arrays as well as the 2-3 tree.
+
+        Afterwards, the venue count will be decremented, and by a larger
+        amount than 1 if there was a head node of similar data removed.
     */
     public boolean removeItem()
     {
@@ -579,71 +669,7 @@ public class Inventory extends JPanel
     }
 
 
-  /*
-        This method is a wrapper method to remove a single item from
-        the inventory, using the item name to determine the venue to be removed.
 
-        Afterwards, the item count will be decremented.
-        
-        You can call it by putting in the name of the enum item, Items.ItemName as the arg.
-    */
-   public boolean removeItem(Items item)
-    {
-        int check = 0;
-        boolean success = false;
-
-        if (items == 0)
-        {
-            System.out.println("Your inventory is empty.");
-        }
-        else
-        {
-            // This method will search the array for the venue to be deleted.
-            check = searchList(item.name);
-
-            if (check >= 0)
-            {
-                heroInv[check].setItem(Items.DEFAULT);
-                --items;
-                System.out.println("Item removed.");
-                success = true;
-            }
-            else
-            {
-                System.out.println("There are no items with that name in the inventory.");
-            }
-        }
-        return success;
-    }
-
-   public boolean removeItem(int itemID)
-    {
-        int check = 0;
-        boolean success = false;
-
-        if (items == 0)
-        {
-            System.out.println("Your inventory is empty.");
-        }
-        else
-        {
-            // This method will search the array for the venue to be deleted.
-            check = searchList(itemID);
-
-            if (check >= 0)
-            {
-                heroInv[check].setItem(Items.DEFAULT);
-                --items;
-                System.out.println("Item removed.");
-                success = true;
-            }
-            else
-            {
-                System.out.println("There are no items with that name in the inventory.");
-            }
-        }
-        return success;
-    }
     /*
         This method is a wrapper method to display all of the
         items in the inventory CLL.

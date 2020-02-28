@@ -4,12 +4,16 @@
  */
 
 package com.screens;
+import java.awt.AlphaComposite;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.KeyEventDispatcher;
 import java.awt.KeyboardFocusManager;
 import java.awt.RenderingHints;
@@ -20,8 +24,10 @@ import java.awt.event.WindowEvent;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.IOException;
 import java.io.PrintWriter;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 
 import com.statemachine.*;
@@ -34,6 +40,7 @@ public class GameScreen implements IState {
 	//Sorry about all the globals, the ui stuff is a pain to work around without them
 	private StateMachine aStateMachine;
 	private MapScreenPanel aMapPanel;
+	private GuiPanel aGuiPanel;
 	private EventLogPanel aEventLogPanel;
 	private InventoryPanel aInventoryPanel;
 	private WinPanel aWinPanel;
@@ -122,8 +129,14 @@ public class GameScreen implements IState {
 			loadConfig();
 		}
 		
-		private void closeManager() {
+		//Stops the user from doing key inputs 
+		protected void stopManager() {
 			manager.removeKeyEventDispatcher(aKeyDispatcher);
+		}
+		
+		//Allows the user to do key inputs
+		protected void startManager() {
+			manager.addKeyEventDispatcher( aKeyDispatcher );
 		}
 		
 		//Update the camera
@@ -164,16 +177,9 @@ public class GameScreen implements IState {
 	            	else {
 		            	if ( paused == false ) {
 		            		player.keyPressed( e, map );
-		            		System.out.println("Energy remaining: " + player.getEnergy());
-		            		
-		            		// Check for flags
-		            		if ( finished == false ) {
-		            			if ( player.getWinFlag() == true ) {
-		            				aWinPanel.openMenu(aFrame);
-		            			} else if ( player.getLoseFlag() == true ) {
-		            				aLosePanel.openMenu(aFrame);
-		            			}
-		            		}
+		            		//System.out.println("Energy remaining: " + player.getEnergy());
+		            		winFlagCheck();
+
 		            	}
 	            	}
 	            } 
@@ -183,14 +189,145 @@ public class GameScreen implements IState {
 	            return false;
 	        }
 	    }
+	    
+	    //The cheat button
+	    protected void winButtonPressed() {
+	    	
+	    	//Give the jewel to the player
+	    	player.addItem( map.getJewel() );
+	    	//Set the jewel's tile on the map to null
+	    	map.get_tile( map.getJewelX(), map.getJewelY() ).setObject( null );
+	    	winFlagCheck();
+	    }
+	    
+	    //Check for win flags
+	    protected void winFlagCheck() {
+    		// Check for flags
+    		if ( finished == false ) {
+    			if ( player.getWinFlag() == true ) {
+    				aWinPanel.openMenu(aFrame);
+    			} else if ( player.getLoseFlag() == true ) {
+    				aLosePanel.openMenu(aFrame);
+    			}
+    		}
+	    }
 		
+	    //Getters for the gui
+	    protected int getPlayerEnergy() { return player.getEnergy(); }
+	    protected int getPlayerMoney() { return player.getMoney(); }
+	}
+	
+	//Holds the gui
+	class GuiPanel extends JPanel {
+		
+		private Image guiset;
+		private int imageSize = 32;
+		
+		private JLabel energyLabel;
+		private JLabel moneyLabel;
+		private int currentEnergy = 0;
+		private int currentMoney = 0;
+		
+		private int enMoGuiWidth = 96;
+		private int enMoGuiHeight = 64;
+		private int guiOffset = 25;
+		
+		private int sidesOffset = 6;
+		
+		public float guiTransparency = .8f;
+		
+		private int guiSize = 48;
+		
+		public GuiPanel() {
+		
+		  	try {
+	    		guiset = ImageIO.read(getClass().getClassLoader().getResourceAsStream("resources/images/guiset.png"));
+	    	}
+	    	catch (IOException ex) {
+	    		System.out.println("Error! guiset can't be loaded!");
+	    	}
+			
+			this.setBounds(0, 0, MAP_SCREEN_PANEL_WIDTH, aFrame.getContentPane().getSize().height );
+			this.setLayout( null );
+			this.setBackground( new Color(0, 0, 0, 0));
+			
+			JPanel energyPanel = new JPanel() {
+				
+				@Override
+				protected void paintComponent(Graphics g) {
+					super.paintComponent(g);
+					Graphics2D g2d = (Graphics2D)g;
+					
+					g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, guiTransparency));
+					g2d.drawImage(guiset, 0, 0 + sidesOffset, guiSize, guiSize + sidesOffset, 
+							0, 0, imageSize, imageSize, null);
+				}
+				
+			};
+			energyPanel.setBounds( this.getWidth() - enMoGuiWidth*2 - guiOffset*2,  guiOffset, enMoGuiWidth, enMoGuiHeight);
+			
+			//energyMoneyPanel.setBackground( Color.WHITE );
+			
+			energyLabel = new JLabel(String.valueOf(currentEnergy), SwingConstants.RIGHT);
+			energyLabel.setFont( new Font( energyLabel.getName(), Font.PLAIN, 40));
+			energyLabel.setBounds(38,8, 50, 50);
+			energyPanel.setLayout( null );
+			energyPanel.add( energyLabel );
+			
+			JPanel moneyPanel = new JPanel() {
+				
+				@Override
+				protected void paintComponent(Graphics g) {
+					super.paintComponent(g);
+					Graphics2D g2d = (Graphics2D)g;
+					
+					g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, guiTransparency));
+					g2d.drawImage(guiset, 0, 0 + sidesOffset, guiSize, guiSize + sidesOffset, 
+							imageSize, 0, imageSize*2, imageSize, null);
+				}
+				
+			};
+			moneyPanel.setBounds( this.getWidth() - enMoGuiWidth - guiOffset,  guiOffset, enMoGuiWidth, enMoGuiHeight);
+			//energyMoneyPanel.setBackground( Color.WHITE );
+			
+			moneyLabel = new JLabel(String.valueOf(currentEnergy), SwingConstants.RIGHT);
+			moneyLabel.setFont( new Font( moneyLabel.getName(), Font.PLAIN, 40));
+			moneyLabel.setBounds(38,8, 50, 50);
+			moneyPanel.setLayout( null );
+			moneyPanel.add( moneyLabel );
+			
+			this.add( energyPanel );
+			this.add( moneyPanel );
+		}
+		
+		public void updateGui() {
+			
+			if ( finished == false ) {
+				//Check if the panel needs to update
+				if ( aMapPanel.getPlayerEnergy() != currentEnergy ) {
+					currentEnergy = aMapPanel.getPlayerEnergy();
+					energyLabel.setText( String.valueOf(currentEnergy) );
+				}
+				if ( aMapPanel.getPlayerMoney() != currentMoney ) {
+					currentMoney = aMapPanel.getPlayerMoney();
+					moneyLabel.setText( String.valueOf(currentMoney) );
+				}
+			}
+		}
+		
+		@Override
+		protected void paintComponent(Graphics g) {
+			super.paintComponent(g);
+			Graphics2D g2d = (Graphics2D)g;
+			g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, guiTransparency));
+		}
 	}
 	
 	//Holds the win panel
 	class WinPanel extends JPanel implements ActionListener{
 		
 		private int width = 300;
-		private int height = 200;
+		private int height = 100;
 		
 		private int offSetY = 0;
 		
@@ -214,8 +351,8 @@ public class GameScreen implements IState {
 			menuPanel.setLayout( new BoxLayout( menuPanel, BoxLayout.PAGE_AXIS ));
 			//menuPanel.setLayout( new BorderLayout() );;
 			this.setLayout( null );
-			
-			JLabel label = new JLabel("Great job, you got the Jewels! You Win!");
+
+			JLabel label = new JLabel("Great job, you got the Jewel! You Win!");
 			label.setAlignmentX( this.CENTER_ALIGNMENT );
 			
 			resumeButton = new JButton("Resume");
@@ -231,23 +368,29 @@ public class GameScreen implements IState {
 			menuButton.setActionCommand("menu");
 			menuButton.setMinimumSize( new Dimension( buttonWidth, buttonHeight ));
 			menuButton.setMaximumSize( new Dimension( buttonWidth, buttonHeight ));
+			menuButton.setPreferredSize( new Dimension( buttonWidth, buttonHeight ));
 			menuButton.setAlignmentX( Component.CENTER_ALIGNMENT );
+			
+			JPanel buttonPanel = new JPanel();
+			buttonPanel.setLayout( new FlowLayout() );
+			buttonPanel.setBackground( Color.WHITE );
+			buttonPanel.add( resumeButton );
+			buttonPanel.add( menuButton );
 			
 			menuPanel.add(label, BorderLayout.PAGE_START);
 			menuPanel.add( Box.createVerticalGlue() );
-			menuPanel.add( resumeButton, BorderLayout.CENTER );
-			menuPanel.add( Box.createVerticalGlue() );
-			menuPanel.add( menuButton, BorderLayout.CENTER );
+			menuPanel.add( buttonPanel , BorderLayout.CENTER );
 			
 			resumeButton.setEnabled(false);
 			menuButton.setEnabled(false);
 			
 			this.add(menuPanel);
 		}
-		
-		//Will be used for saving and loading potentially later
+	
+		//Open the panel
 		public void openMenu( JFrame aFrame ) {
 			
+			aMapPanel.stopManager();
 			paused = true;
 			gamePanes.moveToFront(this);
 			//Enable the buttons
@@ -273,6 +416,7 @@ public class GameScreen implements IState {
 			switch ( e.getActionCommand() ) {
 			case "resume":
 				finished = true;
+				aMapPanel.startManager();
 				closeMenu();
 				break;
 			case "menu":
@@ -288,13 +432,13 @@ public class GameScreen implements IState {
 	//Holds the lose panel
 	class LosePanel extends JPanel implements ActionListener{
 		
-		private int width = 200;
-		private int height = 275;
+		private int width = 300;
+		private int height = 100;
 		
 		private int offSetY = 0;
 		
-		private int buttonWidth = 125;
-		private int buttonHeight = 50000; 
+		private int buttonWidth = 100;
+		private int buttonHeight = 50; 
 		
 		JButton restartButton;
 		JButton menuButton;
@@ -316,9 +460,10 @@ public class GameScreen implements IState {
 			JLabel label = new JLabel("Oh no, you ran out of energy!");
 			label.setAlignmentX( this.CENTER_ALIGNMENT );
 			
-			restartButton = new JButton("Restart Game");
+			restartButton = new JButton("Restart");
 			restartButton.setMinimumSize( new Dimension( buttonWidth, buttonHeight ));
 			restartButton.setMaximumSize( new Dimension( buttonWidth, buttonHeight ));
+			restartButton.setPreferredSize( new Dimension( buttonWidth, buttonHeight ));
 			restartButton.addActionListener(this);
 			restartButton.setActionCommand("restart");
 			restartButton.setAlignmentX( Component.CENTER_ALIGNMENT );
@@ -328,12 +473,18 @@ public class GameScreen implements IState {
 			menuButton.setActionCommand("menu");
 			menuButton.setMinimumSize( new Dimension( buttonWidth, buttonHeight ));
 			menuButton.setMaximumSize( new Dimension( buttonWidth, buttonHeight ));
+			menuButton.setPreferredSize( new Dimension( buttonWidth, buttonHeight ));
 			menuButton.setAlignmentX( Component.CENTER_ALIGNMENT );
 			
+			JPanel buttonPanel = new JPanel();
+			buttonPanel.setLayout( new FlowLayout() );
+			buttonPanel.setBackground( Color.WHITE );
+			buttonPanel.add( restartButton );
+			buttonPanel.add( menuButton );
+			
 			menuPanel.add(label, BorderLayout.PAGE_START );
-			menuPanel.add( restartButton, BorderLayout.CENTER );
 			menuPanel.add( Box.createVerticalGlue() );
-			menuPanel.add( menuButton, BorderLayout.CENTER );
+			menuPanel.add( buttonPanel, BorderLayout.CENTER );
 			
 			restartButton.setEnabled(false);
 			menuButton.setEnabled(false);
@@ -341,9 +492,10 @@ public class GameScreen implements IState {
 			this.add(menuPanel);
 		}
 		
-		//Will be used for saving and loading potentially later
+		//Open the panel
 		public void openMenu( JFrame aFrame ) {
 			
+			aMapPanel.stopManager();
 			paused = true;
 			gamePanes.moveToFront(this);
 			//Enable the buttons
@@ -369,6 +521,7 @@ public class GameScreen implements IState {
 			switch ( e.getActionCommand() ) {
 			case "restart":
 				aMapPanel.restartMap();
+				aMapPanel.startManager();
 				closeMenu();
 				break;
 			case "menu":
@@ -422,8 +575,8 @@ public class GameScreen implements IState {
 			resumeButton.setAlignmentX( Component.CENTER_ALIGNMENT );
 			
 			cheatButton = new JButton( "Cheat!");
-			//menuButton.addActionListener(this);
-			//menuButton.setActionCommand("cheat");
+			cheatButton.addActionListener(this);
+			cheatButton.setActionCommand("cheat");
 			cheatButton.setMinimumSize( new Dimension( buttonWidth, buttonHeight ));
 			cheatButton.setMaximumSize( new Dimension( buttonWidth, buttonHeight ));
 			cheatButton.setAlignmentX( Component.CENTER_ALIGNMENT );
@@ -464,7 +617,9 @@ public class GameScreen implements IState {
 			gamePanes.moveToFront(this);
 			//Enable the buttons
 			resumeButton.setEnabled(true);
-			cheatButton.setEnabled(true);
+			if ( finished == false ) {
+				cheatButton.setEnabled( true );
+			}
 			menuButton.setEnabled(true);
 			quitButton.setEnabled(true);
 			paused = true;
@@ -498,28 +653,16 @@ public class GameScreen implements IState {
 			case "quit":
 				aFrame.dispatchEvent( new WindowEvent( aFrame, WindowEvent.WINDOW_CLOSING));
 				break;
+			case "cheat":
+				closeMenu();
+				aMapPanel.winButtonPressed();
+				break;
 			default:
 				throw new IllegalStateException("Unexpected value: " + String.valueOf( e.getActionCommand()));
 			}
 		}
 	}
-	
-	/*
-	//Initial menu the player views
-	class LoadPanel extends JPanel implements ActionListener {
-		
-		public LoadPanel( JFrame frame ) {
-			
-		}
 
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			// TODO Auto-generated method stub
-			
-		}
-		
-	}*/
-	
 	//Holds Events
 	class EventLogPanel extends JPanel {
 		
@@ -567,8 +710,15 @@ public class GameScreen implements IState {
 		aFrame.repaint();
 		finished = false;
 		
+		JLayeredPane mapScreenPanes = new JLayeredPane();
+		mapScreenPanes.setBounds(0, 0, aFrame.getContentPane().getSize().width , aFrame.getContentPane().getSize().height);
+		
 		//Initialize on screen panels
 		aMapPanel = new MapScreenPanel( aFrame );
+		aGuiPanel = new GuiPanel();
+		mapScreenPanes.add( aMapPanel, 1 );
+		mapScreenPanes.add( aGuiPanel, 0 );
+		
 		aEventLogPanel = new EventLogPanel( aFrame );
 		aInventoryPanel = new InventoryPanel( aFrame );
 		aWinPanel = new WinPanel();
@@ -582,7 +732,7 @@ public class GameScreen implements IState {
 		//Panel to hold all the panels
 		JPanel gamePanelsHolder = new JPanel( null );
 		gamePanelsHolder.setBounds(0, 0, aFrame.getContentPane().getSize().width , aFrame.getContentPane().getSize().height);
-		gamePanelsHolder.add( aMapPanel );
+		gamePanelsHolder.add( mapScreenPanes );
 		gamePanelsHolder.add( aEventLogPanel );
 		gamePanelsHolder.add( aInventoryPanel );
 		
@@ -599,12 +749,15 @@ public class GameScreen implements IState {
 		
 	}
 	
-	
 	@Override
 	public void update() {
 
 		if ( aMapPanel != null ) {
 			aMapPanel.update();
+			
+		}
+		if( aGuiPanel != null ) {
+			aGuiPanel.updateGui();
 		}
 	}
 
@@ -623,7 +776,7 @@ public class GameScreen implements IState {
 
 	@Override
 	public void onExit() {
-		aMapPanel.closeManager();
+		aMapPanel.stopManager();
 		aFrame.getContentPane().removeAll();
 	}
 }

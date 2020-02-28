@@ -16,7 +16,7 @@ public class Frupal extends JPanel {
 	static final int SCREEN_HEIGHT = 720;
 	
 	//Current version 
-	static final String version = "Beta"; 
+	static final String version = "1.0"; 
 	
 	public static void main( String[] args ) throws Exception  {
 		
@@ -40,12 +40,22 @@ public class Frupal extends JPanel {
 		//Game flag
 		boolean gameOn = true;
 		
+		//Used so for later animations
+		long lastLoopTime = System.nanoTime();
+		final int TARGET_FPS = 60;
+		final long OPTIMAL_TIME = 1000000000 / TARGET_FPS;
+		
 		//Main game loop
 		while ( gameOn ) {
 
+			long now = System.nanoTime();
+			long updateLength = now - lastLoopTime;
+			lastLoopTime = now;
+			double delta = updateLength / ((double)OPTIMAL_TIME);
+			
 			gGameMode.update();
 			gGameMode.render();
-			Thread.sleep(10);
+			Thread.sleep( (lastLoopTime - System.nanoTime() + OPTIMAL_TIME)/1000000 );
 		}
 	}
 		

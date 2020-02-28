@@ -7,14 +7,19 @@
 
 package com.screens;
 import com.inventory.*;
+import com.obstacles.*;
 import com.map.*;
 import com.player.Player;
 import com.statemachine.*;
 
 import java.awt.event.*;
 import java.io.File;
+import java.io.IOException;
+
 import javax.swing.filechooser.FileFilter;
 import java.awt.*;
+
+import javax.imageio.ImageIO;
 import javax.swing.*;
 
 import java.util.EnumSet;
@@ -47,6 +52,7 @@ public class MapEditor extends JFrame implements IState {
 	//Current tile type to draw
 	Types currType = Types.FOREST;
 	Items currItem;
+	Obstacles currObstacle;
 	
 	//Used to check if the player has saved recently
 	private boolean recentSave;
@@ -54,7 +60,8 @@ public class MapEditor extends JFrame implements IState {
 	//Used to figure out what is currently being drawn
 	enum Brushes {
 		TILES,
-		OBJECTS
+		OBJECTS,
+		OBSTACLES
 	}
 	
 	//Set so Java doesn't scream at you
@@ -84,7 +91,7 @@ public class MapEditor extends JFrame implements IState {
 		
 		Map map;
 		Player aPlayer; //Needed for every map
-		Jewel aJewel; //Needed for every map
+		Item aJewel; //Needed for every map
 		int mapWidth;
 		int mapHeight;
 		
@@ -98,6 +105,7 @@ public class MapEditor extends JFrame implements IState {
 		private boolean playerSpawn = false;
 		private boolean jewelSpawn = false;
 		
+		
 		public MapPanel() {
 			
 			aPlayer = null;
@@ -108,6 +116,7 @@ public class MapEditor extends JFrame implements IState {
 			this.setVisible(true);
 			addMouseListener(this);
 			addMouseMotionListener(this);
+			
 		}
 		
 		//Creates a map of a given size and height
@@ -147,11 +156,11 @@ public class MapEditor extends JFrame implements IState {
 				aPlayer = new Player();
 				playerSpawn = true;
 			}
-			aPlayer.setPos( map.getStartX(), map.getStartY());
+			aPlayer.setPos( map.getStartX(), map.getStartY() );
 			
 			//Set jewel position
 			if ( aJewel == null ) {
-				aJewel = new Jewel( map.getJewelX(), map.getJewelY() );
+				aJewel = new Item( Items.JEWEL, map.getJewelX(), map.getJewelY() );
 				jewelSpawn = true;
 			} else { //In case there is already a jewel
 				aJewel.setPosX( map.getJewelX() );
@@ -236,7 +245,7 @@ public class MapEditor extends JFrame implements IState {
 								break;
 							case OBJECTS:
 								
-								//Check if this object is being place on an impassable tile
+								//Check if this object is being placed on an impassable tile
 								if ( map.get_tile( tempX, tempY ).getType().getPassable() == true ) {
 									
 									//Brush types
@@ -278,18 +287,34 @@ public class MapEditor extends JFrame implements IState {
 											} else { // Nope
 												
 												jewelSpawn = true; //Set the spawn flag
-												aJewel = new Jewel( tempX, tempY ); //Make a new jewel to keep track of coordinates
+												aJewel = new Item( Items.JEWEL, tempX, tempY ); //Make a new jewel to keep track of coordinates
 												map.get_tile(tempX, tempY).setObject( aJewel ); // Place the jewel on the map
 												
 											}				
 											
 											break;
-											
+										
 										default:
+											//Other items are less important and can be placed more than once
+											
+											//Check if there is something on the tile already
+											checkTile( map.get_tile( tempX, tempY ), tempX, tempY );
+											Item item = new Item( currItem, tempX, tempY );
+											map.get_tile(tempX, tempY).setObject( item );
+											
 									}
 								} else { //Throw an error about placing the player here
 									JOptionPane.showMessageDialog(frame, "Can't place the " + currItem.getName() + " on an impassable tile!", "Placement Warning", JOptionPane.WARNING_MESSAGE);
 								}
+								break;
+								
+							case OBSTACLES:
+								
+								//Check if there is something on the tile already
+								checkTile( map.get_tile( tempX, tempY ), tempX, tempY );
+								Obstacle obstacle = new Obstacle( currObstacle, tempX, tempY );
+								map.get_tile(tempX, tempY).setObject( obstacle );
+								
 								break;
 								
 							default:
@@ -318,11 +343,17 @@ public class MapEditor extends JFrame implements IState {
 			} 
 			if ( aTile.getObject() != null ) { //Is there an object on the tile?
 				
-				//Does this object happen to be the jewel?
-				if ( aTile.getObject() instanceof Jewel ) {
+				//Does this object happen to be the item?
+				if ( aTile.getObject() instanceof Item ) {
 					
-					jewelSpawn = false; //Reset the jewel flag
-					aJewel = null; // Delete the jewel
+					//Since this is an item treat it as such
+					Item tempItem = (Item)aTile.getObject();
+					
+					if( tempItem.getItem() == Items.JEWEL ) {
+						jewelSpawn = false; //Reset the jewel flag
+						aJewel = null; // Delete the jewel
+					}
+					
 				}
 				
 				aTile.setObject( null ); // Delete the object
@@ -401,10 +432,8 @@ public class MapEditor extends JFrame implements IState {
 			if ( "generate".equals( e.getActionCommand() ) ) {
 				mapPanel.generateMap( mapSizeSlider.getValue(), mapSizeSlider.getValue() );
 
-			}
-			
+			}	
 		}
-		
 	}
 	
 	//Deals with picking what the player will draw; is a tabbed pane to switch between tiles, items, and obstacles
@@ -452,10 +481,58 @@ public class MapEditor extends JFrame implements IState {
 				tilesPanel.add(b);
 			}
 			
-			//Generate a button to place one-off items (just the player for now
-			//JPanel objectsPanel = new JPanel( new FlowLayout( FlowLayout.CENTER, 5, 5 ));
+			//Generate buttons to place required items
+			JPanel requiredPanel = new JPanel( new GridLayout( 3, 3 ));
+			JButton playerButton = new JButton( String.valueOf( Items.PLAYER ) );
+			playerButton.setToolTipText( Items.PLAYER.getName() );
+			playerButton.setPreferredSize( new Dimension( 40, 40 ));
+			playerButton.addActionListener( new ActionListener() {
+				public void actionPerformed( ActionEvent e ) {
+					
+					//Clear the description box
+					descriptionPanel.clearText();
+					
+					//Name of the item
+					String tempStr = Items.PLAYER.getName();
+					descriptionPanel.addText( tempStr );
+					
+					//Flavor text
+					tempStr = Items.PLAYER.getDescription();
+					descriptionPanel.addText( tempStr );
+					
+					currItem = Items.PLAYER;
+					aBrush = Brushes.OBJECTS;
+				}
+			});
+			
+			JButton JewelButton = new JButton( String.valueOf( Items.JEWEL ) );
+			JewelButton.setToolTipText( Items.JEWEL.getName() );
+			JewelButton.setPreferredSize( new Dimension( 40, 40 ));
+			JewelButton.addActionListener( new ActionListener() {
+				public void actionPerformed( ActionEvent e ) {
+					
+					//Clear the description box
+					descriptionPanel.clearText();
+					
+					//Name of the item
+					String tempStr = Items.JEWEL.getName();
+					descriptionPanel.addText( tempStr );
+					
+					//Flavor text
+					tempStr = Items.JEWEL.getDescription();
+					descriptionPanel.addText( tempStr );
+					
+					currItem = Items.JEWEL;
+					aBrush = Brushes.OBJECTS;
+				}
+			});
+			
+			requiredPanel.add(playerButton);
+			requiredPanel.add(JewelButton);
+			
+			//Generate buttons to place items
 			JPanel objectsPanel = new JPanel( new GridLayout( 3, 3 ));
-			for ( Items item : complementOf( EnumSet.of( Items.DEFAULT )) ) { //Don't include the default item
+			for ( Items item : complementOf( EnumSet.of( Items.DEFAULT, Items.PLAYER, Items.JEWEL )) ) { //Don't include the default item
 				
 				JButton b = new JButton( String.valueOf( item ) );
 				b.setToolTipText( item.getName() );
@@ -481,8 +558,59 @@ public class MapEditor extends JFrame implements IState {
 				objectsPanel.add(b);
 			}
 			
+			//Generate buttons to place obstacles
+			JPanel obstaclesPanel = new JPanel( new GridLayout( 3, 3 ));
+			for ( Obstacles obstacle : complementOf( EnumSet.of( Obstacles.DEFAULT )) ) { //Don't include the default obstacle
+				
+				JButton b = new JButton( String.valueOf( obstacle ) );
+				b.setToolTipText( obstacle.getName() );
+				b.setPreferredSize( new Dimension( 40, 40 ));
+				b.addActionListener( new ActionListener() {
+					public void actionPerformed( ActionEvent e ) {
+						
+						//Clear the description box
+						descriptionPanel.clearText();
+						
+						//Name of the Obstacle
+						String tempStr = obstacle.getName();
+						descriptionPanel.addText( tempStr );
+						
+						//Flavor text
+						tempStr = obstacle.getDescription();
+						descriptionPanel.addText( tempStr );
+						
+						//Required item
+						tempStr = String.valueOf("Required Item: " + obstacle.requiredItem().getName());
+						descriptionPanel.addText( tempStr );
+						
+						//Passable?
+						tempStr = "Passable: ";
+						if ( obstacle.getPassable() == true ) {
+							
+							tempStr = tempStr.concat( "Yes" );
+							descriptionPanel.addText(tempStr);
+
+							//Additional energy cost
+							tempStr = String.valueOf( "Additional energy cost " + String.valueOf( obstacle.getEnergyCost() ) );
+							descriptionPanel.addText( tempStr );
+							
+						} else {
+							//Nope
+							tempStr = tempStr.concat( "No" );
+							descriptionPanel.addText(tempStr);
+						}
+						
+						currObstacle = obstacle;
+						aBrush = Brushes.OBSTACLES;
+					}
+				});
+				obstaclesPanel.add(b);
+			}
+			
 			this.addTab("Tiles", tilesPanel );
 			this.addTab("Objects", objectsPanel);
+			this.addTab("Obstacles", obstaclesPanel);
+			this.addTab("Required", requiredPanel);
 			this.setPreferredSize( new Dimension( 200, 200 ));
 			this.setMaximumSize( new Dimension( 200, 200 ));
 			this.setMinimumSize(new Dimension( 200, 200 ));
@@ -504,16 +632,15 @@ public class MapEditor extends JFrame implements IState {
 		
 		public DescriptionPanel() {
 			
-			this.setPreferredSize( new Dimension( 200, 150 ));
+			this.setPreferredSize( new Dimension( 200, 175 ));
 			this.setMaximumSize( new Dimension( 200, 200 ));
 			this.setMinimumSize(new Dimension( 200, 200 ));
-			this.setBorder( BorderFactory.createCompoundBorder( BorderFactory.createLineBorder(Color.black), BorderFactory.createEmptyBorder(5, 5, 10, 10 )));
+			this.setBorder( BorderFactory.createCompoundBorder( BorderFactory.createLineBorder(Color.black), BorderFactory.createEmptyBorder(10, 10, 10, 10 )));
 			this.setLayout( new BorderLayout() );
 			
 			textArea = new JTextArea( 5, 5 );
 			textArea.setLineWrap( true );
 			textArea.setWrapStyleWord( true );
-			//JScrollPane scrollPane = new JScrollPane( textArea );
 			textArea.setPreferredSize( new Dimension( 100, 300 ) );
 			textArea.setMaximumSize( new Dimension( 100, 300 ) );
 			textArea.setMinimumSize(new Dimension( 100, 300 )  );
