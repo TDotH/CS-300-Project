@@ -377,6 +377,8 @@ public abstract class Item
         return item.name;
     }
 
+    public String getDescription() { return item.description; }
+
 
     public String getNameInit()
     {
