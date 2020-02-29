@@ -73,9 +73,6 @@ public class Map {
     	// Initialize tiles
     	for ( int x = 0; x < width; x++ ) { 
     		for ( int y = 0; y < height; y++) {
-    			if(x == startX && y == startY) {
-    				map[x][y].setVisited();
-				}
     			map[x][y] = new Tile( type );
     		}
     	} 	
@@ -147,6 +144,9 @@ public class Map {
 
                 //Initialize tile
                 map[x][y] = new Tile(type);
+		   if(x == startX && y == startY) {
+    				map[x][y].setVisited();
+				}
                 //map[x][y].setImageID(tempInt);
             }
         }
