@@ -24,10 +24,12 @@ import java.io.PrintWriter;
 
 import javax.swing.*;
 
+import com.inventory.Item;
 import com.statemachine.*;
 import com.map.Map;
 import com.map.Tile;
 import com.player.*;
+import com.eventlog.*;
 
 public class GameScreen implements IState {
 
@@ -40,6 +42,8 @@ public class GameScreen implements IState {
 	private GameMenu gameMenu;
 	private JLayeredPane gamePanes;
 	private boolean paused;
+	private Player player;
+	private Map map;
 	
 	public JFrame aFrame;
 	
@@ -52,9 +56,6 @@ public class GameScreen implements IState {
 	
 	//Holds the map and player
 	class MapScreenPanel extends JPanel{
-		
-		private Map map;
-		private Player player;
 		private Camera camera;
 		
 		//Config file path
@@ -305,11 +306,20 @@ public class GameScreen implements IState {
 	
 	//Holds Events
 	class EventLogPanel extends JPanel {
-		
+
+		private EventLog eventLog;
+
 		public EventLogPanel( JFrame aFrame ) {
 			
 			this.setBounds(MAP_SCREEN_PANEL_WIDTH, aFrame.getContentPane().getSize().height/2, aFrame.getContentPane().getSize().width - MAP_SCREEN_PANEL_WIDTH, aFrame.getContentPane().getSize().height/2 );
 			this.setBackground(Color.yellow);
+			this.eventLog = new EventLog();
+		}
+
+		private void drawString(Graphics g, String text, int x, int y){
+			for(String line: text.split("\n")){
+				g.drawString(line, x, y += g.getFontMetrics().getHeight());
+			}
 		}
 		
 		@Override
@@ -317,8 +327,28 @@ public class GameScreen implements IState {
 			
 			super.paintComponent(g);
 			//Graphics2D g2d = (Graphics2D) g;
-			g.drawString("Event log goes here", this.getWidth()/3, this.getHeight()/2 );
-			
+			eventLog.update(map.get_tile(player.getPosX(), player.getPosY()), player);
+			drawString(g, eventLog.display(), this.getWidth()/15, this.getHeight()/10);
+
+		}
+		//overwritten calls
+		protected void paintComponent(Graphics g, Item item, char icode ){
+			super.paintComponent(g);
+			eventLog.update(map.get_tile(player.getPosX(), player.getPosY()), player, item, icode);
+			drawString(g, eventLog.display(), this.getWidth()/6, this.getHeight()/3);
+
+		}
+
+		protected void paintComponent(Graphics g, String event){
+			super.paintComponent(g);
+			eventLog.update(map.get_tile(player.getPosX(), player.getPosY()), player, event);
+			drawString(g, eventLog.display(), this.getWidth()/6, this.getHeight()/3);
+		}
+
+		protected void paintComponent(Graphics g, Item item, char icode, String event){
+			super.paintComponent(g);
+			eventLog.update(map.get_tile(player.getPosX(), player.getPosY()), player, item, icode, event);
+			drawString(g, eventLog.display(), this.getWidth()/6, this.getHeight()/3);
 		}
 	}
 	
