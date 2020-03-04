@@ -249,7 +249,7 @@ public class Map {
      * - Deals with what tiles to render and gives the position of rendering to each individual tile.draw()
      * ADD CHECKS TO ENSURE THAT MAP IS ALSO DRAWN IF TILE IS WITHIN ! SQUARE ON ANY SIDE OF PLAYER
      */
-    public void draw(Graphics2D g, int playerPosX, int playerPosY, Camera camera ) {
+    public void draw(Graphics2D g, int playerPosX, int playerPosY, int playerVisionRadius, Camera camera ) {
     	/* Check if the player is near the bounds of the map
     	 * If so just render the same part of the map
     	 */
@@ -275,15 +275,22 @@ public class Map {
 	            	if ( y >= 0 && y < height ) {
 	            		tempPosX =  LINE_WIDTH * ( xDraw );
 	            		tempPosY = LINE_WIDTH * ( yDraw );
-						if(map[x][y].getVisited()) {
-							map[x][y].draw(g, LINE_WIDTH, tempPosX, tempPosY); //, tileset );
-						}
-						yDraw++;
-						if(x < 0 || x > MAX || y < 0 || y > MAX) {
-							if((x == playerPosX + 1 || x == playerPosX - 1 || x == playerPosX) && (y == playerPosY + 1 || y == playerPosY - 1 || y == playerPosY)) {
-								map[x][y].draw(g, LINE_WIDTH, tempPosX, tempPosY); //, tileset );
+						
+						//Draw if within player "vision"
+						if( ( ( playerPosX + playerVisionRadius >= x ) && ( x >= playerPosX - playerVisionRadius ) ) && ( ( playerPosY + playerVisionRadius >= y ) && ( y >= playerPosY - playerVisionRadius ) ) ) {
+								
+							//Set the tiles the player can see to visited if not already
+							if ( map[x][y].getVisited() == false ) {
+								map[x][y].setVisited();
 							}
+							map[x][y].draw(g, LINE_WIDTH, tempPosX, tempPosY, true); //, tileset );
+							
+						//If not then check if the player has seen it already	
+						} else if ( map[x][y].getVisited() ) {
+							map[x][y].draw(g, LINE_WIDTH, tempPosX, tempPosY, false); //, tileset );
 						}
+							
+						yDraw++;
 	            	}
 	            }
 	            yDraw = 0;

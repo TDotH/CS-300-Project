@@ -17,6 +17,9 @@ public class Player implements Objects {
     
     //Player's energy
     private int energy;
+    
+    //Player's vision radius
+    private int visionRadius = 1;
 
     //Energy and money; unused until items are ready
     //private int money;
@@ -24,7 +27,7 @@ public class Player implements Objects {
     //Win Flag (player has the jewel)
     boolean winFlag;
     
-    //Lose Flage (player ran out of energy)
+    //Lose Flag (player ran out of energy)
     boolean loseFlag;
     
     //Empty Constructor
@@ -69,7 +72,6 @@ public class Player implements Objects {
                 	if ( tile.getType().getPassable() == true ) {
                 		//Move the player and check the tile for energy loss, items/obstacles/shopkeep
                 		posX = posX - 1;
-                		map.get_tile(posX, posY).setVisited();
                 		checkTile( tile );
                 	}
                 	else {
@@ -90,7 +92,6 @@ public class Player implements Objects {
                 	if ( tile.getType().getPassable() == true ) {
                 		//Move the player and check the tile for energy loss, items/obstacles/shopkeep
                 		posX = posX + 1;
-						map.get_tile(posX, posY).setVisited();
                 		checkTile( tile );
                 	}
                 	else {
@@ -112,7 +113,6 @@ public class Player implements Objects {
 	                	if ( tile.getType().getPassable() == true ) {
 	                		//Move the player and check the tile for energy loss, items/obstacles/shopkeep
 	                		posY = posY - 1;
-							map.get_tile(posX, posY).setVisited();
 	                		checkTile( tile );
 	                	}
 	                	else {
@@ -133,7 +133,6 @@ public class Player implements Objects {
 		                	if ( tile.getType().getPassable() == true ) {
 		                		//Move the player and check the tile for energy loss, items/obstacles/shopkeep
 		                		posY = posY + 1;
-								map.get_tile(posX , posY).setVisited();
 		                		checkTile( tile );
 		                	}
 		                	else {
@@ -232,9 +231,11 @@ public class Player implements Objects {
     }
     
     public int getEnergy() { return energy; }
+    public int getVisiontRadius() { return visionRadius; }
     public boolean getWinFlag() { return winFlag; }
     public boolean getLoseFlag() { return loseFlag; }
     
     //Setters
     public void setEnergy( int energy ) { this.energy = energy; }
+    public void setVisionRadius( int visionRadius ) { this.visionRadius = visionRadius; }
 }

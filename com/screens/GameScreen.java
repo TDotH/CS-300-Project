@@ -138,7 +138,7 @@ public class GameScreen implements IState {
 			Graphics2D g2d = (Graphics2D) g;
 			g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
 							RenderingHints.VALUE_ANTIALIAS_ON);
-			map.draw(g2d, player.getPosX(), player.getPosY(), camera);
+			map.draw(g2d, player.getPosX(), player.getPosY(), player.getVisiontRadius(),  camera);
 			player.draw(g2d, map.getTileSize(), camera);
 			
 		}
