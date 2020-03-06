@@ -13,6 +13,7 @@ package com.map;
 
 import java.awt.*;
 import com.inventory.*;
+import com.obstacles.Obstacle;
 
 //Contains the type in an int and tests with the enums from the tiles.java file
 public class Tile {
@@ -26,6 +27,7 @@ public class Tile {
         object = null;
     }
 
+    //Regular draw without images
     public void draw(Graphics2D g2d, int line_width, int posX, int posY ) { //Image tileSet ) { <-- ignore for now
     	
     	//There is a corresponding image for this tile!
@@ -69,6 +71,62 @@ public class Tile {
 	        //Is there an object to draw?
 	        if ( object != null ) {
 	        	object.draw( g2d, line_width, posX, posY );
+	        }
+    	//}
+    }
+    
+    //Draw with imported images
+    public void draw(Graphics2D g2d, int line_width, int posX, int posY, Image itemset, Image obstacleset ) { //Image tileSet ) { <-- ignore for now
+    	
+    	//There is a corresponding image for this tile!
+    	//if ( imageID != -1 && tileSet != null ) {
+    	//	g2d.drawImage(tileSet, posX, posY, posX + line_width, posY + line_width, imageID/12 * 16, imageID/4 * 16, 16 + imageID/4 * 16, 16 + imageID/4 * 16, null);
+    	//}
+    	//else { //Just draw a square
+	        //Fill in squares by color
+	        //TODO: Draw graphics instead of flat colors (maybe lol)
+	        switch (type) {
+	            case FOREST:
+	                g2d.setColor(Color.GREEN);
+	                break;
+	            case SWAMP:
+	                g2d.setColor(Color.DARK_GRAY);
+	                break;
+	            case DESERT:
+	                g2d.setColor(Color.YELLOW);
+	                break;
+	            case WATER:
+	                g2d.setColor(Color.BLUE);
+	                break;
+	            case MOUNTAINS:
+	                g2d.setColor(Color.GRAY);
+	                break;
+	            case SHOPKEEPER:
+	                g2d.setColor(Color.magenta);
+	                break;
+	            case CAVERNS:
+	                g2d.setColor(Color.BLACK);
+	                break;
+	            default:
+	                g2d.setColor(Color.WHITE);
+	        }
+	        //Fill color
+	        g2d.fillRect(posX, posY,line_width,line_width);
+	        //Draw rectangle (for the grid)
+	        g2d.setColor(Color.BLACK);
+	        g2d.drawRect(posX ,posY,line_width,line_width);
+	        
+	        //Is there an object to draw?
+	        if ( object != null ) {
+	        	
+	        	if ( object instanceof Item ) {
+	        		object.draw( g2d, line_width, posX, posY, itemset );
+	        	}
+	        	
+	        	if ( object instanceof Obstacle ) {
+	        		object.draw( g2d, line_width, posX, posY, obstacleset );
+	        	}
+	        	
 	        }
     	//}
     }
