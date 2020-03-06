@@ -8,6 +8,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.KeyEventDispatcher;
@@ -23,6 +24,9 @@ import java.io.FileReader;
 import java.io.PrintWriter;
 
 import javax.swing.*;
+import javax.swing.border.BevelBorder;
+import javax.swing.border.Border;
+import javax.swing.border.TitledBorder;
 
 import com.inventory.Item;
 import com.statemachine.*;
@@ -63,8 +67,14 @@ public class GameScreen implements IState {
 		
 		KeyDispatcher aKeyDispatcher = new KeyDispatcher();
 		
+		private Border raisedBorder = BorderFactory.createBevelBorder( BevelBorder.RAISED, new Color(56,112,255) ,new Color(0, 51, 179));
+		private Border loweredBorder= BorderFactory.createBevelBorder( BevelBorder.LOWERED,  new Color(56,112,255), new Color(0, 51, 179));
+		private Border panelBorder = BorderFactory.createCompoundBorder( loweredBorder, 
+				BorderFactory.createCompoundBorder( raisedBorder, loweredBorder));
+		
 		public MapScreenPanel( JFrame aFrame ) {
 			this.setBounds(0, 0, MAP_SCREEN_PANEL_WIDTH, aFrame.getContentPane().getSize().height );
+			this.setBorder(panelBorder);
 		
 			//Load the config file
 			this.loadConfig();
@@ -308,11 +318,17 @@ public class GameScreen implements IState {
 	class EventLogPanel extends JPanel {
 
 		private EventLog eventLog;
+		
+		private Border raisedBorder = BorderFactory.createBevelBorder( BevelBorder.RAISED, new Color(56,112,255) ,new Color(0, 51, 179));
+		private Border loweredBorder= BorderFactory.createBevelBorder( BevelBorder.LOWERED,  new Color(56,112,255), new Color(0, 51, 179));
+		private Border panelBorder = BorderFactory.createCompoundBorder( loweredBorder, 
+				BorderFactory.createCompoundBorder( raisedBorder, loweredBorder));
 
 		public EventLogPanel( JFrame aFrame ) {
 			
 			this.setBounds(MAP_SCREEN_PANEL_WIDTH, aFrame.getContentPane().getSize().height/2, aFrame.getContentPane().getSize().width - MAP_SCREEN_PANEL_WIDTH, aFrame.getContentPane().getSize().height/2 );
-			this.setBackground(Color.yellow);
+			this.setBackground(Color.BLACK);
+			this.setBorder( BorderFactory.createTitledBorder ( panelBorder, "Event Log", TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, new Font("Dialog", Font.PLAIN, 14), Color.WHITE ));
 			this.eventLog = new EventLog();
 		}
 
@@ -355,9 +371,15 @@ public class GameScreen implements IState {
 	//Holds the inventory
 	class InventoryPanel extends JPanel {
 		
+		private Border raisedBorder = BorderFactory.createBevelBorder( BevelBorder.RAISED, new Color(56,112,255) ,new Color(0, 51, 179));
+		private Border loweredBorder= BorderFactory.createBevelBorder( BevelBorder.LOWERED,  new Color(56,112,255), new Color(0, 51, 179));
+		private Border panelBorder = BorderFactory.createCompoundBorder( loweredBorder, 
+				BorderFactory.createCompoundBorder( raisedBorder, loweredBorder));
+		
 		public InventoryPanel( JFrame aFrame ) {
 			this.setBounds(MAP_SCREEN_PANEL_WIDTH, 0, aFrame.getContentPane().getSize().width - MAP_SCREEN_PANEL_WIDTH, aFrame.getContentPane().getSize().height/2 );
-			this.setBackground(Color.cyan);
+			this.setBackground(Color.BLACK);
+			this.setBorder( BorderFactory.createTitledBorder ( panelBorder, "Inventory", TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, new Font("Dialog", Font.PLAIN, 14), Color.WHITE ));
 			//System.out.println("Size:( " + ( aFrame.getContentPane().getSize().width - MAP_SCREEN_PANEL_WIDTH )+ "," + aFrame.getContentPane().getSize().height/2 + " )" );
 
 		}
