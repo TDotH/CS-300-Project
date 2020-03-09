@@ -134,6 +134,7 @@ public class Map {
 	                    break;
 	                case 6:
 	                    type = Types.SHOPKEEPER;
+	                    ShopKeeper testSK = new ShopKeeper();
 	                    break;
 	                case 7:
 	                    type = Types.CAVERNS;
@@ -144,6 +145,9 @@ public class Map {
 
                 //Initialize tile
                 map[x][y] = new Tile(type);
+		   if(x == startX && y == startY) {
+    				map[x][y].setVisited();
+				}
                 //map[x][y].setImageID(tempInt);
             }
         }
@@ -244,6 +248,7 @@ public class Map {
     
     /* Takes in the player's coordinates and a given camera size and draws relative to the camera's position on the map
      * - Deals with what tiles to render and gives the position of rendering to each individual tile.draw()
+     * ADD CHECKS TO ENSURE THAT MAP IS ALSO DRAWN IF TILE IS WITHIN ! SQUARE ON ANY SIDE OF PLAYER
      */
     public void draw(Graphics2D g, int playerPosX, int playerPosY, Camera camera ) {
     	/* Check if the player is near the bounds of the map
@@ -271,8 +276,15 @@ public class Map {
 	            	if ( y >= 0 && y < height ) {
 	            		tempPosX =  LINE_WIDTH * ( xDraw );
 	            		tempPosY = LINE_WIDTH * ( yDraw );
-		                map[x][y].draw(g, LINE_WIDTH, tempPosX, tempPosY ); //, tileset );
-		                yDraw++;
+						if(map[x][y].getVisited()) {
+							map[x][y].draw(g, LINE_WIDTH, tempPosX, tempPosY); //, tileset );
+						}
+						yDraw++;
+						if(x < 0 || x > MAX || y < 0 || y > MAX) {
+							if((x == playerPosX + 1 || x == playerPosX - 1 || x == playerPosX) && (y == playerPosY + 1 || y == playerPosY - 1 || y == playerPosY)) {
+								map[x][y].draw(g, LINE_WIDTH, tempPosX, tempPosY); //, tileset );
+							}
+						}
 	            	}
 	            }
 	            yDraw = 0;
