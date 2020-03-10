@@ -38,7 +38,7 @@ public class StateMachine {
 	}
 	
 	public void change( String stateName ) {
-		
+
 		//System.out.println(stateName);
 		if ( currentState != null ) {
 			//mainFrame.getContentPane().removeAll(); //Clean the frame

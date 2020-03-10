@@ -112,10 +112,10 @@ public class Food extends Item
 
     /*
         If the base class's display was false, then don't call this class's
-    */
+    *//*
     public boolean display()
     {
-        if (super.display())
+        if ()
         {
             System.out.print("The energy boost is: ");
             if (energyContents > 0)
@@ -129,5 +129,5 @@ public class Food extends Item
             return false;
         }
         return true;
-    }
+    }*/
 }

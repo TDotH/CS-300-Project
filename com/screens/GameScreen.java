@@ -69,7 +69,7 @@ public class GameScreen implements IState {
 		private Camera camera;
 
 		//Config file path
-		private static final String CONFIG_FILE = "src/maps/config.ini";
+		private static final String CONFIG_FILE = "H:\\GitProjects\\lort\\CS-300-Project\\maps\\config.ini";
 
 		KeyDispatcher aKeyDispatcher = new KeyDispatcher();
 

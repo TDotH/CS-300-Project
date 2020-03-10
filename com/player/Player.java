@@ -5,6 +5,8 @@ import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.util.HashMap;
+
 import com.map.*;
 import com.obstacles.*;
 
@@ -57,9 +59,9 @@ public class Player implements Objects {
     //returns -3 if player tries to move out of bounds (no movement occurs)
     public void keyPressed(KeyEvent e, Map map ) {
 
-    	switch ( e.getKeyCode() ) {
+    	switch ( filterPlayerInput(e)){//e.getKeyCode() ) {
 
-    		case KeyEvent.VK_A:
+    		case ("LEFT"):
 
     			//Is the player at the bounds?
                 if ((posX - 1) >= 0) {
@@ -79,7 +81,7 @@ public class Player implements Objects {
                 	//Do nothing
                 }
                     break;
-			case KeyEvent.VK_D:
+			case "RIGHT":
 
 	            if ((posX + 1) <= upBoundX) {
 
@@ -99,7 +101,7 @@ public class Player implements Objects {
 	            }
 	            break;
 
-				case KeyEvent.VK_W:
+				case "UP":
 
 		            if ((posY - 1) >= 0) {
 
@@ -119,7 +121,7 @@ public class Player implements Objects {
 		            }
 		            break;
 
-					case KeyEvent.VK_S:
+					case "DOWN":
 			            if ((posY + 1 <= upBoundY )) {
 
 			               	//Get the the tile that will be moved to
@@ -141,6 +143,33 @@ public class Player implements Objects {
 	                	throw new IllegalStateException("Unexpected value!");
 	            }
     }
+
+    private String filterPlayerInput(KeyEvent e){
+
+		HashMap<Integer, String> validInput = new HashMap<Integer, String>();
+		validInput.put(KeyEvent.VK_A, "LEFT");
+		validInput.put(KeyEvent.VK_LEFT, "LEFT");
+		validInput.put(KeyEvent.VK_KP_LEFT, "LEFT");
+
+		validInput.put(KeyEvent.VK_S, "DOWN");
+		validInput.put(KeyEvent.VK_DOWN, "DOWN");
+		validInput.put(KeyEvent.VK_KP_DOWN, "DOWN");
+
+		validInput.put(KeyEvent.VK_D, "RIGHT");
+		validInput.put(KeyEvent.VK_RIGHT, "RIGHT");
+		validInput.put(KeyEvent.VK_KP_RIGHT, "RIGHT");
+
+		validInput.put(KeyEvent.VK_W, "UP");
+		validInput.put(KeyEvent.VK_UP, "UP");
+		validInput.put(KeyEvent.VK_KP_UP, "UP");
+
+		try{
+			String direction = validInput.get(e.getKeyCode());
+			return direction;
+		} catch (Exception exc){
+			return "INVALID";
+		}
+	}
 
     //Does all the tile checking, takes away from players energy depending on stuff
     public boolean checkTile( Tile tile ) {

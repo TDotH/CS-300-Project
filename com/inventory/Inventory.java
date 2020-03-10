@@ -50,11 +50,11 @@ public class Inventory extends JPanel
         // An Tool object used to invoke the item class methods because that class is abstract.
         Tool add = new Tool();
         // The variable for the menu choices.
-        char choice;
+        char choice;*/
         /*
           Quit is for quitting the application, full is for indicating that
           the maximum number of items has been reached.
-        */
+        *//*
         boolean quit = false, full = false;
 
         do {
@@ -610,7 +610,7 @@ public class Inventory extends JPanel
             if (value != -1)
             {
                 System.out.println("\nItem found. Here are it's details:\n");
-                heroInv[value].display();
+                heroInv[value].displayDescription();
                 System.out.println();
                 found = true;
             }
@@ -683,7 +683,7 @@ public class Inventory extends JPanel
             for (i = 0; i < MAX_ITEMS; ++i) {
                 if (heroInv[i].checkType() != 0)
                 {
-                    heroInv[i].display();
+                    heroInv[i].displayDescription();
                     System.out.println();
                 }
             }

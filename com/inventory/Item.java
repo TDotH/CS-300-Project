@@ -243,7 +243,7 @@ public class Item implements Objects
         Checks the string they typed and matches it with a venue type. Then it creates
         a new venue of that type.
     */
-    /*
+
     public Item setItem() throws Exception {
         int temp = 0;
         String temp2;
@@ -306,7 +306,7 @@ public class Item implements Objects
             }
         } while (!success);
         return itemT;
-    }*/
+    }
 
 
 
@@ -317,7 +317,7 @@ public class Item implements Objects
         It uses user input to set the venue, and then
         applies the venue to the festival.
     */
-    /*
+
     public int applyItem(Inventory dest) throws Exception {
         Item temp;
         int success;
@@ -339,7 +339,7 @@ public class Item implements Objects
             }
         }
         return success;
-    }*/
+    }
 
 /*
 

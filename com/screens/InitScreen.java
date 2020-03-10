@@ -26,10 +26,10 @@ public class InitScreen implements IState {
 	private CustomPanel customPanel;
 	
 	//File that the config will be saved to
-	private static final String CONFIG_FILE = "src/maps/config.ini";
+	private static final String CONFIG_FILE = "H:\\GitProjects\\lort\\CS-300-Project\\maps\\config.ini";
 	
 	//Used for default settings
-	private static final String DEFAULT_MAP = "src/maps/default_map.map";
+	private static final String DEFAULT_MAP = "H:\\GitProjects\\lort\\CS-300-Project\\maps\\default_map.map";
 	private static final int    DEFAULT_ENERGY = 20;
 	
 	public InitScreen ( StateMachine aStateMachine ) {
@@ -163,8 +163,8 @@ public class InitScreen implements IState {
 	//Used to create custom games
 	class CustomPanel extends JPanel {
 
-		final String MAPS_PATH = "src/maps";
-		
+		final String MAPS_PATH = "H:\\GitProjects\\lort\\CS-300-Project\\maps";
+
 		//Panel size
 		private int width = 200;
 		private int height = 300;
@@ -219,7 +219,9 @@ public class InitScreen implements IState {
 			JLabel mapLabel = new JLabel( "Map Selector", JLabel.CENTER );
 			mapLabel.setAlignmentX( Component.CENTER_ALIGNMENT );
 			File file = new File( MAPS_PATH );
+			System.out.println(file);
 			String[] maps = file.list(  new MapFilter() );
+
 			mapList = new JComboBox( maps );
 			mapList.setAlignmentX( Component.CENTER_ALIGNMENT );
 			//mapList.setSelectedIndex( 2 );
@@ -330,7 +332,7 @@ public class InitScreen implements IState {
 	
 	
 	public void run( JFrame aFrame ) {
-		
+
 		this.aFrame = aFrame;
 		//Make sure that the game is cleared
 		aFrame.repaint();
@@ -347,6 +349,7 @@ public class InitScreen implements IState {
 		
 		aFrame.revalidate();
 		aFrame.repaint();
+
 	}
 	
 	

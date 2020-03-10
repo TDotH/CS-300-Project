@@ -102,6 +102,7 @@ public class Tool extends Item
     /*
         If the base class's display was false, then don't call this class's
     */
+    /*
     public boolean display()
     {
         if (super.display())
@@ -113,5 +114,5 @@ public class Tool extends Item
         {
             return false;
         }
-    }
+    }*/
 }
