@@ -101,48 +101,76 @@ public class Player implements Objects {
 	            }
 	            break;
 
-				case "UP":
+			case "UP":
 
-		            if ((posY - 1) >= 0) {
+				if ((posY - 1) >= 0) {
 
-		               	//Get the the tile that will be moved to
-	                	Tile tile = map.get_tile( posX, posY - 1 );
-                		//Move the player and check the tile for energy loss, items/obstacles/shopkeep
-                		if ( checkTile( tile ) == true ) {
-                			posY = posY - 1; //Move the player
-                		}
+					//Get the the tile that will be moved to
+					Tile tile = map.get_tile( posX, posY - 1 );
+					//Move the player and check the tile for energy loss, items/obstacles/shopkeep
+					if ( checkTile( tile ) == true ) {
+						posY = posY - 1; //Move the player
+					}
 
-	                	else {
-	                		//Do nothing for now
-	                	}
+					else {
+						//Do nothing for now
+					}
 
-	                } else {
-	                	//Do nothing
-		            }
-		            break;
+				} else {
+					//Do nothing
+				}
+				break;
 
-					case "DOWN":
-			            if ((posY + 1 <= upBoundY )) {
+			case "DOWN":
+				if ((posY + 1 <= upBoundY )) {
 
-			               	//Get the the tile that will be moved to
-		                	Tile tile = map.get_tile( posX, posY + 1 );
-	                		//Check the tile for energy loss, items/obstacles/shopkeep
-	                		if ( checkTile( tile ) == true ) {
-	                			posY = posY + 1; //Move the player
-	                		}
+					//Get the the tile that will be moved to
+					Tile tile = map.get_tile( posX, posY + 1 );
+					//Check the tile for energy loss, items/obstacles/shopkeep
+					if ( checkTile( tile ) == true ) {
+						posY = posY + 1; //Move the player
+					}
 
-		                	else {
-		                		//Do nothing for now
-		                	}
+					else {
+						//Do nothing for now
+					}
 
-		                } else {
-		                	//Do nothing
-			            }
-			        break;
-	                default:
-	                	throw new IllegalStateException("Unexpected value!");
-	            }
+				} else {
+					//Do nothing
+				}
+				break;
+
+			case "TALK":
+				ArrayList<Tile> surroundingTiles = new ArrayList<Tile>();
+
+				//Get the tiles surrounding the player
+				Tile northTile = map.get_tile( posX, posY - 1 );
+				Tile southTile = map.get_tile( posX, posY +1);
+				Tile westTile = map.get_tile(posX-1, posY);
+				Tile eastTile = map.get_tile(posX+1, posY);
+
+				surroundingTiles.add(northTile);
+				surroundingTiles.add(southTile);
+				surroundingTiles.add(eastTile);
+				surroundingTiles.add(westTile);
+
+				speakToNPC(surroundingTiles);
+
+
+				break;
+			default:
+				throw new IllegalStateException("Unexpected value!");
+		}
     }
+
+    private void speakToNPC(ArrayList<Tile> surroundingTiles){
+		for (Tile tile : surroundingTiles){
+			if (tile.getType() == Types.SHOPKEEPER ){
+				System.out.print("FUCKIN YOLO");
+			}
+		}
+
+	}
 
     private String filterPlayerInput(KeyEvent e){
 
@@ -163,9 +191,11 @@ public class Player implements Objects {
 		validInput.put(KeyEvent.VK_UP, "UP");
 		validInput.put(KeyEvent.VK_KP_UP, "UP");
 
+		validInput.put(KeyEvent.VK_SPACE, "TALK");
+
 		try{
-			String direction = validInput.get(e.getKeyCode());
-			return direction;
+			String command = validInput.get(e.getKeyCode());
+			return command;
 		} catch (Exception exc){
 			return "INVALID";
 		}

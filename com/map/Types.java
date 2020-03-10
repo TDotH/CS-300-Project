@@ -15,7 +15,7 @@ package com.map;
 public enum Types {
 	
 	DEFAULT(0, 0, true, "Default"), FOREST(1, 1, true, "Forest"), SWAMP(2, 2, true, "Swamp"), DESERT(3, 1, true, "Desert"), WATER(4, 3, true, "Water"),
-    MOUNTAINS(5, -1, false, "Mountain"), SHOPKEEPER(6, 0, true, "Shopkeeper"), CAVERNS(7, 0, true, "Cavern");
+    MOUNTAINS(5, -1, false, "Mountain"), SHOPKEEPER(6, 0, false, "Shopkeeper"), CAVERNS(7, 0, true, "Cavern");
 	
 	int tileID;
 	int energyCost;
