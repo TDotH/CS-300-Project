@@ -206,9 +206,12 @@ public class Player implements Objects {
 	    	//Check if the tile is water
 	    	if ( tile.getType() == Types.WATER ) {
 	    		//Check if the player has the boat
-	    		if ( hasItem( Items.BOAT ) == true ) {
+	    		if ( hasItem( Items.BOAT ) ) {
 	    			energyCost = 1;
 	    		}
+	    		else{
+	    			passable = false;
+				}
 	    	}
 
 	    	energy -= energyCost;
