@@ -1,4 +1,5 @@
 package com.player;
+import com.actors.ShopKeeper;
 import com.inventory.*;
 
 import java.awt.event.KeyEvent;
@@ -166,9 +167,8 @@ public class Player implements Objects {
     private void speakToNPC(ArrayList<Tile> surroundingTiles){
 		for (Tile tile : surroundingTiles){
 			if (tile.getObject() instanceof ShopKeeper){
-				System.out.println("yes");
-			//if (tile.getType() == Types.SHOPKEEPER ){
-				//System.out.print("MuFUGGIN SHOPKEEPER IN DA HOUSE BITCHES");
+				ShopKeeper thisShopKeep = (ShopKeeper)tile.getObject();
+				thisShopKeep.initDialogue();
 
 			}
 		}

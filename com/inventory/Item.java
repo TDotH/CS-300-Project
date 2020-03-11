@@ -367,7 +367,8 @@ public class Item implements Objects
     }*/
 
 
-
+    public int getValue() { return item.value; }
+    public int getInventoryLimit() { return item.inventoryLimit; }
 
     public String getName()
     {

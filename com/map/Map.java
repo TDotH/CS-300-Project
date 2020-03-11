@@ -28,6 +28,8 @@ import java.awt.Image;
 import java.awt.Toolkit;
 import java.io.*;
 import java.util.ArrayList;
+
+import com.actors.ShopKeeper;
 import com.inventory.*;
 import com.obstacles.Obstacle;
 import com.obstacles.Obstacles;
@@ -171,6 +173,11 @@ public class Map {
 
                 //Initialize tile
                 map[x][y] = new Tile(type);
+                //This is ugly and I'm sorry lol
+				if (type == Types.SHOPKEEPER){
+					ShopKeeper sh = new ShopKeeper(x,y);
+					map[x][y].setObject(sh);
+				}
                 //map[x][y].setImageID(tempInt);
             }
         }
