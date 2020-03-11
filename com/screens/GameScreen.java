@@ -27,11 +27,15 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
 
+import com.actors.ShopKeeper;
+import com.inventory.Inventory;
 import com.inventory.Item;
+import com.inventory.Items;
 import com.statemachine.*;
 import com.map.Map;
 import com.map.Tile;
@@ -213,8 +217,8 @@ public class GameScreen implements IState {
     			} else if ( player.getLoseFlag() == true ) {
     				aLosePanel.openMenu(aFrame);
     			} else if ( player.inDialogue() ){
-    				aShopKeepPanel.openMenu(aFrame);
-    				aShopKeepPanel.updateMenu(player.getDialoguePackage());
+    				aShopKeepPanel.openMenu(aFrame, player);
+    				aShopKeepPanel.updateMenu(player.speakingWith());
 
 				}
     		}
@@ -721,6 +725,11 @@ public class GameScreen implements IState {
 		private int buttonWidth = 200;
 		private int buttonHeight = 25;
 
+		private Player player;
+		private ShopKeeper shopKeep;
+
+		HashMap<JButton, Item> itemsDict = new HashMap<JButton, Item>();
+
 		JPanel menuPanel;
 		JButton exitButton;
 		ArrayList<JButton> buttons  = new ArrayList<JButton>();
@@ -806,9 +815,9 @@ public class GameScreen implements IState {
 			this.setLayout( null );
 
 
-			String msg = "TEST";//shopKeepSet.getKey();
+			String msg = "TEST";//shopKeep.getHello();
 
-			//ArrayList<Item> inv = shopKeepSet.getValue();
+			//ArrayList<Item> inv = shopKeep.getInventory();
 
 			JPanel buttonPanel = new JPanel();
 			buttonPanel.setLayout( new FlowLayout() );
@@ -852,7 +861,9 @@ public class GameScreen implements IState {
 		}
 
 		//Open the panel
-		public void openMenu( JFrame aFrame ) {
+		public void openMenu( JFrame aFrame, Player aPlayer ) {
+			player = aPlayer;
+			//shopKeep = player.speakingWith();
 			aMapPanel.stopManager();
 			paused = true;
 			gamePanes.moveToFront(this);
@@ -863,19 +874,21 @@ public class GameScreen implements IState {
 			exitButton.setEnabled(true);
 		}
 
-		public void updateMenu(Pair<String, ArrayList<Item>> shopKeepSet){
-			String msg = shopKeepSet.getKey();
-			ArrayList<Item> inv = shopKeepSet.getValue();
+		public void updateMenu(ShopKeeper aShopKeep){
+
+			String msg = aShopKeep.getHello();
+			ArrayList<Item> inv = aShopKeep.getInventory();
 			label.setText(msg);
 
 			for(int x = 0; x < inv.size(); x++){
 				buttons.get(x).setText(inv.get(x).getName() + " - " + inv.get(x).getValue() + "G");
+				itemsDict.put(buttons.get(x), inv.get(x));
+
 			}
 		}
 
 		//Closes the menu
 		public void closeMenu() {
-
 			paused = false;
 			gamePanes.moveToBack(this);
 			//Disable the buttons so they wont react when moused over
@@ -883,6 +896,16 @@ public class GameScreen implements IState {
 				button.setEnabled(false);
 			}
 			exitButton.setEnabled(true);
+		}
+
+
+
+		public void sell(JButton button){
+
+			Item itemOfInterest = itemsDict.get(button);
+			shopKeep.sellToPlayer(itemOfInterest, itemOfInterest.getValue());
+			player.buyItem(itemOfInterest);
+			button.setText("SOLD!");
 		}
 
 		@Override
@@ -902,6 +925,8 @@ public class GameScreen implements IState {
 					break;
 				case "sell":
 					//hold on
+					shopKeep = player.speakingWith();
+					sell((JButton)e.getSource());
 					break;
 				default:
 					throw new IllegalStateException("Unexpected value: " + String.valueOf( e.getActionCommand()));

@@ -18,6 +18,8 @@ public class ShopKeeper implements Objects {
     //Didn't wanna do this but I'm sick of trying think of a better way. I've already invested a good five minutes.
     int FINAL_INVENTORY_SIZE = 6;
 
+    String hello = "Trinkets and goods for those who can afford them...";
+
     //Starting money 100. Can change to whatever.
     private int money = 100;
 
@@ -28,18 +30,33 @@ public class ShopKeeper implements Objects {
         this.posX = posX;
         this.posY = posY;
 
-    }
-
-
-    public Pair<String, ArrayList<Item>> initDialogue(){
         setRandomInv(FINAL_INVENTORY_SIZE);
-        String hello = "ShopKeep has wares if you have coin...";
-        ArrayList<Item> tempInv = getInventory();
-
-        Pair<String, ArrayList<Item>> dialoguePackage = new Pair<String, ArrayList<Item>>(hello, tempInv);
-
-        return dialoguePackage;
     }
+
+    /*
+    public ShopKeeper(int posX, int posY, int invSize){
+        this.posX = posX;
+        this.posY = posY;
+
+        setRandomInv(invSize);
+    }*/
+
+    public String getHello(){
+        return hello;
+    }
+
+
+    public int getMoney(){
+        return money;
+    }
+
+    public void sellToPlayer(Item goods, int income){
+        inventory.remove(goods);
+        money += income;
+    }
+
+    //public void buyFromPlayer()
+
 
     public ArrayList<Item> getInventory(){
         return this.inventory;

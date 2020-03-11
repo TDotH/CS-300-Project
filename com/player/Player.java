@@ -34,7 +34,7 @@ public class Player implements Objects {
 
     //See if in dialogue
 	boolean shopKeepDialogue;
-	Pair<String, ArrayList<Item>> dialoguePackage;
+	ShopKeeper shopKeep;
 
 	//Empty Constructor
     public Player() {}
@@ -46,6 +46,9 @@ public class Player implements Objects {
         setBounds( maxX - 1, maxY - 1);
         winFlag = false;
         loseFlag = false;
+        shopKeepDialogue = false;
+
+        setMoney(50);
     }
 
     //sets position coordinates to specified arguments
@@ -172,16 +175,23 @@ public class Player implements Objects {
     private void speakToNPC(ArrayList<Tile> surroundingTiles){
 		for (Tile tile : surroundingTiles){
 			if (tile.getObject() instanceof ShopKeeper){
-				ShopKeeper thisShopKeep = (ShopKeeper)tile.getObject();
-				dialoguePackage = thisShopKeep.initDialogue();
-				this.shopKeepDialogue = true;
+				shopKeep = (ShopKeeper)tile.getObject();
+				toggleDialogue();
 			}
 		}
 
 	}
 
-	public Pair<String, ArrayList<Item>> getDialoguePackage() {
-		return dialoguePackage;
+	public ShopKeeper speakingWith(){
+    	return shopKeep;
+	}
+
+	public void toggleDialogue(){
+    	if (this.shopKeepDialogue){
+    		this.shopKeepDialogue = false;
+		} else {
+    		this.shopKeepDialogue = true;
+		}
 	}
 
 	private String filterPlayerInput(KeyEvent e){
@@ -379,6 +389,12 @@ public class Player implements Objects {
 
     	g.fillRect( tempPosX, tempPosY, playerSz, playerSz );
     }
+
+    public void buyItem(Item item){
+    	int newMoney = money - item.getValue();
+    	money = newMoney;
+    	addItem(item);
+	}
 
     //Getters
 
