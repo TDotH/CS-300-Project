@@ -26,14 +26,17 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
 
+import com.inventory.Item;
 import com.statemachine.*;
 import com.map.Map;
 import com.map.Tile;
 import com.player.*;
+import javafx.util.Pair;
 
 public class GameScreen implements IState {
 
@@ -44,6 +47,7 @@ public class GameScreen implements IState {
 	private EventLogPanel aEventLogPanel;
 	private InventoryPanel aInventoryPanel;
 	private WinPanel aWinPanel;
+	private ShopKeepPanel aShopKeepPanel;
 	private LosePanel aLosePanel;
 	private KeyboardFocusManager manager;
 	private GameMenu gameMenu;
@@ -208,7 +212,11 @@ public class GameScreen implements IState {
     				aWinPanel.openMenu(aFrame);
     			} else if ( player.getLoseFlag() == true ) {
     				aLosePanel.openMenu(aFrame);
-    			}
+    			} else if ( player.inDialogue() ){
+    				aShopKeepPanel.openMenu(aFrame);
+    				aShopKeepPanel.updateMenu(player.getDialoguePackage());
+
+				}
     		}
 	    }
 
@@ -702,6 +710,205 @@ public class GameScreen implements IState {
 
 	}
 
+	//Holds the ShopKeeps panel
+	class ShopKeepPanel extends JPanel implements ActionListener{
+
+		private int width = 500;
+		private int height = 300;
+
+		private int offSetY = 0;
+
+		private int buttonWidth = 200;
+		private int buttonHeight = 25;
+
+		JPanel menuPanel;
+		JButton exitButton;
+		ArrayList<JButton> buttons  = new ArrayList<JButton>();
+		JLabel label;
+
+		public ShopKeepPanel() {
+
+			this.setBounds(0, 0, aFrame.getContentPane().getWidth(), aFrame.getContentPane().getHeight());
+			this.setBackground( new Color( 100, 100, 100, 100 ) );
+			this.setLayout(null);
+
+			generateMenu();
+
+
+		}
+
+
+		/*public void generateMenu(){
+
+			menuPanel = new JPanel();
+			//menuPanel.setBounds( aFrame.getContentPane().getWidth()/2 - width/2, aFrame.getContentPane().getHeight()/2 - height/2 + offSetY, width, height);
+			menuPanel.setBounds( aFrame.getContentPane().getWidth()/2 - width/2, aFrame.getContentPane().getHeight()/2 - height/2 + offSetY, width, height);
+			menuPanel.setBorder( BorderFactory.createCompoundBorder( BorderFactory.createLineBorder(Color.black), BorderFactory.createEmptyBorder( 15, 15, 15, 15 )));
+
+			menuPanel.setBackground( Color.WHITE );
+			menuPanel.setLayout( new BoxLayout( menuPanel, BoxLayout.PAGE_AXIS ));
+			//menuPanel.setLayout( new BorderLayout() );;
+			this.setLayout( null );
+
+			JLabel label = new JLabel("Great job, you got the Jewel! Fuck You!");
+			label.setAlignmentX( this.CENTER_ALIGNMENT );
+
+			resumeButton = new JButton("Resume");
+			//resumeButton.setMinimumSize( new Dimension( buttonWidth, buttonHeight ));
+			//resumeButton.setMaximumSize( new Dimension( buttonWidth, buttonHeight ));
+			//resumeButton.setPreferredSize(new Dimension( buttonWidth, buttonHeight ));
+			resumeButton.addActionListener(this);
+			resumeButton.setActionCommand("resume");
+			resumeButton.setAlignmentX( Component.CENTER_ALIGNMENT );
+
+			menuButton = new JButton( "Main Menu");
+			menuButton.addActionListener(this);
+			menuButton.setActionCommand("menu");
+			//menuButton.setMinimumSize( new Dimension( buttonWidth, buttonHeight ));
+			//menuButton.setMaximumSize( new Dimension( buttonWidth, buttonHeight ));
+			//menuButton.setPreferredSize( new Dimension( buttonWidth, buttonHeight ));
+			menuButton.setAlignmentX( Component.CENTER_ALIGNMENT );
+
+			thirdButton = new JButton( "Third Menu");
+			thirdButton.addActionListener(this);
+			thirdButton.setActionCommand("sell");
+			//thirdButton.setMinimumSize( new Dimension( buttonWidth, buttonHeight ));
+			//thirdButton.setMaximumSize( new Dimension( buttonWidth, buttonHeight ));
+			//thirdButton.setPreferredSize( new Dimension( buttonWidth, buttonHeight ));
+			thirdButton.setAlignmentX( Component.CENTER_ALIGNMENT );
+
+			JPanel buttonPanel = new JPanel();
+			buttonPanel.setLayout( new FlowLayout() );
+			buttonPanel.setBackground( Color.WHITE );
+			buttonPanel.add( resumeButton );
+			buttonPanel.add( menuButton );
+			buttonPanel.add( thirdButton);
+
+			menuPanel.add(label, BorderLayout.PAGE_START);
+			menuPanel.add( Box.createVerticalGlue() );
+			menuPanel.add( buttonPanel , BorderLayout.CENTER );
+
+			resumeButton.setEnabled(false);
+			menuButton.setEnabled(false);
+			thirdButton.setEnabled(false);
+
+			this.add(menuPanel);
+		}*/
+
+		public void generateMenu(){
+			menuPanel = new JPanel();
+			menuPanel.setBounds( aFrame.getContentPane().getWidth()/2 - width/2, aFrame.getContentPane().getHeight()/2 - height/2 + offSetY, width, height);
+			menuPanel.setBorder( BorderFactory.createCompoundBorder( BorderFactory.createLineBorder(Color.black), BorderFactory.createEmptyBorder( 15, 15, 15, 15 )));
+
+			menuPanel.setBackground( Color.WHITE );
+			menuPanel.setLayout( new BoxLayout( menuPanel, BoxLayout.PAGE_AXIS ));
+			//menuPanel.setLayout( new BorderLayout() );;
+			this.setLayout( null );
+
+
+			String msg = "TEST";//shopKeepSet.getKey();
+
+			//ArrayList<Item> inv = shopKeepSet.getValue();
+
+			JPanel buttonPanel = new JPanel();
+			buttonPanel.setLayout( new FlowLayout() );
+			buttonPanel.setBackground( Color.WHITE );
+
+			for(int x = 0; x < 6; x++){
+				JButton thisJButton = new JButton("TEST");//item.getName() + " - " + item.getValue() + "G");
+				thisJButton.setMinimumSize( new Dimension( buttonWidth, buttonHeight ));
+				thisJButton.setMaximumSize( new Dimension( buttonWidth, buttonHeight ));
+				thisJButton.setPreferredSize(new Dimension( buttonWidth, buttonHeight ));
+				thisJButton.addActionListener(this);
+				thisJButton.setActionCommand("sell");
+				thisJButton.setAlignmentX( Component.CENTER_ALIGNMENT );
+
+
+
+				thisJButton.setEnabled(false);
+
+				buttons.add(thisJButton);
+				buttonPanel.add(thisJButton);
+			}
+
+			exitButton = new JButton("Goodbye (Exit)");
+			exitButton.setMinimumSize( new Dimension( buttonWidth, buttonHeight ));
+			exitButton.setMaximumSize( new Dimension( buttonWidth, buttonHeight ));
+			exitButton.setPreferredSize(new Dimension( buttonWidth, buttonHeight ));
+			exitButton.addActionListener(this);
+			exitButton.setActionCommand("resume");
+			exitButton.setAlignmentX( Component.CENTER_ALIGNMENT );
+			exitButton.setEnabled(false);
+			buttonPanel.add(exitButton);
+
+			label = new JLabel(msg);
+			label.setAlignmentX( this.CENTER_ALIGNMENT );
+
+			menuPanel.add(label, BorderLayout.PAGE_START);
+			menuPanel.add( Box.createVerticalGlue() );
+			menuPanel.add( buttonPanel , BorderLayout.CENTER );
+
+			this.add(menuPanel);
+		}
+
+		//Open the panel
+		public void openMenu( JFrame aFrame ) {
+			aMapPanel.stopManager();
+			paused = true;
+			gamePanes.moveToFront(this);
+			//Enable the buttons
+			for (JButton button : buttons) {
+				button.setEnabled(true);
+			}
+			exitButton.setEnabled(true);
+		}
+
+		public void updateMenu(Pair<String, ArrayList<Item>> shopKeepSet){
+			String msg = shopKeepSet.getKey();
+			ArrayList<Item> inv = shopKeepSet.getValue();
+			label.setText(msg);
+
+			for(int x = 0; x < inv.size(); x++){
+				buttons.get(x).setText(inv.get(x).getName() + " - " + inv.get(x).getValue() + "G");
+			}
+		}
+
+		//Closes the menu
+		public void closeMenu() {
+
+			paused = false;
+			gamePanes.moveToBack(this);
+			//Disable the buttons so they wont react when moused over
+			for (JButton button : buttons){
+				button.setEnabled(false);
+			}
+			exitButton.setEnabled(true);
+		}
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			// TODO Auto-generated method stub
+			System.out.println(e.getActionCommand());
+			switch ( e.getActionCommand() ) {
+
+				case "resume":
+					finished = true;
+					aMapPanel.startManager();
+					closeMenu();
+					break;
+				case "menu":
+					paused = false; //Make sure paused is always false
+					aStateMachine.change("mainmenu");
+					break;
+				case "sell":
+					//hold on
+					break;
+				default:
+					throw new IllegalStateException("Unexpected value: " + String.valueOf( e.getActionCommand()));
+			}
+		}
+	}
+
 	private void run( JFrame aFrame ) {
 
 		this.aFrame = aFrame;
@@ -721,6 +928,7 @@ public class GameScreen implements IState {
 		aEventLogPanel = new EventLogPanel( aFrame );
 		aInventoryPanel = new InventoryPanel( aFrame );
 		aWinPanel = new WinPanel();
+		aShopKeepPanel = new ShopKeepPanel();
 		aLosePanel = new LosePanel();
 		gameMenu = new GameMenu();
 
@@ -739,6 +947,7 @@ public class GameScreen implements IState {
 		gamePanes.add( gameMenu, 1 );
 		gamePanes.add( aWinPanel, 2 );
 		gamePanes.add( aLosePanel, 3);
+		gamePanes.add(aShopKeepPanel, 4);
 
 		aFrame.add( gamePanes );
 

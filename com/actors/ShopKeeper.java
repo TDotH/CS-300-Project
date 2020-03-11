@@ -2,6 +2,7 @@ package com.actors;
 
 import javax.swing.*;
 import com.inventory.*;
+import javafx.util.Pair;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -12,6 +13,10 @@ public class ShopKeeper implements Objects {
 
     //ShopKeep Inventory
     private ArrayList<Item> inventory = new ArrayList<Item>();
+
+    //Max Inventory size
+    //Didn't wanna do this but I'm sick of trying think of a better way. I've already invested a good five minutes.
+    int FINAL_INVENTORY_SIZE = 6;
 
     //Starting money 100. Can change to whatever.
     private int money = 100;
@@ -26,20 +31,14 @@ public class ShopKeeper implements Objects {
     }
 
 
-
-    public void initDialogue(){
-        setRandomInv(6);
+    public Pair<String, ArrayList<Item>> initDialogue(){
+        setRandomInv(FINAL_INVENTORY_SIZE);
         String hello = "ShopKeep has wares if you have coin...";
-
         ArrayList<Item> tempInv = getInventory();
 
-        System.out.println(hello);
+        Pair<String, ArrayList<Item>> dialoguePackage = new Pair<String, ArrayList<Item>>(hello, tempInv);
 
-        for(Item item : tempInv){
-            System.out.println(item.getName() + " - " + item.getValue() + "G");
-        }
-
-
+        return dialoguePackage;
     }
 
     public ArrayList<Item> getInventory(){

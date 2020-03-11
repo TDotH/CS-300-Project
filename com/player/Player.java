@@ -10,6 +10,7 @@ import java.util.HashMap;
 
 import com.map.*;
 import com.obstacles.*;
+import javafx.util.Pair;
 
 public class Player implements Objects {
 
@@ -31,7 +32,11 @@ public class Player implements Objects {
     //Lose Flag (player ran out of energy)
     boolean loseFlag;
 
-    //Empty Constructor
+    //See if in dialogue
+	boolean shopKeepDialogue;
+	Pair<String, ArrayList<Item>> dialoguePackage;
+
+	//Empty Constructor
     public Player() {}
 
     //Constructor: startX, startY, maxX, maxY, minX, minY
@@ -168,14 +173,18 @@ public class Player implements Objects {
 		for (Tile tile : surroundingTiles){
 			if (tile.getObject() instanceof ShopKeeper){
 				ShopKeeper thisShopKeep = (ShopKeeper)tile.getObject();
-				thisShopKeep.initDialogue();
-
+				dialoguePackage = thisShopKeep.initDialogue();
+				this.shopKeepDialogue = true;
 			}
 		}
 
 	}
 
-    private String filterPlayerInput(KeyEvent e){
+	public Pair<String, ArrayList<Item>> getDialoguePackage() {
+		return dialoguePackage;
+	}
+
+	private String filterPlayerInput(KeyEvent e){
 
 		HashMap<Integer, String> validInput = new HashMap<Integer, String>();
 		validInput.put(KeyEvent.VK_A, "LEFT");
@@ -387,6 +396,7 @@ public class Player implements Objects {
     final public int getMoney() { return money; }
     final public boolean getWinFlag() { return winFlag; }
     final public boolean getLoseFlag() { return loseFlag; }
+    final public boolean inDialogue(){return shopKeepDialogue;}
 
     //Setters
     public void setEnergy( int energy ) { this.energy = energy; }
