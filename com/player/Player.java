@@ -165,8 +165,11 @@ public class Player implements Objects {
 
     private void speakToNPC(ArrayList<Tile> surroundingTiles){
 		for (Tile tile : surroundingTiles){
-			if (tile.getType() == Types.SHOPKEEPER ){
-				System.out.print("FUCKIN YOLO");
+			if (tile.getObject() instanceof ShopKeeper){
+				System.out.println("yes");
+			//if (tile.getType() == Types.SHOPKEEPER ){
+				//System.out.print("MuFUGGIN SHOPKEEPER IN DA HOUSE BITCHES");
+
 			}
 		}
 

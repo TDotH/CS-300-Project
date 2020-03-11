@@ -2,6 +2,7 @@ package com.map;
 
 import javax.swing.*;
 import com.inventory.*;
+import com.player.Objects;
 
 import java.util.HashMap;
 
@@ -9,13 +10,45 @@ public class ShopKeeper extends JPanel {
 
     HashMap<Item, Integer> valueInv = new HashMap<Item, Integer>();
 
-
     //Starting money 100. Can change to whatever.
     private int money = 100;
 
+    private int posX, posY;
+
+    /*
     public ShopKeeper(){
         //When map loaded
         initInventory();
+    }*/
+
+    public ShopKeeper(int posX, int posY){
+        this.posX = posX;
+        this.posY = posY;
+
+        initInventory();
+    }
+    //Position functions
+    public void setPosX(int posX)
+    {
+        this.posX = posX;
+    }
+
+
+    public void setPosY(int posY)
+    {
+        this.posY = posY;
+    }
+
+
+    public int getPosX()
+    {
+        return posX;
+    }
+
+
+    public int getPosY()
+    {
+        return posY;
     }
 
     //Shop Keeper Inventory functions------------------------------------------
