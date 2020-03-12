@@ -390,12 +390,18 @@ public class Player implements Objects {
     	g.fillRect( tempPosX, tempPosY, playerSz, playerSz );
     }
 
-    public void buyItem(Item item){
+    public boolean buyItem(Item item){
+    	boolean purchaseSuccess;
+
     	int newMoney = money - item.getValue();
     	if (newMoney >= 0){
 			money = newMoney;
 			addItem(item);
+			purchaseSuccess = true;
+		} else {
+    		purchaseSuccess = false;
 		}
+    	return purchaseSuccess;
 	}
 
     //Getters

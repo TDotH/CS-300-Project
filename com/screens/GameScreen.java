@@ -904,9 +904,11 @@ public class GameScreen implements IState {
 		public void sell(JButton button){
 
 			Item itemOfInterest = itemsDict.get(button);
-			shopKeep.sellToPlayer(itemOfInterest, itemOfInterest.getValue());
-			player.buyItem(itemOfInterest);
-			button.setText("SOLD!");
+			if (player.buyItem(itemOfInterest)){
+				shopKeep.sellToPlayer(itemOfInterest, itemOfInterest.getValue());
+				button.setText("SOLD!");
+			}
+
 		}
 
 		@Override
