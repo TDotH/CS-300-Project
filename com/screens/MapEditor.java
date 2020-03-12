@@ -6,6 +6,7 @@
  */
 
 package com.screens;
+import com.actors.ShopKeeper;
 import com.inventory.*;
 import com.obstacles.*;
 import com.map.*;
@@ -14,12 +15,10 @@ import com.statemachine.*;
 
 import java.awt.event.*;
 import java.io.File;
-import java.io.IOException;
 
 import javax.swing.filechooser.FileFilter;
 import java.awt.*;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 
 import java.util.EnumSet;
@@ -27,6 +26,10 @@ import static java.util.EnumSet.complementOf;
 
 public class MapEditor extends JFrame implements IState {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	//UI constraints
 	static final int GUI_POSX = 0;
 	static final int GUI_POSY = 0;
@@ -71,6 +74,11 @@ public class MapEditor extends JFrame implements IState {
 	//Panel that holds all other gui Panels
 	class TileGuiPanel extends JPanel  {
 
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+
 		public TileGuiPanel() {
 
 			this.setBounds( GUI_POSX, GUI_POSY, GUI_WIDTH, frame.getContentPane().getHeight() );
@@ -86,9 +94,14 @@ public class MapEditor extends JFrame implements IState {
 	//Panel that deals with map drawing
 	class MapPanel extends JPanel implements MouseListener, MouseMotionListener{
 
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
 		Map map;
 		Player aPlayer; //Needed for every map
 		Item aJewel; //Needed for every map
+		ShopKeeper shopkeeper;
 		int mapWidth;
 		int mapHeight;
 
@@ -102,15 +115,15 @@ public class MapEditor extends JFrame implements IState {
 		//Used so that the player can only place on of each
 		private boolean playerSpawn = false;
 		private boolean jewelSpawn = false;
+		
+		private DescriptionPanel descriptionPanel;
 
 
 		public MapPanel() {
 
 			aPlayer = null;
 			aJewel = null;
-			//mapEditorWidth = frame.getContentPane().getWidth() - GUI_WIDTH;
-			//mapEditorHeight = frame.getContentPane().getHeight();
-			//this.setBounds(MAP_EDITOR_POSX, MAP_EDITOR_POSY, mapEditorWidth, mapEditorHeight);
+			shopkeeper = null;
 			this.setBounds(MAP_EDITOR_POSX, MAP_EDITOR_POSY, 1000, 1000);
 			//this.setPreferredSize( new Dimension( 1000, 1000));
 			this.setVisible(true);
@@ -140,6 +153,10 @@ public class MapEditor extends JFrame implements IState {
 				if ( aJewel != null ) {
 					aJewel = null;
 					jewelSpawn = false;
+				}
+				
+				if ( shopkeeper != null ) {
+					shopkeeper = null;
 				}
 
 				mapGenerated = true;
@@ -171,6 +188,8 @@ public class MapEditor extends JFrame implements IState {
 				aJewel.setPosX( map.getJewelX() );
 				aJewel.setPosY( map.getJewelY() );
 			}
+			
+			shopkeeper = map.getShopkeep();
 
 			mapGenerated = true;
 		}
@@ -178,6 +197,7 @@ public class MapEditor extends JFrame implements IState {
 		//Saves the current map with the given filename
 		public void saveMap( String fileName ) throws Exception {
 
+			map.setShopkeep( shopkeeper );
 			map.saveMap( fileName );
 		}
 
@@ -229,6 +249,7 @@ public class MapEditor extends JFrame implements IState {
 			//Check if a map is generated
 			if ( mapGenerated == true ) {
 
+
 				//Check if clicked within map bounds
 				if ( e.getX() > (this.getWidth() - ( mapWidth*map.getTileSize() ))/2 && e.getX() < (this.getWidth() + ( mapWidth*map.getTileSize() ))/2)  {
 
@@ -240,91 +261,150 @@ public class MapEditor extends JFrame implements IState {
 
 						recentSave = false;
 
-						switch( aBrush ) {
-
-							case TILES:
-								//Used for drag drawing
-								drawing = true;
-								map.set_tile_at( currType, tempX, tempY );
-
-								break;
-							case OBJECTS:
-
-								//Check if this object is being placed on an impassable tile
-								if ( map.get_tile( tempX, tempY ).getType().getPassable() == true ) {
-
-									//Brush types
-									switch( currItem ) {
-
-										case PLAYER:
-
-												//Check if there is something on the tile already
-												checkTile( map.get_tile( tempX, tempY ), tempX, tempY );
-												//Set player spawn flag
-												playerSpawn = true;
-
-												//Set spawn on map
-												map.setStartX( tempX );
-												map.setStartY( tempY );
-
-												//Create a player and set his coordinates
-												if ( aPlayer == null ) {
-													aPlayer = new Player();
-												}
-												aPlayer.setPos( tempX, tempY );
-
-											break;
-
-										case JEWEL:
-
-											//Check if there is something on the tile already
-											checkTile( map.get_tile( tempX, tempY ), tempX, tempY );
-
-											//Check if there is a jewel placed already
-											if ( aJewel != null ) {
-
-												map.get_tile( aJewel.getPosX() , aJewel.getPosY() ).setObject( null ); //Set the jewel's current location on the map to null
-												//Set the jewel's new position
-												aJewel.setPosX( tempX );
-												aJewel.setPosY( tempY );
-												map.get_tile(tempX, tempY).setObject( aJewel ); // Place the jewel's new location on the map
-
-											} else { // Nope
-
-												jewelSpawn = true; //Set the spawn flag
-												aJewel = new Item( Items.JEWEL, tempX, tempY ); //Make a new jewel to keep track of coordinates
-												map.get_tile(tempX, tempY).setObject( aJewel ); // Place the jewel on the map
-
+						//Used for drawing
+							if ( e.getButton() == MouseEvent.BUTTON1 ) {
+								switch( aBrush ) {
+		
+									case TILES:
+										//Used for drag drawing
+										drawing = true;
+										map.set_tile_at( currType, tempX, tempY );
+		
+										break;
+									case OBJECTS:
+		
+										//Check if this object is being placed on an impassable tile
+										if ( map.get_tile( tempX, tempY ).getType().getPassable() == true ) {
+		
+											//Brush types
+											switch( currItem ) {
+		
+												case PLAYER:
+		
+														//Check if there is something on the tile already
+														checkTile( map.get_tile( tempX, tempY ), tempX, tempY );
+														//Set player spawn flag
+														playerSpawn = true;
+		
+														//Set spawn on map
+														map.setStartX( tempX );
+														map.setStartY( tempY );
+		
+														//Create a player and set his coordinates
+														if ( aPlayer == null ) {
+															aPlayer = new Player();
+														}
+														aPlayer.setPos( tempX, tempY );
+		
+													break;
+		
+												case JEWEL:
+		
+													//Check if there is something on the tile already
+													checkTile( map.get_tile( tempX, tempY ), tempX, tempY );
+		
+													//Check if there is a jewel placed already
+													if ( aJewel != null ) {
+		
+														map.get_tile( aJewel.getPosX() , aJewel.getPosY() ).setObject( null ); //Set the jewel's current location on the map to null
+														//Set the jewel's new position
+														aJewel.setPosX( tempX );
+														aJewel.setPosY( tempY );
+														map.get_tile(tempX, tempY).setObject( aJewel ); // Place the jewel's new location on the map
+		
+													} else { // Nope
+		
+														jewelSpawn = true; //Set the spawn flag
+														aJewel = new Item( Items.JEWEL, tempX, tempY ); //Make a new jewel to keep track of coordinates
+														map.get_tile(tempX, tempY).setObject( aJewel ); // Place the jewel on the map
+													}
+		
+													break;
+													
+												case SHOPKEEP:
+													
+													//Check if there is something on the tile already
+													checkTile( map.get_tile( tempX, tempY ), tempX, tempY );
+		
+													//Check if there is a shopkeep placed already
+													if ( shopkeeper != null ) {
+		
+														map.get_tile( shopkeeper.getPosX() , shopkeeper.getPosY() ).setObject( null ); //Set the shopkeep's current location on the map to null
+														shopkeeper.setPos( tempX, tempY );
+														shopkeeper.clearInventory();
+														map.get_tile(tempX, tempY).setObject( shopkeeper ); // Place the shopkeep's new location on the map
+		
+													} else { // Nope
+		
+														shopkeeper = new ShopKeeper( tempX, tempY );
+														map.get_tile(tempX, tempY).setObject( shopkeeper ); // Place the shopkeep's new location on the map
+													}
+		
+													break;
+												default:
+													//Other items are less important and can be placed more than once
+		
+													//Check if there is something on the tile already
+													checkTile( map.get_tile( tempX, tempY ), tempX, tempY );
+													Item item = new Item( currItem, tempX, tempY );
+													map.get_tile(tempX, tempY).setObject( item );
+		
 											}
-
-											break;
-
-										default:
-											//Other items are less important and can be placed more than once
-
-											//Check if there is something on the tile already
-											checkTile( map.get_tile( tempX, tempY ), tempX, tempY );
-											Item item = new Item( currItem, tempX, tempY );
-											map.get_tile(tempX, tempY).setObject( item );
-
-									}
-								} else { //Throw an error about placing the player here
-									JOptionPane.showMessageDialog(frame, "Can't place the " + currItem.getName() + " on an impassable tile!", "Placement Warning", JOptionPane.WARNING_MESSAGE);
+										} else { //Throw an error about placing the player here
+											JOptionPane.showMessageDialog(frame, "Can't place the " + currItem.getName() + " on an impassable tile!", "Placement Warning", JOptionPane.WARNING_MESSAGE);
+										}
+										break;
+		
+									case OBSTACLES:
+		
+										//Check if there is something on the tile already
+										checkTile( map.get_tile( tempX, tempY ), tempX, tempY );
+										Obstacle obstacle = new Obstacle( currObstacle, tempX, tempY );
+										map.get_tile(tempX, tempY).setObject( obstacle );
+		
+										break;
+		
+									default:
+										throw new IllegalStateException("Unexpected value: " + String.valueOf(aBrush));
 								}
-								break;
+							}
+							//Used to put items in the shopkeep
+							if ( e.getButton() == MouseEvent.BUTTON3 ) {
+								
+								Object tempObject = map.get_tile(tempX, tempY).getObject();
+								
+								//Check if the tile being clicked on is the shopkeep
+								if ( tempObject != null ) {
+									
+									if ( tempObject instanceof ShopKeeper ) {
+										
+										if ( aBrush == Brushes.OBJECTS ) {
+											
+											if ( currItem.getBuyable() == true ) {
+												
+												Item item = new Item( currItem );
+												descriptionPanel.clearText();
+												descriptionPanel.addText( "Adding " + currItem.getName() + " to the shopkeeper...");
+												shopkeeper.addItem( item );
+												
+											} else {
 
-							case OBSTACLES:
-
-								//Check if there is something on the tile already
-								checkTile( map.get_tile( tempX, tempY ), tempX, tempY );
-								Obstacle obstacle = new Obstacle( currObstacle, tempX, tempY );
-								map.get_tile(tempX, tempY).setObject( obstacle );
-
-								break;
-
-							default:
-								throw new IllegalStateException("Unexpected value: " + String.valueOf(aBrush));
-						}
+												JOptionPane.showMessageDialog(frame, "Error! Need to have an item selected to place in the shopkeep!", "Shopkeep Warning", JOptionPane.WARNING_MESSAGE);
+											}
+											
+										} else {
+											
+											descriptionPanel.clearText();
+											descriptionPanel.addText("Shopkeep's inventory:");
+											for ( Item items : shopkeeper.getInventory() ) {
+												descriptionPanel.addText( items.getName() );
+											}
+										}
+									}
+									
+								}
+							}
+							
 					}
 				}
 			}
@@ -358,7 +438,11 @@ public class MapEditor extends JFrame implements IState {
 						jewelSpawn = false; //Reset the jewel flag
 						aJewel = null; // Delete the jewel
 					}
-
+				}
+				
+				if ( aTile.getObject() instanceof ShopKeeper ) {
+					
+					shopkeeper = null;
 				}
 
 				aTile.setObject( null ); // Delete the object
@@ -397,11 +481,20 @@ public class MapEditor extends JFrame implements IState {
 
 			}
 		}
+
+		public void setDescriptionPanel(DescriptionPanel descriptionPanel) {
+			this.descriptionPanel = descriptionPanel;
+			
+		}
 	}
 
 	//Deals with map generation
 	class MapGenPanel extends JPanel implements ActionListener {
 
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
 		//Slider used to set map size (from 0x0 to MAP_MAX_SIZExMAP_MAX_SIZE)
 		JSlider mapSizeSlider;
 
@@ -443,6 +536,11 @@ public class MapEditor extends JFrame implements IState {
 
 	//Deals with picking what the player will draw; is a tabbed pane to switch between tiles, items, and obstacles
 	class DrawPickerPanel extends JTabbedPane implements ActionListener {
+
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
 
 		public DrawPickerPanel( DescriptionPanel descriptionPanel ) {
 
@@ -531,13 +629,36 @@ public class MapEditor extends JFrame implements IState {
 					aBrush = Brushes.OBJECTS;
 				}
 			});
+			
+			JButton ShopkeepButton = new JButton( String.valueOf( Items.SHOPKEEP ) );
+			ShopkeepButton.setToolTipText( Items.SHOPKEEP.getName() );
+			ShopkeepButton.setPreferredSize( new Dimension( 40, 40 ));
+			ShopkeepButton.addActionListener( new ActionListener() {
+				public void actionPerformed( ActionEvent e ) {
+
+					//Clear the description box
+					descriptionPanel.clearText();
+
+					//Name of the item
+					String tempStr = Items.SHOPKEEP.getName();
+					descriptionPanel.addText( tempStr );
+
+					//Flavor text
+					tempStr = Items.SHOPKEEP.getDescription();
+					descriptionPanel.addText( tempStr );
+
+					currItem = Items.SHOPKEEP;
+					aBrush = Brushes.OBJECTS;
+				}
+			});
 
 			requiredPanel.add(playerButton);
 			requiredPanel.add(JewelButton);
+			requiredPanel.add(ShopkeepButton);
 
 			//Generate buttons to place items
 			JPanel objectsPanel = new JPanel( new GridLayout( 3, 3 ));
-			for ( Items item : complementOf( EnumSet.of( Items.DEFAULT, Items.PLAYER, Items.JEWEL )) ) { //Don't include the default item
+			for ( Items item : complementOf( EnumSet.of( Items.DEFAULT, Items.PLAYER, Items.JEWEL, Items.SHOPKEEP )) ) { //Don't include the default item
 
 				JButton b = new JButton( String.valueOf( item ) );
 				b.setToolTipText( item.getName() );
@@ -613,9 +734,9 @@ public class MapEditor extends JFrame implements IState {
 			}
 
 			this.addTab("Tiles", tilesPanel );
-			this.addTab("Objects", objectsPanel);
+			this.addTab("Items", objectsPanel);
 			this.addTab("Obstacles", obstaclesPanel);
-			this.addTab("Required", requiredPanel);
+			this.addTab("Important Objects", requiredPanel);
 			this.setPreferredSize( new Dimension( 200, 200 ));
 			this.setMaximumSize( new Dimension( 200, 200 ));
 			this.setMinimumSize(new Dimension( 200, 200 ));
@@ -633,6 +754,10 @@ public class MapEditor extends JFrame implements IState {
 	//Deals with the text display
 	class DescriptionPanel extends JPanel {
 
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
 		private JTextArea textArea;
 
 		public DescriptionPanel() {
@@ -667,6 +792,11 @@ public class MapEditor extends JFrame implements IState {
 
 	//Deals with file saving/load and exiting the map editor
 	class FileManagerPanel extends JPanel implements ActionListener {
+
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
 
 		public FileManagerPanel() {
 
@@ -805,6 +935,7 @@ public class MapEditor extends JFrame implements IState {
 		DrawPickerPanel drawPickerPanel = new DrawPickerPanel( descriptionPanel );
 		FileManagerPanel fileManagerPanel = new FileManagerPanel();
 
+		mapPanel.setDescriptionPanel( descriptionPanel );
 
 		//Add all the panels together
 		tileGuiPanel.add( mapGenPanel );
@@ -822,7 +953,7 @@ public class MapEditor extends JFrame implements IState {
 		scrollPane.getVerticalScrollBar().setUnitIncrement( 12 );
 		
 		//Add everything to the window
-		frame.add( tileGuiPanel);
+		frame.add( tileGuiPanel );
 		frame.add( scrollPane, BorderLayout.CENTER  );
 		frame.setLayout( null );
 		frame.setVisible( true );

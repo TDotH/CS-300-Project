@@ -1,8 +1,11 @@
 package com.player;
+import com.actors.ShopKeeper;
+import com.eventlog.EventLog;
 import com.inventory.*;
 
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import com.map.*;
@@ -33,20 +36,27 @@ public class Player implements Objects {
     //Inventory Flag (inventory has changed)
     boolean inventoryFlag;
     
+    //See if in dialogue
+	boolean dialogue;
+	ShopKeeper shopKeep;
+    
     //Player's vision radius
     private int visionRadius = 1;
+    
+    private EventLog eventLog;
 
     //Empty Constructor
     public Player() {}
 
     //Constructor: startX, startY, maxX, maxY, minX, minY
-    public Player( int posX, int posY, int maxX, int maxY ) {
+    public Player( int posX, int posY, int maxX, int maxY, EventLog eventLog ) {
 
         setPos( posX, posY );
         setBounds( maxX - 1, maxY - 1);
         winFlag = false;
         loseFlag = false;
         inventoryFlag = false;
+        this.eventLog = eventLog;//point to eventLog
     }
 
     //sets position coordinates to specified arguments
@@ -66,9 +76,9 @@ public class Player implements Objects {
     //returns -3 if player tries to move out of bounds (no movement occurs)
     public void keyPressed(KeyEvent e, Map map ) {
 
-    	switch ( e.getKeyCode() ) {
+    	switch ( filterPlayerInput(e)) {//e.getKeyCode() ) {
 
-    		case KeyEvent.VK_A:
+    		case ("LEFT"):
 
     			//Is the player at the bounds?
                 if ((posX - 1) >= 0) {
@@ -78,6 +88,7 @@ public class Player implements Objects {
                 	//Check the tile for energy loss, items/obstacles/shopkeep
             		if ( checkTile( tile ) == true ) {
             			posX = posX - 1;
+            			eventLog.update(map.get_tile(this.getPosX(), this.getPosY()), this);
             		}
 
                 	else {
@@ -88,7 +99,7 @@ public class Player implements Objects {
                 	//Do nothing
                 }
                     break;
-			case KeyEvent.VK_D:
+			case "RIGHT":
 
 	            if ((posX + 1) <= upBoundX) {
 
@@ -97,6 +108,7 @@ public class Player implements Objects {
                 	//Check the tile for energy loss, items/obstacles/shopkeep
             		if ( checkTile( tile ) == true ) {
             			posX = posX + 1; //Move the player
+            			eventLog.update(map.get_tile(this.getPosX(), this.getPosY()), this);
             		}
 
                 	else {
@@ -108,49 +120,136 @@ public class Player implements Objects {
 	            }
 	            break;
 
-				case KeyEvent.VK_W:
+			case "UP":
 
-		            if ((posY - 1) >= 0) {
+				if ((posY - 1) >= 0) {
 
-		               	//Get the the tile that will be moved to
-	                	Tile tile = map.get_tile( posX, posY - 1 );
-                		//Move the player and check the tile for energy loss, items/obstacles/shopkeep
-                		if ( checkTile( tile ) == true ) {
-                			posY = posY - 1; //Move the player
-                		}
+					//Get the the tile that will be moved to
+					Tile tile = map.get_tile( posX, posY - 1 );
+					//Move the player and check the tile for energy loss, items/obstacles/shopkeep
+					if ( checkTile( tile ) == true ) {
+						posY = posY - 1; //Move the player
+						eventLog.update(map.get_tile(this.getPosX(), this.getPosY()), this);
+					}
 
-	                	else {
-	                		//Do nothing for now
-	                	}
+					else {
+						//Do nothing for now
+					}
 
-	                } else {
-	                	//Do nothing
-		            }
-		            break;
+				} else {
+					//Do nothing
+				}
+				break;
 
-					case KeyEvent.VK_S:
-			            if ((posY + 1 <= upBoundY )) {
+			case "DOWN":
+				if ((posY + 1 <= upBoundY )) {
 
-			               	//Get the the tile that will be moved to
-		                	Tile tile = map.get_tile( posX, posY + 1 );
-	                		//Check the tile for energy loss, items/obstacles/shopkeep
-	                		if ( checkTile( tile ) == true ) {
-	                			posY = posY + 1; //Move the player
-	                		}
+					//Get the the tile that will be moved to
+					Tile tile = map.get_tile( posX, posY + 1 );
+					//Check the tile for energy loss, items/obstacles/shopkeep
+					if ( checkTile( tile ) == true ) {
+						posY = posY + 1; //Move the player
+						eventLog.update(map.get_tile(this.getPosX(), this.getPosY()), this);
+					}
 
-		                	else {
-		                		//Do nothing for now
-		                	}
+					else {
+						//Do nothing for now
+					}
 
-		                } else {
-		                	//Do nothing
-			            }
-			        break;
-	                default:
-	                	throw new IllegalStateException("Unexpected value!");
-	            }
+				} else {
+					//Do nothing
+				}
+				break;
+
+			case "TALK":
+
+				checkNPC( map, posX, posY);
+				break;
+			default:
+				throw new IllegalStateException("Unexpected value!");
+		}
+    }
+    
+    //Checks surrounding tiles around the player for any npcs to talk to
+    private void checkNPC( Map map, int playerPosX, int playerPosY ) {
+    	
+    	Object npc = null;
+    	
+    	if ( map.get_tile( playerPosX, playerPosY).getObject() instanceof ShopKeeper ) { //Center
+    		npc = map.get_tile( playerPosX, playerPosY ).getObject();
+    	}
+    	if ( map.get_tile( playerPosX, playerPosY  - 1).getObject() instanceof ShopKeeper ) { //North
+    		npc = map.get_tile( playerPosX, playerPosY  - 1).getObject();
+    	}
+    	if ( map.get_tile( playerPosX, playerPosY  + 1).getObject() instanceof ShopKeeper ) { //South
+    		npc = map.get_tile( playerPosX, playerPosY  + 1).getObject();
+    	}
+    	if ( map.get_tile( playerPosX - 1, playerPosY ).getObject() instanceof ShopKeeper ) { //West
+    		npc = map.get_tile( playerPosX - 1, playerPosY ).getObject();
+    	}
+    	if ( map.get_tile( playerPosX + 1, playerPosY ).getObject() instanceof ShopKeeper ) { //East
+    		npc = map.get_tile( playerPosX + 1, playerPosY ).getObject();
+    	}
+    	
+    	if ( npc != null ) {
+    		speakToNPC( npc );
+    	}
+    	
     }
 
+    //Opens up npc dialog
+    private void speakToNPC( Object npc ){
+    	
+    	shopKeep = (ShopKeeper)npc;
+    	toggleDialogue();
+	}
+
+	public ShopKeeper speakingWith(){
+    	return shopKeep;
+	}
+
+	public void toggleDialogue(){
+    	if (this.dialogue){
+    		this.dialogue = false;
+		} else {
+    		this.dialogue = true;
+		}
+	}
+
+	private String filterPlayerInput(KeyEvent e){
+
+		HashMap<Integer, String> validInput = new HashMap<Integer, String>();
+		validInput.put(KeyEvent.VK_A, "LEFT");
+		validInput.put(KeyEvent.VK_LEFT, "LEFT");
+		validInput.put(KeyEvent.VK_KP_LEFT, "LEFT");
+
+		validInput.put(KeyEvent.VK_S, "DOWN");
+		validInput.put(KeyEvent.VK_DOWN, "DOWN");
+		validInput.put(KeyEvent.VK_KP_DOWN, "DOWN");
+
+		validInput.put(KeyEvent.VK_D, "RIGHT");
+		validInput.put(KeyEvent.VK_RIGHT, "RIGHT");
+		validInput.put(KeyEvent.VK_KP_RIGHT, "RIGHT");
+
+		validInput.put(KeyEvent.VK_W, "UP");
+		validInput.put(KeyEvent.VK_UP, "UP");
+		validInput.put(KeyEvent.VK_KP_UP, "UP");
+
+		validInput.put(KeyEvent.VK_SPACE, "TALK");
+
+		try{
+			String command = validInput.get(e.getKeyCode());
+			return command;
+		} catch (Exception exc){
+			return "INVALID";
+		}
+	}
+
+    public void buyItem(Item item){
+    	currMoney = currMoney - item.getValue();
+    	addItem(item);
+	}
+	
     //Does all the tile checking, takes away from players energy depending on stuff
     public boolean checkTile( Tile tile ) {
 
@@ -362,6 +461,7 @@ public class Player implements Objects {
     final public boolean getLoseFlag() { return loseFlag; }
     final public ArrayList<Item> getInventory() { return inventory; }
     final public boolean  getInventoryFlag() { return inventoryFlag; }
+    final public boolean inDialogue(){return dialogue;}
 
     //Setters
     public void setEnergy( int currEnergy ) { this.currEnergy = currEnergy; }

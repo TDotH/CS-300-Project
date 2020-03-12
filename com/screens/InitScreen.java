@@ -10,10 +10,7 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-
 import javax.swing.*;
-import javax.swing.filechooser.FileFilter;
 
 import com.statemachine.*;
 
@@ -31,6 +28,7 @@ public class InitScreen implements IState {
 	//Used for default settings
 	private static final String DEFAULT_MAP = "src/maps/default_map.map";
 	private static final int    DEFAULT_ENERGY = 99;
+	private static final int    DEFAULT_MONEY = 0;
 	
 	public InitScreen ( StateMachine aStateMachine ) {
 		this.aStateMachine = aStateMachine;
@@ -39,6 +37,10 @@ public class InitScreen implements IState {
 	//Lets the player choose if they want to just play using a default file setup or a custom game
 	class StartPanel extends JPanel implements ActionListener {
 		
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
 		//Panel size
 		private int width = 200;
 		private int height = 300;
@@ -103,6 +105,9 @@ public class InitScreen implements IState {
 	    		
 	    		//Write how much energy the player should start with
 	    		aWriter.println( String.valueOf( DEFAULT_ENERGY ));
+	    		
+	    		//Write how much money the player should start with
+	    		aWriter.println( String.valueOf( DEFAULT_MONEY ));
 	    		aWriter.close();
 	    		
 	    		//Change to the game screen if everything worked out
@@ -163,6 +168,11 @@ public class InitScreen implements IState {
 	//Used to create custom games
 	class CustomPanel extends JPanel {
 
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+
 		final String MAPS_PATH = "src/maps";
 		
 		//Panel size
@@ -175,8 +185,10 @@ public class InitScreen implements IState {
 		
 		private JButton playButton;
 		private JButton returnButton;
-		JSlider energySlider;
 		JComboBox mapList;
+		
+		JTextField energyTextField;
+		JTextField moneyTextField;
 		
 		String selectedMap;
 		int energy;
@@ -235,24 +247,34 @@ public class InitScreen implements IState {
 					selectedMap = (String)cb.getSelectedItem();
 				}
 			});
-			//mapList.addActionListener(this);
 			
-			//Slider creation to set player energy
-			JLabel energyLabel = new JLabel( "Player Energy", JLabel.CENTER );
-			
+			//Textbox to set player energy
+			JLabel energyLabel = new JLabel( "Enter starting energy (1 - 999)", JLabel.CENTER );
 			energyLabel.setAlignmentX( Component.CENTER_ALIGNMENT );
-			energySlider = new JSlider( JSlider.HORIZONTAL, 1, MAX_ENERGY, 5);
-			energySlider.setMajorTickSpacing(11);
-			energySlider.setMinorTickSpacing(1);
-			energySlider.setPaintTicks(true);
-			energySlider.setPaintLabels(true);
-			energySlider.setAlignmentX( Component.CENTER_ALIGNMENT );
+			energyTextField = new JTextField( String.valueOf(DEFAULT_ENERGY), 5 );
+			energyTextField.setAlignmentX( Component.CENTER_ALIGNMENT );
+			energyTextField.setHorizontalAlignment( JTextField.CENTER );
+			energyTextField.setPreferredSize( new Dimension(125, 25));
+			energyTextField.setMinimumSize( new Dimension( 125, 25 ));
+			energyTextField.setMaximumSize( new Dimension( 125, 25 ));
+			
+			//Textbox to set player money
+			JLabel moneyLabel = new JLabel( "Enter starting Money (1 - 999)", JLabel.CENTER );
+			moneyLabel.setAlignmentX( Component.CENTER_ALIGNMENT );
+			moneyTextField = new JTextField( String.valueOf( DEFAULT_MONEY ), 5);
+			moneyTextField.setAlignmentX( Component.CENTER_ALIGNMENT );
+			moneyTextField.setHorizontalAlignment( JTextField.CENTER );
+			moneyTextField.setPreferredSize( new Dimension(125, 25));
+			moneyTextField.setMinimumSize( new Dimension( 125, 25 ));
+			moneyTextField.setMaximumSize( new Dimension( 125, 25 ));
 			
 			this.add( playButton, BorderLayout.PAGE_START );
 			this.add( mapLabel, BorderLayout.CENTER);
 			this.add( mapList, BorderLayout.CENTER );
 			this.add( energyLabel, BorderLayout.CENTER );
-			this.add( energySlider, BorderLayout.CENTER );
+			this.add( energyTextField, BorderLayout.CENTER );
+			this.add( moneyLabel, BorderLayout.CENTER );
+			this.add( moneyTextField, BorderLayout.CENTER );
 			this.add( Box.createVerticalGlue() );
 			this.add( returnButton, BorderLayout.PAGE_END );
 			
@@ -260,7 +282,8 @@ public class InitScreen implements IState {
 			playButton.setEnabled( false );
 			returnButton.setEnabled( false );
 			mapList.setEnabled( false );
-			energySlider.setEnabled( false );
+			energyTextField.setEnabled( false );
+			moneyTextField.setEnabled( false );
 			
 			this.setVisible( false );
 			
@@ -274,7 +297,8 @@ public class InitScreen implements IState {
 			playButton.setEnabled( true );
 			returnButton.setEnabled( true );
 			mapList.setEnabled( true );
-			energySlider.setEnabled( true );
+			energyTextField.setEnabled( true );
+			moneyTextField.setEnabled( true );
 			
 			//Move the panel to the front
 			aLayeredPane.moveToFront( this );
@@ -287,31 +311,80 @@ public class InitScreen implements IState {
 			playButton.setEnabled( false );
 			returnButton.setEnabled( false );
 			mapList.setEnabled( false );
-			energySlider.setEnabled( false );
+			energyTextField.setEnabled( false );
+			moneyTextField.setEnabled( false );
 			
 			this.setVisible( false );
 		}
 		
 		//Setup config file according to player inputs
 		private void customSetup() {
-	    	try {
-	    		PrintWriter aWriter = new PrintWriter( CONFIG_FILE ); //Open file
-	    		
-	    		//Write the wanted map
-	    		aWriter.println( MAPS_PATH + "/" + selectedMap );
-	    		
-	    		//Write how much energy the user wants to start with
-	    		aWriter.println( String.valueOf( String.valueOf( energySlider.getValue() ) ));
-	    		aWriter.close();
-	    		
-	    		//Change to the game screen if everything worked out
-	    		aStateMachine.change("gamescreen");
-	    		
-	    	} catch (Exception e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
+			
+			boolean energyFlag = false;
+			boolean moneyFlag = false;
+			
+			int startingEnergy = 0;
+			int startingMoney = 0;
+			
+			//First, check if energy is a number within bounds
+			try {
+				startingEnergy = Integer.parseInt( energyTextField.getText() );
+				
+				//Check if energy is within bounds
+				if ( ( startingEnergy >=1 ) && ( startingEnergy <= 999 ) ) {
+					
+					energyFlag = true;
+					
+				} else {
+					JOptionPane.showMessageDialog(aFrame, "Error! Energy needs to be a number between 1 and 999", "Energy Warning", JOptionPane.WARNING_MESSAGE);
+				}
+				
+			} catch (Exception e) {
+				JOptionPane.showMessageDialog(aFrame, "Error! Energy needs to be a number between 1 and 999!", "Energy Warning", JOptionPane.WARNING_MESSAGE);
 			}
 			
+			if ( energyFlag == true ) {
+				//Second, check if money is a number within bounds
+				try {
+					startingMoney = Integer.parseInt( moneyTextField.getText() );
+					
+					//Check if money is within bounds
+					if ( ( startingMoney >=1 ) && ( startingMoney <= 999 ) ) {
+						
+						moneyFlag = true;
+						
+					} else {
+						JOptionPane.showMessageDialog(aFrame, "Error! Money needs to be a number between 1 and 999", "Money Warning", JOptionPane.WARNING_MESSAGE);
+					}
+					
+				} catch (Exception e) {
+					JOptionPane.showMessageDialog(aFrame, "Error! money needs to be a number between 1 and 999!", "Money Warning", JOptionPane.WARNING_MESSAGE);
+				}
+			
+			}
+			
+			if ( ( energyFlag == true) && ( moneyFlag == true ) ) {
+		    	try {
+		    		PrintWriter aWriter = new PrintWriter( CONFIG_FILE ); //Open file
+		    		
+		    		//Write the wanted map
+		    		aWriter.println( MAPS_PATH + "/" + selectedMap );
+		    		
+		    		//Write how much energy the user wants to start with
+		    		aWriter.println( String.valueOf( startingEnergy ));
+		    		
+		    		//Write how much money the user wants to start with
+		    		aWriter.println( String.valueOf( startingMoney ));
+		    		aWriter.close();
+		    		
+		    		//Change to the game screen if everything worked out
+		    		aStateMachine.change("gamescreen");
+		    		
+		    	} catch (Exception e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			}
 		}
 		
 		//Create a custom file filter

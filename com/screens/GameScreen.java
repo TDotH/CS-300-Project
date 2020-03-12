@@ -25,8 +25,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -35,10 +35,12 @@ import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
 
 import com.statemachine.*;
+import com.actors.ShopKeeper;
+import com.eventlog.EventLog;
 import com.inventory.Item;
 import com.map.Map;
-import com.map.Tile;
 import com.player.*;
+import com.screens.GameScreen.ShopKeepPanel;
 
 public class GameScreen implements IState {
 
@@ -50,6 +52,7 @@ public class GameScreen implements IState {
 	private InventoryPanel aInventoryPanel;
 	private WinPanel aWinPanel;
 	private LosePanel aLosePanel;
+	private ShopKeepPanel aShopKeepPanel;
 	private KeyboardFocusManager manager;
 	private GameMenu gameMenu;
 	private JLayeredPane gamePanes;
@@ -58,17 +61,24 @@ public class GameScreen implements IState {
 	private boolean finished; //Used so that when the player wants to explore after they win, the player is unaffected by stuff
 
 	public JFrame aFrame;
+	private EventLog eventLog;
+	
 
 	private static final int MAP_SCREEN_PANEL_WIDTH = 624;
 
 	public GameScreen ( StateMachine aStateMachine ) {
 
 		this.aStateMachine = aStateMachine;
+		this.eventLog = new EventLog();
 	}
 
 	//Holds the map and player
 	class MapScreenPanel extends JPanel{
 
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
 		private Map map;
 		private Player player;
 		private Camera camera;
@@ -110,7 +120,7 @@ public class GameScreen implements IState {
 				map = new Map();
 				try {
 					map.loadMap( tempString );
-
+					
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -119,9 +129,19 @@ public class GameScreen implements IState {
 				//Second line is player's starting energy
 			    tempString = br.readLine();
 				try {
-					player = new Player( map.getStartX(), map.getStartY(), map.getWidth(), map.getHeight() );
+					player = new Player( map.getStartX(), map.getStartY(), map.getWidth(), map.getHeight(), eventLog );
 					camera = new Camera( this.getWidth(), this.getHeight(), map.getTileSize(), map.getStartX(), map.getStartY(), map.getWidth(), map.getHeight() );
 					player.setEnergy( Integer.parseInt( tempString ));
+
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+				//Third line is player's starting money
+			    tempString = br.readLine();
+				try {
+					player.setMoney( Integer.parseInt( tempString ));
 
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
@@ -226,23 +246,34 @@ public class GameScreen implements IState {
     				aWinPanel.openMenu(aFrame);
     			} else if ( player.getLoseFlag() == true ) {
     				aLosePanel.openMenu(aFrame);
-    			}
+    			} else if ( player.inDialogue() ){
+    				
+    				if ( aShopKeepPanel != null ) {
+    	   				aShopKeepPanel.openMenu(aFrame, player);
+        				aShopKeepPanel.updateMenu();
+    				}
+				}
     		}
 	    }
 
 	    protected void setPlayerInventoryFlag( boolean flag ) { player.setInventoryFlag( flag ); } 
+	    protected void togglePlayerDialog() { player.toggleDialogue(); }
 	    
 	    //Getters for the gui
 	    protected int getPlayerEnergy() { return player.getEnergy(); }
 	    protected int getPlayerMoney() { return player.getMoney(); }
 	    protected ArrayList<Item> getPlayerInventory() { return player.getInventory(); }
 	    protected boolean getPlayerInventoryFlag() { return player.getInventoryFlag(); }
-	    
+	    public ShopKeeper getShopKeeper() { return map.getShopkeep(); }   
 	}
 
 	//Holds the gui
 	class GuiPanel extends JPanel {
 
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
 		private Image guiset;
 		private int imageSize = 32;
 
@@ -257,9 +288,13 @@ public class GameScreen implements IState {
 
 		private int sidesOffset = 6;
 
-		public float guiTransparency = .8f;
+		public float guiTransparency = .75f;
 
 		private int guiSize = 48;
+		
+		private Border raisedBorder = BorderFactory.createBevelBorder( BevelBorder.RAISED, new Color(56,112,255) ,new Color(0, 51, 179));
+		private Border loweredBorder= BorderFactory.createBevelBorder( BevelBorder.LOWERED,  new Color(56,112,255), new Color(0, 51, 179));
+		private Border panelBorder = BorderFactory.createCompoundBorder( raisedBorder, loweredBorder );
 
 		public GuiPanel() {
 
@@ -276,6 +311,11 @@ public class GameScreen implements IState {
 
 			JPanel energyPanel = new JPanel() {
 
+				/**
+				 * 
+				 */
+				private static final long serialVersionUID = 1L;
+
 				@Override
 				protected void paintComponent(Graphics g) {
 					super.paintComponent(g);
@@ -288,16 +328,20 @@ public class GameScreen implements IState {
 
 			};
 			energyPanel.setBounds( this.getWidth() - enMoGuiWidth*2 - guiOffset*2,  guiOffset, enMoGuiWidth, enMoGuiHeight);
-
-			//energyMoneyPanel.setBackground( Color.WHITE );
+			energyPanel.setBorder( panelBorder );
 
 			energyLabel = new JLabel(String.valueOf(currentEnergy), SwingConstants.RIGHT);
-			energyLabel.setFont( new Font( energyLabel.getName(), Font.PLAIN, 40));
+			energyLabel.setFont( new Font( energyLabel.getName(), Font.PLAIN, 25));
 			energyLabel.setBounds(38,8, 50, 50);
 			energyPanel.setLayout( null );
 			energyPanel.add( energyLabel );
 
 			JPanel moneyPanel = new JPanel() {
+
+				/**
+				 * 
+				 */
+				private static final long serialVersionUID = 1L;
 
 				@Override
 				protected void paintComponent(Graphics g) {
@@ -311,10 +355,10 @@ public class GameScreen implements IState {
 
 			};
 			moneyPanel.setBounds( this.getWidth() - enMoGuiWidth - guiOffset,  guiOffset, enMoGuiWidth, enMoGuiHeight);
-			//energyMoneyPanel.setBackground( Color.WHITE );
+			moneyPanel.setBorder( panelBorder );
 
 			moneyLabel = new JLabel(String.valueOf(currentEnergy), SwingConstants.RIGHT);
-			moneyLabel.setFont( new Font( moneyLabel.getName(), Font.PLAIN, 40));
+			moneyLabel.setFont( new Font( moneyLabel.getName(), Font.PLAIN, 25));
 			moneyLabel.setBounds(38,8, 50, 50);
 			moneyPanel.setLayout( null );
 			moneyPanel.add( moneyLabel );
@@ -329,11 +373,12 @@ public class GameScreen implements IState {
 				//Check if the panel needs to update
 				if ( aMapScreenPanel.getPlayerEnergy() != currentEnergy ) {
 					currentEnergy = aMapScreenPanel.getPlayerEnergy();
-					energyLabel.setText( String.valueOf(currentEnergy) );
+					energyLabel.setText( String.valueOf( Math.max(0, currentEnergy) ) );
+					
 				}
 				if ( aMapScreenPanel.getPlayerMoney() != currentMoney ) {
 					currentMoney = aMapScreenPanel.getPlayerMoney();
-					moneyLabel.setText( String.valueOf(currentMoney) );
+					moneyLabel.setText( String.valueOf( Math.max(0, currentMoney) ) );
 				}
 			}
 		}
@@ -348,6 +393,10 @@ public class GameScreen implements IState {
 	//Holds the win panel
 	class WinPanel extends JPanel implements ActionListener{
 
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
 		private int width = 300;
 		private int height = 100;
 
@@ -375,7 +424,7 @@ public class GameScreen implements IState {
 			this.setLayout( null );
 
 			JLabel label = new JLabel("Great job, you got the Jewel! You Win!");
-			label.setAlignmentX( this.CENTER_ALIGNMENT );
+			label.setAlignmentX( Component.CENTER_ALIGNMENT );
 
 			resumeButton = new JButton("Resume");
 			resumeButton.setMinimumSize( new Dimension( buttonWidth, buttonHeight ));
@@ -454,6 +503,10 @@ public class GameScreen implements IState {
 	//Holds the lose panel
 	class LosePanel extends JPanel implements ActionListener{
 
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
 		private int width = 300;
 		private int height = 100;
 
@@ -480,7 +533,7 @@ public class GameScreen implements IState {
 			this.setLayout( null );
 
 			JLabel label = new JLabel("Oh no, you ran out of energy!");
-			label.setAlignmentX( this.CENTER_ALIGNMENT );
+			label.setAlignmentX( Component.CENTER_ALIGNMENT );
 
 			restartButton = new JButton("Restart");
 			restartButton.setMinimumSize( new Dimension( buttonWidth, buttonHeight ));
@@ -557,9 +610,194 @@ public class GameScreen implements IState {
 
 	}
 
+	//Holds the ShopKeeps panel
+	class ShopKeepPanel extends JPanel implements ActionListener{
+
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+		private int width = 500;
+		private int height = 300;
+
+		private int offSetY = 0;
+
+		private int buttonWidth = 200;
+		private int buttonHeight = 25;
+
+		private Player player;
+		private ShopKeeper shopKeep;
+
+		HashMap<JButton, Item> itemsDict = new HashMap<JButton, Item>();
+
+		JPanel menuPanel;
+		JButton exitButton;
+		ArrayList<JButton> buttons  = new ArrayList<JButton>();
+		JLabel label;
+
+		public ShopKeepPanel( ShopKeeper shopkeep) {
+
+			this.setBounds(0, 0, aFrame.getContentPane().getWidth(), aFrame.getContentPane().getHeight());
+			this.setBackground( new Color( 100, 100, 100, 100 ) );
+			this.setLayout(null);
+			
+			this.shopKeep = shopkeep;
+			
+			generateMenu();
+
+		}
+
+		public void generateMenu(){
+			menuPanel = new JPanel();
+			menuPanel.setBounds( aFrame.getContentPane().getWidth()/2 - width/2, aFrame.getContentPane().getHeight()/2 - height/2 + offSetY, width, height);
+			menuPanel.setBorder( BorderFactory.createCompoundBorder( BorderFactory.createLineBorder(Color.black), BorderFactory.createEmptyBorder( 15, 15, 15, 15 )));
+
+			menuPanel.setBackground( Color.WHITE );
+			menuPanel.setLayout( new BoxLayout( menuPanel, BoxLayout.PAGE_AXIS ));
+			//menuPanel.setLayout( new BorderLayout() );;
+			this.setLayout( null );
+
+			String msg = "TEST";//shopKeep.getHello();
+
+			//ArrayList<Item> inv = shopKeep.getInventory();
+
+			JPanel buttonPanel = new JPanel();
+			buttonPanel.setLayout( new FlowLayout() );
+			buttonPanel.setBackground( Color.WHITE );
+
+			for(int x = 0; x < shopKeep.getInventory().size(); x++ ){
+				JButton thisJButton = new JButton("TEST");//item.getName() + " - " + item.getValue() + "G");
+				thisJButton.setMinimumSize( new Dimension( buttonWidth, buttonHeight ));
+				thisJButton.setMaximumSize( new Dimension( buttonWidth, buttonHeight ));
+				thisJButton.setPreferredSize(new Dimension( buttonWidth, buttonHeight ));
+				thisJButton.addActionListener(this);
+				thisJButton.setActionCommand("sell");
+				thisJButton.setAlignmentX( Component.CENTER_ALIGNMENT );
+
+				thisJButton.setEnabled(false);
+
+				buttons.add(thisJButton);
+				buttonPanel.add(thisJButton);
+			}
+
+			exitButton = new JButton("Goodbye (Exit)");
+			exitButton.setMinimumSize( new Dimension( buttonWidth, buttonHeight ));
+			exitButton.setMaximumSize( new Dimension( buttonWidth, buttonHeight ));
+			exitButton.setPreferredSize(new Dimension( buttonWidth, buttonHeight ));
+			exitButton.addActionListener(this);
+			exitButton.setActionCommand("resume");
+			exitButton.setAlignmentX( Component.CENTER_ALIGNMENT );
+			exitButton.setEnabled(false);
+			buttonPanel.add(exitButton);
+
+			label = new JLabel(msg);
+			label.setAlignmentX( this.CENTER_ALIGNMENT );
+
+			menuPanel.add(label, BorderLayout.PAGE_START);
+			menuPanel.add( Box.createVerticalGlue() );
+			menuPanel.add( buttonPanel , BorderLayout.CENTER );
+
+			this.add(menuPanel);
+		}
+
+		//Open the panel
+		public void openMenu( JFrame aFrame, Player aPlayer ) {
+			player = aPlayer;
+			//shopKeep = player.speakingWith();
+			aMapScreenPanel.stopManager();
+			paused = true;
+			gamePanes.moveToFront(this);
+			//Enable the buttons
+			for (JButton button : buttons) {
+				button.setEnabled(true);
+			}
+			exitButton.setEnabled(true);
+			
+			if ( shopKeep != null ) {
+				label.setText( shopKeep.getHello() );
+			}
+		}
+
+		public void updateMenu(){
+
+			ArrayList<Item> inv = shopKeep.getInventory();
+			label.setText( shopKeep.getHello() );
+
+			for(int x = 0; x < inv.size(); x++){
+				buttons.get(x).setText(inv.get(x).getName() + " - " + inv.get(x).getValue() + "G");
+				itemsDict.put(buttons.get(x), inv.get(x));
+
+			}
+		}
+		
+		public void setShopkeeper( ShopKeeper aShopKeep ) { this.shopKeep = aShopKeep; }
+
+		//Closes the menu
+		public void closeMenu() {
+			
+			aMapScreenPanel.togglePlayerDialog();
+			paused = false;
+			gamePanes.moveToBack(this);
+			//Disable the buttons so they wont react when moused over
+			for (JButton button : buttons){
+				button.setEnabled(false);
+			}
+			exitButton.setEnabled(false);
+		}
+
+
+
+		public void sell(JButton button){
+
+			Item itemOfInterest = itemsDict.get(button);
+			
+			//Check if the player can buy the item first
+			if ( player.getMoney() > itemOfInterest.getValue() ) {
+				
+				shopKeep.sellToPlayer(itemOfInterest, itemOfInterest.getValue());
+				player.buyItem(itemOfInterest);
+				button.setText("SOLD!");
+				button.setActionCommand("sold");
+			} else {
+				label.setText( shopKeep.notEnoughMoney() );
+			}
+
+		}
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			// TODO Auto-generated method stub
+			switch ( e.getActionCommand() ) {
+
+				case "resume":
+					closeMenu();
+					aMapScreenPanel.startManager();
+					break;
+				case "menu":
+					paused = false; //Make sure paused is always false
+					aStateMachine.change("mainmenu");
+					break;
+				case "sell":
+					//hold on
+					shopKeep = player.speakingWith();
+					sell((JButton)e.getSource());
+					break;
+				case "sold":
+					label.setText( shopKeep.soldOut() );
+					break;
+				default:
+					throw new IllegalStateException("Unexpected value: " + String.valueOf( e.getActionCommand()));
+			}
+		}
+	}
+	
 	//Holds the menu screen
 	class GameMenu extends JPanel implements ActionListener {
 
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
 		private int width = 200;
 		private int height = 275;
 
@@ -688,6 +926,10 @@ public class GameScreen implements IState {
 	//Holds Events
 	class EventLogPanel extends JPanel {
 
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
 		private Border raisedBorder = BorderFactory.createBevelBorder( BevelBorder.RAISED, new Color(56,112,255) ,new Color(0, 51, 179));
 		private Border loweredBorder= BorderFactory.createBevelBorder( BevelBorder.LOWERED,  new Color(56,112,255), new Color(0, 51, 179));
 		private Border panelBorder = BorderFactory.createCompoundBorder( loweredBorder, 
@@ -700,21 +942,48 @@ public class GameScreen implements IState {
 			this.setBackground(Color.BLACK);
 			this.setBorder( BorderFactory.createTitledBorder ( panelBorder, "Event Log", TitledBorder.DEFAULT_JUSTIFICATION, 
 					TitledBorder.DEFAULT_POSITION, new Font("Dialog", Font.PLAIN, 14), Color.WHITE ));
-		}
+			
+			JPanel aLogPanel = new JPanel() {
 
+				/**
+				 * 
+				 */
+				private static final long serialVersionUID = 1L;
+
+				private void drawString(Graphics g, String text, int x, int y){
+					for(String line: text.split("\n")){
+						g.drawString(line, x, y += g.getFontMetrics().getHeight());
+					}
+				}
+				
+				@Override
+				protected void paintComponent( Graphics g ) {
+					
+					super.paintComponent(g);
+					drawString(g, eventLog.display(), this.getWidth()/15, this.getHeight()/10);
+
+				}
+			};
+			
+			aLogPanel.setBackground( Color.WHITE );
+			aLogPanel.setPreferredSize( new Dimension ( this.getWidth() - this.getInsets().bottom * 2, this.getHeight() - this.getInsets().top*2 ));
+			this.add(aLogPanel);
+		}
+		
 		@Override
 		protected void paintComponent( Graphics g ) {
-
+			
 			super.paintComponent(g);
-			//Graphics2D g2d = (Graphics2D) g;
-			g.drawString("Event log goes here", this.getWidth()/3, this.getHeight()/2 );
-
 		}
 	}
 
 	//Holds the inventory
 	class InventoryPanel extends JPanel {
 
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
 		private Border raisedBorder = BorderFactory.createBevelBorder( BevelBorder.RAISED, new Color(56,112,255) ,new Color(0, 51, 179));
 		private Border loweredBorder= BorderFactory.createBevelBorder( BevelBorder.LOWERED,  new Color(56,112,255), new Color(0, 51, 179));
 		private Border panelBorder = BorderFactory.createCompoundBorder( loweredBorder, 
@@ -740,6 +1009,10 @@ public class GameScreen implements IState {
 		//Holds multiple itemPanels in a grid
 		private class InventoryGrid extends JPanel {
 			
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 1L;
 			private ArrayList<aItemPanel> itemPanels;
 			
 			public InventoryGrid( int parentWidth, int parentHeight ) {
@@ -769,6 +1042,11 @@ public class GameScreen implements IState {
 		//Panel to display individual items
 		private class aItemPanel extends JPanel {
 			
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 1L;
+
 			//Constructor a panel of a certian width, height, and item
 			public aItemPanel( int width, int height, String itemName ) {
 				
@@ -848,6 +1126,7 @@ public class GameScreen implements IState {
 		aEventLogPanel = new EventLogPanel( aFrame );
 		aInventoryPanel = new InventoryPanel( aFrame );
 		aWinPanel = new WinPanel();
+		
 		aLosePanel = new LosePanel();
 		gameMenu = new GameMenu();
 
@@ -866,7 +1145,11 @@ public class GameScreen implements IState {
 		gamePanes.add( gameMenu, 1 );
 		gamePanes.add( aWinPanel, 2 );
 		gamePanes.add( aLosePanel, 3);
-
+		
+		if ( aMapScreenPanel.getShopKeeper() != null ) {
+			aShopKeepPanel = new ShopKeepPanel( aMapScreenPanel.getShopKeeper()) ;
+			gamePanes.add(aShopKeepPanel, 4);
+		}
 		aFrame.add( gamePanes );
 
 		//aFrame.setLayout( null );

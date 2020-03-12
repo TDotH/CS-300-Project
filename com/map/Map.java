@@ -25,9 +25,10 @@ package com.map;
 
 import java.awt.Graphics2D;
 import java.awt.Image;
-import java.awt.Toolkit;
 import java.io.*;
 import java.util.ArrayList;
+
+import com.actors.ShopKeeper;
 import com.inventory.*;
 import com.obstacles.Obstacle;
 import com.obstacles.Obstacles;
@@ -44,6 +45,7 @@ public class Map {
     private int width, height; //Width and height of the map
     private int startX, startY; //Start coordinates for the player
     private Item jewel; //Makes getting the jewel for the cheat button much easier
+    private ShopKeeper shopkeeper; //Makes getting the shopkeep easier
 
     //Controls size of tiles
     private static int LINE_WIDTH = 32;
@@ -135,14 +137,12 @@ public class Map {
             str = br.readLine(); //Read in line
             for (int x = 0; x < width; ++x) {
                 Types type; // For initializing individual tiles
-                //int tempInt = -1;
                 switch ( Integer.parseInt( String.valueOf(str.charAt(x))) ) { //assign from file index
 	                case 0:
 	                	type = Types.DEFAULT;
 	                	break;
 	                case 1:
 	                    type = Types.FOREST;
-	                    //tempInt = 0;
 	                    break;
 	                case 2:
 	                    type = Types.SWAMP;
@@ -152,7 +152,6 @@ public class Map {
 	                    break;
 	                case 4:
 	                    type = Types.WATER;
-	                    //tempInt = 12;
 	                    break;
 	                case 5:
 	                    type = Types.MOUNTAINS;
@@ -163,10 +162,9 @@ public class Map {
 
                 //Initialize tile
                 map[x][y] = new Tile(type);
-                //map[x][y].setImageID(tempInt);
             }
         }
-        //Load items on second to last line
+        //Load items on next line
         if ((str = br.readLine()) != null) { //Check for first line
 
             String[] itemLocations = str.split(";"); //First split individual items
@@ -201,7 +199,7 @@ public class Map {
 
         } else { br.close(); }
 
-        //Load obstacles on last line
+        //Load obstacles on next next line
         if ((str = br.readLine()) != null) { //Check for first line
 
             String[] obstacleLocations = str.split(";"); //First split individual obstacles
@@ -228,10 +226,58 @@ public class Map {
         				//mapObstacles.add( tempObstacle );
         				map[tempPosX][tempPosY].setObject(tempObstacle);
             		}
-
             }
-
         } else { br.close(); }
+        
+        //Load shopkeep on last line
+        shopkeeper = null;
+        
+        if ((str = br.readLine()) != null) { //Check for first line
+
+        	//First, check if there is a shopkeep on this map
+        	if ( Integer.parseInt(str) == 1 ) {
+        		
+        		//Check the next line for shopkeeper location
+                if ((str = br.readLine()) != null) { 
+                    String[] shopLoc = str.split(","); 
+
+                    int shopX = Integer.parseInt(shopLoc[0]);
+                    int shopY = Integer.parseInt(shopLoc[1]);
+                    
+                    shopkeeper = new ShopKeeper( shopX, shopY );
+                    map[shopX][shopY].setObject(shopkeeper);
+
+                } else { br.close(); }
+        		
+        		//Check the next line for shopkeeper inventory
+                if ( shopkeeper != null ) {
+                    if ((str = br.readLine()) != null) { 
+                    	
+                    	String[] shopkeepInventory = str.split(";"); //First split individual items
+                    	
+                    	for ( int i = 0; i < shopkeepInventory.length; i++ ) {
+                    		
+                    		String[] item = shopkeepInventory[i].split(","); //Second split to get item type and location
+                    		//Get the items position on the map
+                    		int tempItemId = Integer.parseInt( item[0] );
+                    		int tempPrice = Integer.parseInt( item[1] );
+
+                    		Item tempItem = null;
+                    		//Iterate through items to find the item with the specific id
+                    		for( Items aItem : Items.values() ) {
+
+                    			if( aItem.getItemID() == tempItemId ) {
+                    				tempItem = new Item( aItem );
+                    				shopkeeper.addItem( tempItem );
+                    			}
+                    		}
+
+                    	}
+                    	
+                    } else { br.close(); }
+                }
+        	}
+        }
     }
 
     //Saves the current map with format (src/maps/(filename).map)
@@ -299,6 +345,26 @@ public class Map {
 
     		if ( tempString.length() != 0 ) {
     			aWriter.println( tempString );
+    		}
+    		
+    		//Clear the string
+    		tempString = "";
+    		//Add the shopkeeper and the inventory
+    		if ( shopkeeper != null ) {
+    			aWriter.println("1");
+    			
+    			aWriter.println( String.valueOf( shopkeeper.getPosX() ) + ',' + String.valueOf( shopkeeper.getPosY() ));
+    			
+    			for ( Item items : shopkeeper.getInventory() ) {
+    				tempString = tempString.concat( String.valueOf( items.getItem().getItemID() ) + "," + String.valueOf(items.getItem().getValue() ) + ";");
+    			}
+    			
+        		if ( tempString.length() != 0 ) {
+        			aWriter.println( tempString );
+        		}
+    			
+    		} else {
+    			aWriter.println("0");
     		}
 
     		aWriter.close();
@@ -401,8 +467,6 @@ public class Map {
 	        	xDraw++;
         	}
         }
-
-
     }
 
     //Tile getter
@@ -444,9 +508,11 @@ public class Map {
     public int getJewelX() { return jewel.getPosX(); }
     public int getJewelY() { return jewel.getPosY(); }
     public Item getJewel() { return jewel; };
+    public ShopKeeper getShopkeep() { return shopkeeper; }
 
     //Setters
     public void setStartX( int startX ) { this.startX = startX; }
     public void setStartY( int startY ) { this.startY = startY; }
+    public void setShopkeep( ShopKeeper shopkeeper ) { this.shopkeeper = shopkeeper; }
 
 }

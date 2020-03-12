@@ -2,7 +2,6 @@
  * A enum of all possible game states
  */
 package com.statemachine;
-import com.screens.*;
 
 public enum GameStates {
 

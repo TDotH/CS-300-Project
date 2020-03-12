@@ -12,6 +12,10 @@ import com.statemachine.*;
 
 public class MainMenu extends JFrame implements IState{
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private StateMachine aStateMachine = null;
 	private JFrame mainFrame;
 	
@@ -31,6 +35,10 @@ public class MainMenu extends JFrame implements IState{
 	//Holds all the ui components
 	class MenuPanel extends JPanel implements ActionListener {
 		
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
 		private int width = 200;
 		private int height = 300;
 		

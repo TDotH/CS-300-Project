@@ -11,6 +11,10 @@ import javax.swing.*;
 
 public class Frupal extends JPanel {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	//Screen size
 	static final int SCREEN_WIDTH = 960;
 	static final int SCREEN_HEIGHT = 720;

@@ -12,11 +12,8 @@ package com.map;
 */
 
 import java.awt.*;
-import java.awt.image.ImageObserver;
-import java.io.IOException;
 
-import javax.imageio.ImageIO;
-
+import com.actors.ShopKeeper;
 import com.inventory.*;
 import com.obstacles.*;
 
@@ -92,7 +89,7 @@ public class Tile {
         //Is there an object to draw?
         if ( object != null ) {
         	
-        	if ( object instanceof Item ) {
+        	if ( object instanceof Item  || object instanceof ShopKeeper) {
         		object.draw( g2d, line_width, posX, posY, itemset );
         	}
         	
@@ -124,7 +121,7 @@ public class Tile {
 	        //Is there an object to draw?
 	        if ( object != null ) {
 	        	
-	        	if ( object instanceof Item ) {
+	        	if ( object instanceof Item  || object instanceof ShopKeeper ) {
 	        		object.draw( g2d, line_width, posX, posY, itemset );
 	        	}
 	        	
@@ -147,6 +144,7 @@ public class Tile {
 	        			object.draw( g2d, line_width, posX, posY, obstacleset );
 	        		}
 	        	}
+	        
 	        }
 	        
         } else {
