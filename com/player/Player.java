@@ -18,6 +18,7 @@ public class Player implements Objects {
     
     //Player's energy
     private int energy;
+    private boolean playerMoved = true;
 
     //Energy and money; unused until items are ready
     //private int energy, money;
@@ -64,6 +65,7 @@ public class Player implements Objects {
                 	if ( tileType.getPassable() == true ) {
                 		//Move the player and take away from the player's energy count
                 		posX = posX - 1;
+                		playerMoved = true;
                 		energy -= tileType.getEnergyCost();
                 	}
                 	else {
@@ -84,6 +86,7 @@ public class Player implements Objects {
                 	if ( tileType.getPassable() == true ) {
                 		//Move the player and take away from the player's energy count
                 		posX = posX + 1;
+                		playerMoved = true;
                 		energy -= tileType.getEnergyCost();
                 	}
                 	else {
@@ -105,6 +108,7 @@ public class Player implements Objects {
 	                	if ( tileType.getPassable() == true ) {
 	                		//Move the player and take away from the player's energy count
 	                		posY = posY - 1;
+	                		playerMoved = true;
 	                		energy -= tileType.getEnergyCost();
 	                	}
 	                	else {
@@ -125,6 +129,7 @@ public class Player implements Objects {
 		                	if ( tileType.getPassable() == true ) {
 		                		//Move the player and take away from the player's energy count
 		                		posY = posY + 1;
+		                		playerMoved = true;
 		                		energy -= tileType.getEnergyCost();
 		                	}
 		                	else {
@@ -191,4 +196,12 @@ public class Player implements Objects {
     
     //Setters
     public void setEnergy( int energy ) { this.energy = energy; }
+
+    public boolean ifMoved(){
+    	if (this.playerMoved == true){
+    		this.playerMoved = false;
+    		return true;
+		}
+    	return false;
+	}
 }

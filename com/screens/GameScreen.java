@@ -327,7 +327,8 @@ public class GameScreen implements IState {
 			
 			super.paintComponent(g);
 			//Graphics2D g2d = (Graphics2D) g;
-			eventLog.update(map.get_tile(player.getPosX(), player.getPosY()), player);
+			if(player.ifMoved())
+				eventLog.update(map.get_tile(player.getPosX(), player.getPosY()), player);
 			drawString(g, eventLog.display(), this.getWidth()/15, this.getHeight()/10);
 
 		}

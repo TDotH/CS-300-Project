@@ -80,31 +80,36 @@ public class EventLog {
 	public String display() {
 		if(log.size() == 0)
 			return "Empty Log";
-		return log.getLast();
+		Iterator<String> iterator = log.descendingIterator();
+		StringBuilder s = new StringBuilder();
+		while(iterator.hasNext()){
+			s.append(iterator.next());
+
+		}
+		return s.toString();
 	}
 
 
 	public void update(Tile tile, Player p, Item item, char icode, String event){
 		String s = buildS(tile, p.getPosX(), p.getPosY(), item, icode, event);
+		String last = log.peekLast();
+		if(last.compareTo(s) == 0)
+			return;
 		log.addLast(s);
-		display();
 	}
 
 	public void update(Tile tile, Player p) {
 		String s = buildS(tile, p.getPosX(), p.getPosY());
 		log.addLast(s);
-		display();
 	}
 
 	public void update(Tile tile, Player p, Item item, char icode){
 		String s = buildS(tile, p.getPosX(), p.getPosY(), item, icode);
 		log.addLast(s);
-		display();
 	}
 
 	public void update(Tile tile, Player p, String event){
 		String s = buildS(tile, p.getPosX(), p.getPosY(), event);
 		log.addLast(s);
-		display();
 	}
 }
