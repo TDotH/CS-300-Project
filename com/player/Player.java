@@ -10,6 +10,7 @@ import java.awt.event.KeyEvent;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import com.map.*;
+import com.eventlog.*;
 
 public class Player implements Objects {
 
@@ -18,7 +19,7 @@ public class Player implements Objects {
     
     //Player's energy
     private int energy;
-    private boolean playerMoved = true;
+    private EventLog eventLog;
 
     //Energy and money; unused until items are ready
     //private int energy, money;
@@ -27,11 +28,12 @@ public class Player implements Objects {
     public Player() {}
 
     //Constructor: startX, startY, maxX, maxY, minX, minY
-    public Player( int posX, int posY, int maxX, int maxY ) {
+    public Player( int posX, int posY, int maxX, int maxY, EventLog eventLog ) {
 
         setPos( posX, posY );
         setBounds( maxX - 1, maxY - 1);
         energy = 10000;
+        this.eventLog = eventLog;//point to eventLog
 
     }
 
@@ -65,7 +67,7 @@ public class Player implements Objects {
                 	if ( tileType.getPassable() == true ) {
                 		//Move the player and take away from the player's energy count
                 		posX = posX - 1;
-                		playerMoved = true;
+                		eventLog.update(map.get_tile(this.getPosX(), this.getPosY()), this);
                 		energy -= tileType.getEnergyCost();
                 	}
                 	else {
@@ -86,7 +88,7 @@ public class Player implements Objects {
                 	if ( tileType.getPassable() == true ) {
                 		//Move the player and take away from the player's energy count
                 		posX = posX + 1;
-                		playerMoved = true;
+						eventLog.update(map.get_tile(this.getPosX(), this.getPosY()), this);
                 		energy -= tileType.getEnergyCost();
                 	}
                 	else {
@@ -108,7 +110,7 @@ public class Player implements Objects {
 	                	if ( tileType.getPassable() == true ) {
 	                		//Move the player and take away from the player's energy count
 	                		posY = posY - 1;
-	                		playerMoved = true;
+							eventLog.update(map.get_tile(this.getPosX(), this.getPosY()), this);
 	                		energy -= tileType.getEnergyCost();
 	                	}
 	                	else {
@@ -129,7 +131,7 @@ public class Player implements Objects {
 		                	if ( tileType.getPassable() == true ) {
 		                		//Move the player and take away from the player's energy count
 		                		posY = posY + 1;
-		                		playerMoved = true;
+								eventLog.update(map.get_tile(this.getPosX(), this.getPosY()), this);
 		                		energy -= tileType.getEnergyCost();
 		                	}
 		                	else {
@@ -197,11 +199,4 @@ public class Player implements Objects {
     //Setters
     public void setEnergy( int energy ) { this.energy = energy; }
 
-    public boolean ifMoved(){
-    	if (this.playerMoved == true){
-    		this.playerMoved = false;
-    		return true;
-		}
-    	return false;
-	}
 }

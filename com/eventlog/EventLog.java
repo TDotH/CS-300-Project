@@ -24,6 +24,9 @@ public class EventLog {
 	private String buildS(Tile tile, int x, int y, Item item, char icode, String event) {
 		if (log.size() > 20)
 			log.removeFirst();
+		y = 12 - y;
+		if(y < 0)
+			y *= -1;
 		StringBuilder s = new StringBuilder("Location: " + x + "," + y
 				+ "\nTile: " + tile.getType().name() + "\n" +
 				"Cost to move: " + tile.getType().getEnergyCost()
@@ -41,6 +44,9 @@ public class EventLog {
 	private String buildS(Tile tile, int x, int y, Item item, char icode) {
 		if (log.size() > 20)
 			log.removeFirst();
+		y = 12 - y;
+		if(y < 0)
+			y *= -1;
 		StringBuilder s = new StringBuilder("Location: " + x + "," + y
 				+ "\nTile: " + tile.getType().name() + "\n" +
 				"Cost to move: " + tile.getType().getEnergyCost()
@@ -58,6 +64,9 @@ public class EventLog {
 	private String buildS(Tile tile, int x, int y, String event){
 		if (log.size() > 20)
 			log.removeFirst();
+		y = 12 - y;
+		if(y < 0)
+			y *= -1;
 		StringBuilder s = new StringBuilder("Location: " + x + "," + y
 				+ "\nTile: " + tile.getType().name() + "\n" +
 				"Cost to move: " + tile.getType().getEnergyCost()
@@ -70,6 +79,9 @@ public class EventLog {
 	private String buildS(Tile tile, int x, int y){
 		if (log.size() > 20)
 			log.removeFirst();
+		y = 12 - y;
+		if(y < 0)
+			y *= -1;
 		StringBuilder s = new StringBuilder("Location: " + x + "," + y
 				+ "\nTile: " + tile.getType().name() + "\n" +
 				"Cost to move: " + tile.getType().getEnergyCost()
@@ -88,7 +100,6 @@ public class EventLog {
 		}
 		return s.toString();
 	}
-
 
 	public void update(Tile tile, Player p, Item item, char icode, String event){
 		String s = buildS(tile, p.getPosX(), p.getPosY(), item, icode, event);

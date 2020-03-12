@@ -11,6 +11,7 @@ package com.inventory;
 import javax.swing.*;
 import java.awt.*;
 import java.util.Scanner;
+import com.eventlog.*;
 
 public class Inventory extends JPanel
 {
@@ -36,6 +37,7 @@ public class Inventory extends JPanel
  //   private int MAX_ITEMS;
     // The count of each of the three types of items, and the number of items total.
     private double items, food, tools; //entertainment;
+    private EventLog eventLog;
 
     public static void main( String[] args ) throws Exception  {
         inventory = new Inventory();

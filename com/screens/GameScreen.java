@@ -44,6 +44,7 @@ public class GameScreen implements IState {
 	private boolean paused;
 	private Player player;
 	private Map map;
+	private EventLog eventLog;
 	
 	public JFrame aFrame;
 	
@@ -52,6 +53,7 @@ public class GameScreen implements IState {
 	public GameScreen ( StateMachine aStateMachine ) {
 		
 		this.aStateMachine = aStateMachine;
+		this.eventLog = new EventLog();
 	}
 	
 	//Holds the map and player
@@ -99,9 +101,10 @@ public class GameScreen implements IState {
 				//Second line is player's starting energy
 			    tempString = br.readLine();
 				try {
-					player = new Player( map.getStartX(), map.getStartY(), map.getWidth(), map.getHeight() );
+					player = new Player( map.getStartX(), map.getStartY(), map.getWidth(), map.getHeight(), eventLog);
 					camera = new Camera( this.getWidth(), this.getHeight(), map.getTileSize(), map.getStartX(), map.getStartY(), map.getWidth(), map.getHeight() );
 					player.setEnergy( Integer.parseInt( tempString ));
+					eventLog.update(map.get_tile(player.getPosX(), player.getPosY()), player);
 
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
@@ -307,13 +310,10 @@ public class GameScreen implements IState {
 	//Holds Events
 	class EventLogPanel extends JPanel {
 
-		private EventLog eventLog;
-
 		public EventLogPanel( JFrame aFrame ) {
 			
 			this.setBounds(MAP_SCREEN_PANEL_WIDTH, aFrame.getContentPane().getSize().height/2, aFrame.getContentPane().getSize().width - MAP_SCREEN_PANEL_WIDTH, aFrame.getContentPane().getSize().height/2 );
 			this.setBackground(Color.yellow);
-			this.eventLog = new EventLog();
 		}
 
 		private void drawString(Graphics g, String text, int x, int y){
@@ -326,30 +326,8 @@ public class GameScreen implements IState {
 		protected void paintComponent( Graphics g ) {
 			
 			super.paintComponent(g);
-			//Graphics2D g2d = (Graphics2D) g;
-			if(player.ifMoved())
-				eventLog.update(map.get_tile(player.getPosX(), player.getPosY()), player);
 			drawString(g, eventLog.display(), this.getWidth()/15, this.getHeight()/10);
 
-		}
-		//overwritten calls
-		protected void paintComponent(Graphics g, Item item, char icode ){
-			super.paintComponent(g);
-			eventLog.update(map.get_tile(player.getPosX(), player.getPosY()), player, item, icode);
-			drawString(g, eventLog.display(), this.getWidth()/6, this.getHeight()/3);
-
-		}
-
-		protected void paintComponent(Graphics g, String event){
-			super.paintComponent(g);
-			eventLog.update(map.get_tile(player.getPosX(), player.getPosY()), player, event);
-			drawString(g, eventLog.display(), this.getWidth()/6, this.getHeight()/3);
-		}
-
-		protected void paintComponent(Graphics g, Item item, char icode, String event){
-			super.paintComponent(g);
-			eventLog.update(map.get_tile(player.getPosX(), player.getPosY()), player, item, icode, event);
-			drawString(g, eventLog.display(), this.getWidth()/6, this.getHeight()/3);
 		}
 	}
 	
