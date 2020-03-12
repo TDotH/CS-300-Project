@@ -55,7 +55,7 @@ public class Frupal extends JPanel {
 			
 			gGameMode.update();
 			gGameMode.render();
-			Thread.sleep( (lastLoopTime - System.nanoTime() + OPTIMAL_TIME)/1000000 );
+			Thread.sleep( Math.max(0, (lastLoopTime - System.nanoTime() + OPTIMAL_TIME)/1000000 ) );
 		}
 	}
 		

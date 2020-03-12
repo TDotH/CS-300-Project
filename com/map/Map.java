@@ -46,10 +46,10 @@ public class Map {
     private Item jewel; //Makes getting the jewel for the cheat button much easier
 
     //Controls size of tiles
-    private static int LINE_WIDTH = 48;
+    private static int LINE_WIDTH = 32;
 
     //The tilesets to be used
-    //private Image tileset = null;
+    private Image tileset = null;
     private Image itemset = null;
     private Image obstacleset = null;
 
@@ -95,21 +95,19 @@ public class Map {
     		System.out.println("Error! Itemset can't be loaded!");
     	}
 
-    	//Ignore for now
-    	//tileset = Toolkit.getDefaultToolkit().getImage(("src/images/tileset.png"));
-    	/*try {
+    	//Load the tileset
+    	try {
     		tileset = ImageIO.read(getClass().getClassLoader().getResourceAsStream("resources/images/tileset.png"));
     	}
     	catch (IOException ex) {
     		System.out.println("Error! Tileset can't be loaded!");
-    	}*/
+    	}
     }
 
     //Loads a map with the given filename of format (src/maps/(filename).map)
     public void loadMap(String filename) throws Exception {
         File file = new File(filename); //Read in file
         BufferedReader br = new BufferedReader(new FileReader(file)); //set up buffer reader
-        //tileset = Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("src/images/tileset.png"));
 
         String str; //Holds the data from file
 
@@ -158,12 +156,6 @@ public class Map {
 	                    break;
 	                case 5:
 	                    type = Types.MOUNTAINS;
-	                    break;
-	                case 6:
-	                    type = Types.SHOPKEEPER;
-	                    break;
-	                case 7:
-	                    type = Types.CAVERNS;
 	                    break;
                     default: //okay intelliJ lol
                         throw new IllegalStateException("Unexpected value: " + str.charAt(x));
@@ -323,8 +315,8 @@ public class Map {
     	for ( int x = 0; x < width; x++ ) {
     		for ( int y = 0; y < height; y++) {
 
-        		if ( ( itemset != null ) && ( obstacleset != null )  ) { //Draw with images
-        			map[x][y].draw(g, LINE_WIDTH, centerPosX + LINE_WIDTH * x, centerPosY + LINE_WIDTH * y, itemset, obstacleset ); //, tileset );
+        		if ( ( itemset != null ) && ( obstacleset != null ) && ( tileset != null ) ) { //Draw with images
+        			map[x][y].draw(g, LINE_WIDTH, centerPosX + LINE_WIDTH * x, centerPosY + LINE_WIDTH * y, itemset, obstacleset, tileset );
         		}
         		else { //Draw with colored blocks
         			map[x][y].draw(g, LINE_WIDTH, centerPosX + LINE_WIDTH * x, centerPosY + LINE_WIDTH * y );
@@ -336,7 +328,7 @@ public class Map {
     /* Takes in the player's coordinates and a given camera size and draws relative to the camera's position on the map
      * - Deals with what tiles to render and gives the position of rendering to each individual tile.draw()
      */
-    public void draw(Graphics2D g, int playerPosX, int playerPosY, Camera camera ) {
+    public void draw(Graphics2D g, int playerPosX, int playerPosY, int playerVisionRadius, Camera camera, boolean finished, int inset ) {
     	/* Check if the player is near the bounds of the map
     	 * If so just render the same part of the map
     	 */
@@ -360,16 +352,49 @@ public class Map {
         	if ( x >= 0 && x < width ) {
 	            for (int y = cameraBoundY[MIN]; y <= cameraBoundY[MAX]; ++y) {
 	            	if ( y >= 0 && y < height ) {
-	            		tempPosX =  LINE_WIDTH * ( xDraw );
-	            		tempPosY = LINE_WIDTH * ( yDraw );
-
-	            		if ( ( itemset != null ) && ( obstacleset != null )  ) { //Draw with images
-	            			map[x][y].draw(g, LINE_WIDTH, tempPosX, tempPosY, itemset, obstacleset ); //, tileset );
+	            		tempPosX =  LINE_WIDTH * ( xDraw ) + inset;
+	            		tempPosY = LINE_WIDTH * ( yDraw ) + inset;
+	            		
+	            		//Check to see if the game "finished"
+	            		if ( finished == true ) {
+	            			
+	                		if ( ( itemset != null ) && ( obstacleset != null ) && ( tileset != null ) ) { //Draw with images
+	                			map[x][y].draw(g, LINE_WIDTH, tempPosX, tempPosY, itemset, obstacleset, tileset );
+	                		}
+	                		else { //Draw with colored blocks
+	                			map[x][y].draw(g, LINE_WIDTH, tempPosX, tempPosY + LINE_WIDTH * y );
+	                		}
 	            		}
-	            		else { //Draw with colored blocks
-	            			map[x][y].draw(g, LINE_WIDTH, tempPosX, tempPosY );
-	            		}
-		                yDraw++;
+	            		
+	            		else {
+		            		//Draw if within player "vision"
+							if( ( ( playerPosX + playerVisionRadius >= x ) && ( x >= playerPosX - playerVisionRadius ) ) && 
+									( ( playerPosY + playerVisionRadius >= y ) && ( y >= playerPosY - playerVisionRadius ) ) ) {
+									
+								//Set the tiles the player can see to visited if not already
+								if ( map[x][y].getVisited() == false ) {
+									map[x][y].setVisited();
+								}
+								
+			            		if ( ( itemset != null ) && ( obstacleset != null ) && ( tileset != null ) ) { //Draw with images
+			            			map[x][y].draw(g, LINE_WIDTH, tempPosX, tempPosY, itemset, obstacleset, tileset, true ); 
+			            		}
+			            		else { //Draw with colored blocks
+			            			//map[x][y].draw(g, LINE_WIDTH, tempPosX, tempPosY, true );
+			            		}
+								
+							//If not then check if the player has seen it already	
+							} else if ( map[x][y].getVisited() ) {
+								
+			            		if ( ( itemset != null ) && ( obstacleset != null )  && ( tileset != null )  ) { //Draw with images
+			            			map[x][y].draw(g, LINE_WIDTH, tempPosX, tempPosY, itemset, obstacleset, tileset, false ); 
+			            		}
+			            		else { //Draw with colored blocks
+			            			//map[x][y].draw(g, LINE_WIDTH, tempPosX, tempPosY, false );
+			            		}
+							}
+		            	}
+	            		yDraw++;
 	            	}
 	            }
 	            yDraw = 0;
@@ -377,19 +402,6 @@ public class Map {
         	}
         }
 
-        /*
-
-        /*Draw items second
-         * TODO: Figure out how to cull items
-         */
-        /*
-        for ( Item anItem : mapItems ) {
-
-        	//Just draw the for now
-        	anItem.draw(g, LINE_WIDTH, 0, 0 );
-        }*/
-
-        //Draw obstacles third
 
     }
 

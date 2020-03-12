@@ -17,16 +17,24 @@ public class Player implements Objects {
     private ArrayList<Item> inventory = new ArrayList<Item>();
 
     //Player's energy
-    private int energy;
+    private int maxEnergy;
+    private int currEnergy;
 
     //Energy and money; unused until items are ready
-    private int money;
+    private int maxMoney;
+    private int currMoney;
 
     //Win Flag (player has the jewel)
     boolean winFlag;
 
     //Lose Flag (player ran out of energy)
     boolean loseFlag;
+    
+    //Inventory Flag (inventory has changed)
+    boolean inventoryFlag;
+    
+    //Player's vision radius
+    private int visionRadius = 1;
 
     //Empty Constructor
     public Player() {}
@@ -38,6 +46,7 @@ public class Player implements Objects {
         setBounds( maxX - 1, maxY - 1);
         winFlag = false;
         loseFlag = false;
+        inventoryFlag = false;
     }
 
     //sets position coordinates to specified arguments
@@ -145,11 +154,11 @@ public class Player implements Objects {
     //Does all the tile checking, takes away from players energy depending on stuff
     public boolean checkTile( Tile tile ) {
 
+    	//Set the energy cost to the default
+		int energyCost = tile.getType().getEnergyCost();
+    	
     	boolean passable = true;
     	if ( tile.getType().getPassable() == true ) {
-
-    		//Set the energy cost to the default
-    		int energyCost = tile.getType().getEnergyCost();
 
 	    	//Is there something there?
 	    	if ( tile.getObject() != null ) {
@@ -171,6 +180,10 @@ public class Player implements Objects {
 	    			Obstacle tempObstacle = (Obstacle)tile.getObject();
 	    			//Check if the object is possible and augment energy cost if needed
 	    			passable = checkObstacle( tile, tempObstacle.getObstacle() );
+	    			
+	    			if ( tempObstacle.getVisible() == false ) {
+	    				tempObstacle.setVisible(true);
+	    			}
 	    		}
 	    	}
 
@@ -178,14 +191,16 @@ public class Player implements Objects {
 	    	if ( tile.getType() == Types.WATER ) {
 	    		//Check if the player has the boat
 	    		if ( hasItem( Items.BOAT ) == true ) {
-	    			energyCost = 1;
+	    			energyCost = 0;
+	    		} else {
+	    			passable = false;
 	    		}
 	    	}
 
-	    	energy -= energyCost;
+	    	//currEnergy -= energyCost;
 
 	    	//Check if the player has any energy left
-	    	if ( energy <= 0 ) {
+	    	if ( currEnergy <= 0 ) {
 	    		loseFlag = true;
 	    	}
 
@@ -193,6 +208,7 @@ public class Player implements Objects {
     		passable = false;
     	}
 
+    	currEnergy -= energyCost;
     	return passable;
     }
 
@@ -205,11 +221,24 @@ public class Player implements Objects {
 
     		//Does the player have the required item?
     		if ( hasItem( obstacle.requiredItem() ) == true ) {
-    			//Just remove it from the map for now
-    			tile.setObject( null );
+    			
+    			//Keep the halfer tile on the map
+    			if ( obstacle != Obstacles.HALFER ) {
+    				
+        			//Just remove it from the map for now
+        			tile.setObject( null );
+    			}
+
     		}
-    		else { //Remove additional energy
-    			energy -= obstacle.getEnergyCost();
+    		else { 
+    			
+    			//if the obstacle happens to be the halfer tile remove half the player's money
+    			if ( obstacle == Obstacles.HALFER ) {
+    				currMoney = currMoney / 2;
+    			}
+    			
+    			//Remove additional energy
+    			currEnergy -= obstacle.getEnergyCost();
     		}
     	}
     	else {
@@ -242,30 +271,38 @@ public class Player implements Objects {
     		switch ( item.getItem() ) {
 
 	    		case JEWEL:
-
 	    			winFlag = true;
 	    			inventory.add( item );
+	    			inventoryFlag = true;
 	    			break;
 
 	    		case GOLD:
-
-	    			money += 25;
+	    			currMoney += 25;
 	    			break;
 
 	    		case POWERBAR:
-	    			energy += 3;
+	    			currEnergy += 3;
 	    			break;
 
 	    		case FISH:
-	    			energy += 1;
+	    			currEnergy += 1;
+	    			break;
+	    			
+	    		case BINOCULARS:
+	    			visionRadius += 1;
+	    			inventory.add(item);
+	    			inventoryFlag = true;
 	    			break;
 
     			default:
     				inventory.add(item);
+    				inventoryFlag = true;
+    				break;
     		}
 
     		//Add the item to the inventory
-    		System.out.println("Adding: " + item.getName());
+    		//System.out.println("Adding: " + item.getName());
+    		
 
     	}
     	else {
@@ -274,7 +311,7 @@ public class Player implements Objects {
     }
 
     //Draws the player according to the given tile size and relative to the camera; offsets movement by tile size
-    public void draw( Graphics2D g, int tile_size, Camera camera ) {
+    public void draw( Graphics2D g, int tile_size, Camera camera, int inset ) {
 
     	int playerSz = (tile_size/2);
     	int offSetX = (tile_size/4);
@@ -283,8 +320,8 @@ public class Player implements Objects {
     	g.setColor(Color.RED);
 
     	//Set the player's position relative to the camera
-    	int tempPosX = tile_size * ( posX - camera.getCameraPosX() + camera.gettileMaxWidth()/2 ) + offSetX;
-    	int tempPosY = tile_size * ( posY - camera.getCameraPosY() + camera.gettileMaxHeight()/2 ) + offSetY;
+    	int tempPosX = tile_size * ( posX - camera.getCameraPosX() + camera.gettileMaxWidth()/2 ) + offSetX + inset;
+    	int tempPosY = tile_size * ( posY - camera.getCameraPosY() + camera.gettileMaxHeight()/2 ) + offSetY + inset;
 
     	g.fillRect( tempPosX, tempPosY, playerSz, playerSz );
 
@@ -318,12 +355,17 @@ public class Player implements Objects {
         return posY;
     }
 
-    final public int getEnergy() { return energy; }
-    final public int getMoney() { return money; }
+    final public int getEnergy() { return currEnergy; }
+    final public int getMoney() { return currMoney; }
+    public int getVisiontRadius() { return visionRadius; }
     final public boolean getWinFlag() { return winFlag; }
     final public boolean getLoseFlag() { return loseFlag; }
+    final public ArrayList<Item> getInventory() { return inventory; }
+    final public boolean  getInventoryFlag() { return inventoryFlag; }
 
     //Setters
-    public void setEnergy( int energy ) { this.energy = energy; }
-    public void setMoney( int money ) { this.money = money; }
+    public void setEnergy( int currEnergy ) { this.currEnergy = currEnergy; }
+    public void setMoney( int currMoney ) { this.currMoney = currMoney; }
+    public void setVisionRadius( int visionRadius ) { this.visionRadius = visionRadius; }
+    public void setInventoryFlag( boolean inventoryFlag ) { this.inventoryFlag = inventoryFlag; }
 }

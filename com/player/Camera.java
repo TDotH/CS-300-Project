@@ -23,8 +23,7 @@ public class Camera {
 		// Calculate max tile size that can be drawn
 		tileMaxWidth = viewPortSzX / tileWidth;
 		tileMaxHeight = viewPortSzY / tileWidth;
-		
-		
+	
 		//If the max is greater than the size of the map, change it to the max of the map
 		if( tileMaxWidth > mapMaxX ) {
 			tileMaxWidth = mapMaxX - 1;
@@ -53,14 +52,14 @@ public class Camera {
 		cameraPosX = playerPosX;
 		cameraPosY = playerPosY;
 		
-		if( cameraPosX - mapMaxX/2 < 0 ) {
+		if( cameraPosX - tileMaxWidth/2 < 0 ) {
 			
-			cameraPosX = mapMaxX/2;
+			cameraPosX = tileMaxWidth/2;
 		}
 		
-		if( cameraPosY - mapMaxY/2 < 0 ) {
+		if( cameraPosY - tileMaxHeight/2 < 0 ) {
 			
-			cameraPosY = mapMaxY/2;
+			cameraPosY = tileMaxHeight/2;
 		}
 		
 		if( cameraPosX + tileMaxWidth/2 > mapMaxX  ) {

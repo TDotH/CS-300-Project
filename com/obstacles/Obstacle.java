@@ -16,6 +16,7 @@ public class Obstacle implements Objects {
 	
     private Obstacles obstacle;
     private int posX, posY; // Item position
+    private boolean visible = true; //Used for the halfer
 
     // Public Methods
     public Obstacle() {
@@ -25,6 +26,10 @@ public class Obstacle implements Objects {
     	this.obstacle = obstacle;
     	this.posX = posX;
     	this.posY = posY;
+    	
+    	if ( obstacle == Obstacles.HALFER ) {
+    		this.visible = false;
+    	}
     }
 
     public void setPosX(int posX) {
@@ -76,7 +81,9 @@ public class Obstacle implements Objects {
         return obstacle.name;
     }
 
-
+	public boolean getVisible() { return visible; };
+	public void setVisible( boolean visible ) { this.visible = visible; }
+    
     //Draws at the given location from the center position
     public void draw( Graphics2D g, int tile_size, int centerPosX, int centerPosY ) {
 

@@ -37,11 +37,8 @@ public class MapEditor extends JFrame implements IState {
 	static final int MAP_EDITOR_POSY = 0;
 
 	//Slider constraints
-	static final int MAX_MAP_SIZE = 15;
-
-	//Tile size constraints
-	static final int TILE_SIZE = 48;
-
+	static final int MAX_MAP_SIZE = 50;
+	
 	private StateMachine aStateMachine;
 	private KeyboardFocusManager manager;
 
@@ -97,6 +94,7 @@ public class MapEditor extends JFrame implements IState {
 
 		private int mapEditorWidth;
 		private int mapEditorHeight;
+		private int margins = 50;
 
 		private boolean mapGenerated = false;
 		private boolean drawing = false;
@@ -110,9 +108,11 @@ public class MapEditor extends JFrame implements IState {
 
 			aPlayer = null;
 			aJewel = null;
-			mapEditorWidth = frame.getContentPane().getWidth() - GUI_WIDTH;
-			mapEditorHeight = frame.getContentPane().getHeight();
-			this.setBounds(MAP_EDITOR_POSX, MAP_EDITOR_POSY, mapEditorWidth, mapEditorHeight);
+			//mapEditorWidth = frame.getContentPane().getWidth() - GUI_WIDTH;
+			//mapEditorHeight = frame.getContentPane().getHeight();
+			//this.setBounds(MAP_EDITOR_POSX, MAP_EDITOR_POSY, mapEditorWidth, mapEditorHeight);
+			this.setBounds(MAP_EDITOR_POSX, MAP_EDITOR_POSY, 1000, 1000);
+			//this.setPreferredSize( new Dimension( 1000, 1000));
 			this.setVisible(true);
 			addMouseListener(this);
 			addMouseMotionListener(this);
@@ -127,6 +127,9 @@ public class MapEditor extends JFrame implements IState {
 				this.mapWidth = width;
 				this.mapHeight = height;
 				map = new Map( width, height, type );
+				
+				this.setPreferredSize( new Dimension( width * map.getTileSize() + margins, height * map.getTileSize() + margins));
+				getParent().revalidate();
 
 				//Reset jewel and player just in case the player loads a map the generates a new one
 				if ( aPlayer != null ) {
@@ -150,6 +153,8 @@ public class MapEditor extends JFrame implements IState {
 			map.loadMap(fileName);
 			this.mapWidth = map.getWidth();
 			this.mapHeight = map.getHeight();
+			this.setPreferredSize( new Dimension( map.getWidth() * map.getTileSize() + margins, map.getHeight() * map.getTileSize() + margins));
+			getParent().revalidate();
 
 			//Set player position
 			if ( aPlayer == null ) {
@@ -185,11 +190,11 @@ public class MapEditor extends JFrame implements IState {
 				Graphics2D g2d = (Graphics2D) g;
 				g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
 								RenderingHints.VALUE_ANTIALIAS_ON);
-				map.draw(g2d, (mapEditorWidth - ( mapWidth*TILE_SIZE ))/2, (mapEditorHeight - ( mapHeight*TILE_SIZE ))/2);
+				map.draw(g2d, (this.getWidth() - ( mapWidth*map.getTileSize() ))/2, (this.getHeight()  - ( mapHeight*map.getTileSize() ))/2);
 
 				//If there is a player spawn
 				if ( playerSpawn == true ) {
-					aPlayer.draw(g2d, TILE_SIZE, (mapEditorWidth - ( mapWidth*TILE_SIZE ))/2, (mapEditorHeight - ( mapHeight*TILE_SIZE ))/2);
+					aPlayer.draw(g2d, map.getTileSize(), (this.getWidth() - ( mapWidth*map.getTileSize() ))/2, (this.getHeight() - ( mapHeight*map.getTileSize() ))/2);
 				}
 			}
 		}
@@ -225,13 +230,13 @@ public class MapEditor extends JFrame implements IState {
 			if ( mapGenerated == true ) {
 
 				//Check if clicked within map bounds
-				if ( e.getX() > (mapEditorWidth - ( mapWidth*TILE_SIZE ))/2 && e.getX() < (mapEditorWidth + ( mapWidth*TILE_SIZE ))/2)  {
+				if ( e.getX() > (this.getWidth() - ( mapWidth*map.getTileSize() ))/2 && e.getX() < (this.getWidth() + ( mapWidth*map.getTileSize() ))/2)  {
 
-					if ( e.getY() > (mapEditorHeight - ( mapHeight*TILE_SIZE ))/2 && e.getY() < (mapEditorHeight + ( mapHeight*TILE_SIZE ))/2) {
+					if ( e.getY() > (this.getHeight() - ( mapHeight*map.getTileSize() ))/2 && e.getY() < (this.getHeight() + ( mapHeight*map.getTileSize() ))/2) {
 
 						//Get Mouse position on the map
-						int tempX = ( e.getX() - ( mapEditorWidth - mapWidth*TILE_SIZE )/2 ) / TILE_SIZE;
-						int tempY = ( e.getY() - ( mapEditorHeight - mapHeight*TILE_SIZE )/2 ) /TILE_SIZE;
+						int tempX = ( e.getX() - ( this.getWidth() - mapWidth*map.getTileSize() )/2 ) / map.getTileSize();
+						int tempY = ( e.getY() - ( this.getHeight() - mapHeight*map.getTileSize() )/2 ) /map.getTileSize();
 
 						recentSave = false;
 
@@ -378,13 +383,13 @@ public class MapEditor extends JFrame implements IState {
 			if ( drawing == true ) {
 
 				//Draw at mouse position
-				if ( e.getX() > (mapEditorWidth - ( mapWidth*TILE_SIZE ))/2 && e.getX() < (mapEditorWidth + ( mapWidth*TILE_SIZE ))/2)  {
+				if ( e.getX() > (this.getWidth() - ( mapWidth*map.getTileSize() ))/2 && e.getX() < (this.getWidth() + ( mapWidth*map.getTileSize() ))/2)  {
 
-					if ( e.getY() > (mapEditorHeight - ( mapHeight*TILE_SIZE ))/2 && e.getY() < (mapEditorHeight + ( mapHeight*TILE_SIZE ))/2) {
+					if ( e.getY() > (this.getHeight() - ( mapHeight*map.getTileSize() ))/2 && e.getY() < (this.getHeight() + ( mapHeight*map.getTileSize() ))/2) {
 
 						//Mouse position on the map
-						int tempX = ( e.getX() - ( mapEditorWidth - mapWidth*TILE_SIZE )/2 ) / TILE_SIZE;
-						int tempY = ( e.getY() - ( mapEditorHeight - mapHeight*TILE_SIZE )/2 ) / TILE_SIZE;
+						int tempX = ( e.getX() - ( this.getWidth() - mapWidth*map.getTileSize() )/2 ) / map.getTileSize();
+						int tempY = ( e.getY() - ( this.getHeight() - mapHeight*map.getTileSize() )/2 ) / map.getTileSize();
 
 						map.set_tile_at( currType, tempX, tempY );
 					}
@@ -773,6 +778,7 @@ public class MapEditor extends JFrame implements IState {
 		} else {
 			int choice = JOptionPane.showConfirmDialog(frame, "Unsaved changes will be lost! Are you sure you wish to continue?", "Save warning", JOptionPane.YES_NO_OPTION);
 			if ( choice == JOptionPane.YES_OPTION ) {
+				recentSave = true;
 				return true;
 			} else {
 				return false;
@@ -808,12 +814,20 @@ public class MapEditor extends JFrame implements IState {
 		tileGuiPanel.add( Box.createVerticalGlue() ); //Utilizes extra space to put this at the bottom of the ui
 		tileGuiPanel.add( fileManagerPanel, BorderLayout.PAGE_END );
 
+		JScrollPane scrollPane = new JScrollPane();
+		scrollPane.setViewportView( mapPanel );
+		scrollPane.setPreferredSize( new Dimension( frame.getContentPane().getWidth() - GUI_WIDTH, frame.getContentPane().getHeight()) );
+		scrollPane.setBounds( MAP_EDITOR_POSX, MAP_EDITOR_POSY, frame.getContentPane().getWidth() - GUI_WIDTH, frame.getContentPane().getHeight());
+		scrollPane.getHorizontalScrollBar().setUnitIncrement( 12 );
+		scrollPane.getVerticalScrollBar().setUnitIncrement( 12 );
+		
 		//Add everything to the window
-		frame.add( tileGuiPanel );
-		frame.add( mapPanel );
+		frame.add( tileGuiPanel);
+		frame.add( scrollPane, BorderLayout.CENTER  );
 		frame.setLayout( null );
 		frame.setVisible( true );
 
+		frame.revalidate();
 		//Create the keymanager
 		manager = KeyboardFocusManager.getCurrentKeyboardFocusManager();
 		manager.addKeyEventDispatcher( aKeyDispatcher );

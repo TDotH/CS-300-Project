@@ -61,9 +61,9 @@ public class MainMenu extends JFrame implements IState{
 			mapEditorButton.setMaximumSize( new Dimension( buttonWidth, buttonHeight ));
 			mapEditorButton.setAlignmentX( Component.CENTER_ALIGNMENT );
 			
-			JButton optionsButton = new JButton( "Options ");
+			JButton optionsButton = new JButton( "Manual");
 			optionsButton.addActionListener(this);
-			optionsButton.setActionCommand("options");
+			optionsButton.setActionCommand("manual");
 			optionsButton.setMinimumSize( new Dimension( buttonWidth, buttonHeight ));
 			optionsButton.setMaximumSize( new Dimension( buttonWidth, buttonHeight ));
 			optionsButton.setAlignmentX( Component.CENTER_ALIGNMENT );
@@ -99,7 +99,7 @@ public class MainMenu extends JFrame implements IState{
 					case "quit":
 						mainFrame.dispatchEvent( new WindowEvent( mainFrame, WindowEvent.WINDOW_CLOSING));
 						break;
-					case "options":
+					case "manual":
 						System.out.println("I do nothing!");
 						break;
 					default:

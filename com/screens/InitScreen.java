@@ -30,7 +30,7 @@ public class InitScreen implements IState {
 	
 	//Used for default settings
 	private static final String DEFAULT_MAP = "src/maps/default_map.map";
-	private static final int    DEFAULT_ENERGY = 20;
+	private static final int    DEFAULT_ENERGY = 99;
 	
 	public InitScreen ( StateMachine aStateMachine ) {
 		this.aStateMachine = aStateMachine;

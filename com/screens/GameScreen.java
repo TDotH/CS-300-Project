@@ -1,4 +1,4 @@
-/* Author: Tyde Hashimoto
+/* Author: Tyde Hashimototem
  * The main game screen with map, event log, and inventory
  *
  */
@@ -26,11 +26,16 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
+import javax.swing.border.BevelBorder;
+import javax.swing.border.Border;
+import javax.swing.border.TitledBorder;
 
 import com.statemachine.*;
+import com.inventory.Item;
 import com.map.Map;
 import com.map.Tile;
 import com.player.*;
@@ -39,7 +44,7 @@ public class GameScreen implements IState {
 
 	//Sorry about all the globals, the ui stuff is a pain to work around without them
 	private StateMachine aStateMachine;
-	private MapScreenPanel aMapPanel;
+	private MapScreenPanel aMapScreenPanel;
 	private GuiPanel aGuiPanel;
 	private EventLogPanel aEventLogPanel;
 	private InventoryPanel aInventoryPanel;
@@ -72,14 +77,20 @@ public class GameScreen implements IState {
 		private static final String CONFIG_FILE = "src/maps/config.ini";
 
 		KeyDispatcher aKeyDispatcher = new KeyDispatcher();
+		
+		private Border raisedBorder = BorderFactory.createBevelBorder( BevelBorder.RAISED, new Color(56,112,255) ,new Color(0, 51, 179));
+		private Border loweredBorder= BorderFactory.createBevelBorder( BevelBorder.LOWERED,  new Color(56,112,255), new Color(0, 51, 179));
+		private Border panelBorder = BorderFactory.createCompoundBorder( loweredBorder, 
+				BorderFactory.createCompoundBorder( raisedBorder, loweredBorder));
 
 		public MapScreenPanel( JFrame aFrame ) {
 			this.setBounds(0, 0, MAP_SCREEN_PANEL_WIDTH, aFrame.getContentPane().getSize().height );
-
+			this.setBorder(panelBorder);
+			
 			//Load the config file
 			this.loadConfig();
 
-			this.setBackground( Color.DARK_GRAY );
+			this.setBackground( Color.BLACK );
 			manager = KeyboardFocusManager.getCurrentKeyboardFocusManager();
 			manager.addKeyEventDispatcher( aKeyDispatcher );
 		}
@@ -127,6 +138,7 @@ public class GameScreen implements IState {
 		//Restarts map and player
 		protected void restartMap() {
 			loadConfig();
+			aInventoryPanel.setInventory();
 		}
 
 		//Stops the user from doing key inputs
@@ -142,6 +154,12 @@ public class GameScreen implements IState {
 		//Update the camera
 		public void update() {
 			camera.update( player.getPosX(), player.getPosY() );
+			
+			//Update the inventory panel if need be
+			if ( aInventoryPanel != null ) {
+				if ( player.getInventoryFlag() == true );
+				aInventoryPanel.update();
+			}
 		}
 
 		@Override
@@ -151,8 +169,8 @@ public class GameScreen implements IState {
 			Graphics2D g2d = (Graphics2D) g;
 			g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
 							RenderingHints.VALUE_ANTIALIAS_ON);
-			map.draw(g2d, player.getPosX(), player.getPosY(), camera);
-			player.draw(g2d, map.getTileSize(), camera);
+			map.draw(g2d, player.getPosX(), player.getPosY(), player.getVisiontRadius(),  camera, finished, this.getInsets().top);
+			player.draw(g2d, map.getTileSize(), camera, this.getInsets().top);
 
 		}
 
@@ -212,9 +230,14 @@ public class GameScreen implements IState {
     		}
 	    }
 
+	    protected void setPlayerInventoryFlag( boolean flag ) { player.setInventoryFlag( flag ); } 
+	    
 	    //Getters for the gui
 	    protected int getPlayerEnergy() { return player.getEnergy(); }
 	    protected int getPlayerMoney() { return player.getMoney(); }
+	    protected ArrayList<Item> getPlayerInventory() { return player.getInventory(); }
+	    protected boolean getPlayerInventoryFlag() { return player.getInventoryFlag(); }
+	    
 	}
 
 	//Holds the gui
@@ -304,12 +327,12 @@ public class GameScreen implements IState {
 
 			if ( finished == false ) {
 				//Check if the panel needs to update
-				if ( aMapPanel.getPlayerEnergy() != currentEnergy ) {
-					currentEnergy = aMapPanel.getPlayerEnergy();
+				if ( aMapScreenPanel.getPlayerEnergy() != currentEnergy ) {
+					currentEnergy = aMapScreenPanel.getPlayerEnergy();
 					energyLabel.setText( String.valueOf(currentEnergy) );
 				}
-				if ( aMapPanel.getPlayerMoney() != currentMoney ) {
-					currentMoney = aMapPanel.getPlayerMoney();
+				if ( aMapScreenPanel.getPlayerMoney() != currentMoney ) {
+					currentMoney = aMapScreenPanel.getPlayerMoney();
 					moneyLabel.setText( String.valueOf(currentMoney) );
 				}
 			}
@@ -389,7 +412,7 @@ public class GameScreen implements IState {
 		//Open the panel
 		public void openMenu( JFrame aFrame ) {
 
-			aMapPanel.stopManager();
+			aMapScreenPanel.stopManager();
 			paused = true;
 			gamePanes.moveToFront(this);
 			//Enable the buttons
@@ -415,7 +438,7 @@ public class GameScreen implements IState {
 			switch ( e.getActionCommand() ) {
 			case "resume":
 				finished = true;
-				aMapPanel.startManager();
+				aMapScreenPanel.startManager();
 				closeMenu();
 				break;
 			case "menu":
@@ -494,7 +517,7 @@ public class GameScreen implements IState {
 		//Open the panel
 		public void openMenu( JFrame aFrame ) {
 
-			aMapPanel.stopManager();
+			aMapScreenPanel.stopManager();
 			paused = true;
 			gamePanes.moveToFront(this);
 			//Enable the buttons
@@ -519,8 +542,8 @@ public class GameScreen implements IState {
 			// TODO Auto-generated method stub
 			switch ( e.getActionCommand() ) {
 			case "restart":
-				aMapPanel.restartMap();
-				aMapPanel.startManager();
+				aMapScreenPanel.restartMap();
+				aMapScreenPanel.startManager();
 				closeMenu();
 				break;
 			case "menu":
@@ -654,7 +677,7 @@ public class GameScreen implements IState {
 				break;
 			case "cheat":
 				closeMenu();
-				aMapPanel.winButtonPressed();
+				aMapScreenPanel.winButtonPressed();
 				break;
 			default:
 				throw new IllegalStateException("Unexpected value: " + String.valueOf( e.getActionCommand()));
@@ -665,10 +688,18 @@ public class GameScreen implements IState {
 	//Holds Events
 	class EventLogPanel extends JPanel {
 
+		private Border raisedBorder = BorderFactory.createBevelBorder( BevelBorder.RAISED, new Color(56,112,255) ,new Color(0, 51, 179));
+		private Border loweredBorder= BorderFactory.createBevelBorder( BevelBorder.LOWERED,  new Color(56,112,255), new Color(0, 51, 179));
+		private Border panelBorder = BorderFactory.createCompoundBorder( loweredBorder, 
+				BorderFactory.createCompoundBorder( raisedBorder, loweredBorder));
+		
 		public EventLogPanel( JFrame aFrame ) {
 
-			this.setBounds(MAP_SCREEN_PANEL_WIDTH, aFrame.getContentPane().getSize().height/2, aFrame.getContentPane().getSize().width - MAP_SCREEN_PANEL_WIDTH, aFrame.getContentPane().getSize().height/2 );
-			this.setBackground(Color.yellow);
+			this.setBounds(MAP_SCREEN_PANEL_WIDTH, aFrame.getContentPane().getSize().height/2, 
+					aFrame.getContentPane().getSize().width - MAP_SCREEN_PANEL_WIDTH, aFrame.getContentPane().getSize().height/2 );
+			this.setBackground(Color.BLACK);
+			this.setBorder( BorderFactory.createTitledBorder ( panelBorder, "Event Log", TitledBorder.DEFAULT_JUSTIFICATION, 
+					TitledBorder.DEFAULT_POSITION, new Font("Dialog", Font.PLAIN, 14), Color.WHITE ));
 		}
 
 		@Override
@@ -684,11 +715,106 @@ public class GameScreen implements IState {
 	//Holds the inventory
 	class InventoryPanel extends JPanel {
 
+		private Border raisedBorder = BorderFactory.createBevelBorder( BevelBorder.RAISED, new Color(56,112,255) ,new Color(0, 51, 179));
+		private Border loweredBorder= BorderFactory.createBevelBorder( BevelBorder.LOWERED,  new Color(56,112,255), new Color(0, 51, 179));
+		private Border panelBorder = BorderFactory.createCompoundBorder( loweredBorder, 
+				BorderFactory.createCompoundBorder( raisedBorder, loweredBorder));
+		
+		private ArrayList<Item> playerInventory; //A copy of the player inventory, it's bad practice but whatevs
+		
+		private InventoryGrid aInventoryGrid;
+		
 		public InventoryPanel( JFrame aFrame ) {
 			this.setBounds(MAP_SCREEN_PANEL_WIDTH, 0, aFrame.getContentPane().getSize().width - MAP_SCREEN_PANEL_WIDTH, aFrame.getContentPane().getSize().height/2 );
-			this.setBackground(Color.cyan);
+			this.setBackground(Color.BLACK);
+			this.setBorder( BorderFactory.createTitledBorder ( panelBorder, "Inventory", TitledBorder.DEFAULT_JUSTIFICATION, 
+					TitledBorder.DEFAULT_POSITION, new Font("Dialog", Font.PLAIN, 14), Color.WHITE ));
+			
+			playerInventory = aMapScreenPanel.getPlayerInventory();
 			//System.out.println("Size:( " + ( aFrame.getContentPane().getSize().width - MAP_SCREEN_PANEL_WIDTH )+ "," + aFrame.getContentPane().getSize().height/2 + " )" );
 
+			aInventoryGrid = new InventoryGrid( this.getWidth() - this.getInsets().bottom * 2, this.getHeight() - this.getInsets().top*2 ); 
+			this.add( aInventoryGrid );
+		}
+		
+		//Holds multiple itemPanels in a grid
+		private class InventoryGrid extends JPanel {
+			
+			private ArrayList<aItemPanel> itemPanels;
+			
+			public InventoryGrid( int parentWidth, int parentHeight ) {
+				
+				//this.setBounds( 0, 0, parentWidth, parentHeight );
+				this.setBackground(Color.darkGray);
+				this.setLayout( new BoxLayout( this, BoxLayout.PAGE_AXIS ));
+				this.setPreferredSize( new Dimension(parentWidth, parentHeight) );
+			}
+			
+			public void update( ArrayList<Item> inventory ) {
+				
+				this.removeAll();
+				for ( Item item: inventory ) {
+					
+					
+					this.add( new aItemPanel( this.getWidth(), 50, item.getName() ));
+				}
+			}
+			
+			public void reset() {
+				this.removeAll();
+			}
+			
+		};
+		
+		//Panel to display individual items
+		private class aItemPanel extends JPanel {
+			
+			//Constructor a panel of a certian width, height, and item
+			public aItemPanel( int width, int height, String itemName ) {
+				
+				this.setBackground( Color.white );
+				this.setLayout( new FlowLayout() );
+				this.setPreferredSize( new Dimension( width + 10, height ));
+				this.setMaximumSize( new Dimension( width + 10, height ));
+				
+				JLabel itemLabel = new JLabel( itemName, JLabel.CENTER );
+				this.add( itemLabel );
+			}
+		}
+		
+		public void update() {
+			
+			//Check if the panel exists
+			if ( aMapScreenPanel != null ) {
+				
+				//Did the player's inventory change?
+				if ( aMapScreenPanel.getPlayerInventoryFlag() == true ) { //If so update the panel
+					
+					aInventoryGrid.update( playerInventory );
+					/*
+					String temp = "";
+					
+					for( Item item : playerInventory ) {
+						
+						temp = temp + item.getName() + " ";
+					}
+					System.out.println( temp );*/
+					
+					//Reset the player's flag
+					aMapScreenPanel.setPlayerInventoryFlag( false );
+				}
+			}
+			
+		
+		}
+		
+		//Used if the player has to restart the map
+		public void setInventory() {
+			if ( playerInventory != null ) {
+				playerInventory = null;
+				playerInventory = aMapScreenPanel.getPlayerInventory();
+				aInventoryGrid.reset();
+			}
 		}
 
 		@Override
@@ -697,8 +823,9 @@ public class GameScreen implements IState {
 			super.paintComponent(g);
 			//Graphics2D g2d = (Graphics2D) g;
 			g.drawString("Inventory goes here", this.getWidth()/3, this.getHeight()/2 );
-
 		}
+		
+		public void setInventory( ArrayList<Item> playerInventory ) { this.playerInventory = playerInventory; }
 
 	}
 
@@ -713,9 +840,9 @@ public class GameScreen implements IState {
 		mapScreenPanes.setBounds(0, 0, aFrame.getContentPane().getSize().width , aFrame.getContentPane().getSize().height);
 
 		//Initialize on screen panels
-		aMapPanel = new MapScreenPanel( aFrame );
+		aMapScreenPanel = new MapScreenPanel( aFrame );
 		aGuiPanel = new GuiPanel();
-		mapScreenPanes.add( aMapPanel, 1 );
+		mapScreenPanes.add( aMapScreenPanel, 1 );
 		mapScreenPanes.add( aGuiPanel, 0 );
 
 		aEventLogPanel = new EventLogPanel( aFrame );
@@ -751,8 +878,8 @@ public class GameScreen implements IState {
 	@Override
 	public void update() {
 
-		if ( aMapPanel != null ) {
-			aMapPanel.update();
+		if ( aMapScreenPanel != null ) {
+			aMapScreenPanel.update();
 
 		}
 		if( aGuiPanel != null ) {
@@ -775,7 +902,7 @@ public class GameScreen implements IState {
 
 	@Override
 	public void onExit() {
-		aMapPanel.stopManager();
+		aMapScreenPanel.stopManager();
 		aFrame.getContentPane().removeAll();
 	}
 }

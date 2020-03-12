@@ -3,10 +3,12 @@ import com.inventory.Items;
 
 public enum Obstacles {
 
-    DEFAULT(0, Items.DEFAULT, " ",  " ", true, 0, 0, 0),
-    BUSHES(1, Items.WEEDWHACKER, "Bushes", "A thorny entanglement of bushes, the thorn in the side of any hero.", true, 1, 0, 0),
-    ROCKS(2, Items.JACKHAMMER, "Rock", "A Larger-than-life rock which happens to be blocking the path.", false, -1, 1, 0),
-    TREES(3, Items.CHAINSAW, "Trees", "A thicket of trees, closely gathered together and impassable.", false, -1, 2, 0);
+    DEFAULT		(0, Items.DEFAULT, " ",  " ", true, 0, 0, 0),
+    BUSHES		(1, Items.WEEDWHACKER, "Bushes", "A thorny entanglement of bushes, the thorn in the side of any hero.", true, 1, 0, 0),
+    ROCKS		(2, Items.JACKHAMMER, "Rock", "A Larger-than-life rock which happens to be blocking the path.", false, -1, 1, 0),
+    TREES		(3, Items.CHAINSAW, "Trees", "A thicket of trees, closely gathered together and impassable.", false, -1, 2, 0),
+    HALFER		(4, Items.WALLET, "Halfer", "A tile that steels half the money of anyone unlucky enough to step on it", true, 0, 3, 0);
+    
     //WATER(6, "Boat", "The raging waters engulf all those who try to cross without proper equipment."),
     //CLIFF(10, "Rope", "A vertical mountainside, my freeclimbing skills aren't yet good enough to scale this without a rope.");
 

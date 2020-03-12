@@ -14,19 +14,28 @@ package com.map;
 
 public enum Types {
 	
-	DEFAULT(0, 0, true, "Default"), FOREST(1, 1, true, "Forest"), SWAMP(2, 2, true, "Swamp"), DESERT(3, 1, true, "Desert"), WATER(4, 3, true, "Water"),
-    MOUNTAINS(5, -1, false, "Mountain"), SHOPKEEPER(6, 0, true, "Shopkeeper"), CAVERNS(7, 0, true, "Cavern");
+	DEFAULT		(0, 0, true, "Default", 0 , 0), 
+	FOREST		(1, 1, true, "Forest", 0, 0), 
+	SWAMP		(2, 2, true, "Swamp", 3, 0), 
+	DESERT		(3, 1, true, "Desert", 1, 0), 
+	WATER		(4, 3, true, "Water", 0, 1),
+    MOUNTAINS	(5, -1, false, "Mountain", 2, 0); 
+	//, SHOPKEEPER(6, 0, true, "Shopkeeper"), CAVERNS(7, 0, true, "Cavern");
 	
 	int tileID;
 	int energyCost;
 	boolean passable; 
 	String name;
+    int imagePosX;
+    int imagePosY;
 	
-	Types(int tileID, int energyCost, boolean passable, String name ) {
+	Types(int tileID, int energyCost, boolean passable, String name, int imagePosX, int imagePosY ) {
 		this.tileID = tileID;
 		this.energyCost = energyCost;
 		this.passable = passable;
 		this.name = name;
+		this.imagePosX = imagePosX;
+		this.imagePosY = imagePosY;
 	}
 	
 	public int getTileID() { return tileID; }
