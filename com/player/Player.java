@@ -392,8 +392,10 @@ public class Player implements Objects {
 
     public void buyItem(Item item){
     	int newMoney = money - item.getValue();
-    	money = newMoney;
-    	addItem(item);
+    	if (newMoney >= 0){
+			money = newMoney;
+			addItem(item);
+		}
 	}
 
     //Getters

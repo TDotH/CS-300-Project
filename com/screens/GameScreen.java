@@ -862,10 +862,10 @@ public class GameScreen implements IState {
 
 		//Open the panel
 		public void openMenu( JFrame aFrame, Player aPlayer ) {
+			paused = true;
 			player = aPlayer;
 			//shopKeep = player.speakingWith();
 			aMapPanel.stopManager();
-			paused = true;
 			gamePanes.moveToFront(this);
 			//Enable the buttons
 			for (JButton button : buttons) {
@@ -889,6 +889,7 @@ public class GameScreen implements IState {
 
 		//Closes the menu
 		public void closeMenu() {
+			player.toggleDialogue();
 			paused = false;
 			gamePanes.moveToBack(this);
 			//Disable the buttons so they wont react when moused over
@@ -915,13 +916,10 @@ public class GameScreen implements IState {
 			switch ( e.getActionCommand() ) {
 
 				case "resume":
-					finished = true;
+					//finished = true;
+					paused = false;
 					aMapPanel.startManager();
 					closeMenu();
-					break;
-				case "menu":
-					paused = false; //Make sure paused is always false
-					aStateMachine.change("mainmenu");
 					break;
 				case "sell":
 					//hold on
