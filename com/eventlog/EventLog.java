@@ -15,18 +15,20 @@ import com.inventory.*;
 import com.screens.*;
 
 public class EventLog {
-	private LinkedList<String> log;//current and past dialog
+	private LinkedList<String> log;//current and past dialogA
+	private boolean pickedUp;
+	private Item itemptr;
+	private char icodeptr;
 
 	public EventLog() {
 		this.log = new LinkedList<String>();
+		this.pickedUp = false;
 	}
 
 	private String buildS(Tile tile, int x, int y, Item item, char icode, String event) {
 		if (log.size() > 20)
 			log.removeFirst();
 		y = 12 - y;
-		if(y < 0)
-			y *= -1;
 		StringBuilder s = new StringBuilder("Location: " + x + "," + y
 				+ "\nTile: " + tile.getType().name() + "\n" +
 				"Cost to move: " + tile.getType().getEnergyCost()
@@ -35,7 +37,7 @@ public class EventLog {
 			s.append("You used " + item.getName() + "!\n");
 		} else {//item acquired
 			s.append("You picked up a " + item.getName() +
-					"!\n" + item.getDescription());
+					"!\n" + item.getDescription() + '\n');
 		}
 		s.append(event + "\n");
 		return s.toString();
@@ -45,8 +47,6 @@ public class EventLog {
 		if (log.size() > 20)
 			log.removeFirst();
 		y = 12 - y;
-		if(y < 0)
-			y *= -1;
 		StringBuilder s = new StringBuilder("Location: " + x + "," + y
 				+ "\nTile: " + tile.getType().name() + "\n" +
 				"Cost to move: " + tile.getType().getEnergyCost()
@@ -54,19 +54,20 @@ public class EventLog {
 
 		if (icode == 'u') {//item used
 			s.append("You used " + item.getName() + "!\n");
-		} else {//item acquired
+		} else if (icode == 'a'){//item acquired
 			s.append("You picked up a " + item.getName() +
-					"!\n" + item.getDescription());
+					"!\n" + item.getDescription() + '\n');
 		}
-			return s.toString();
+		else{//item bought, but shouldn't be called here
+			s.append("You bought a " + item.getName() + "!\n" + item.getDescription() + '\n');
+		}
+		return s.toString();
 	}
 
 	private String buildS(Tile tile, int x, int y, String event){
 		if (log.size() > 20)
 			log.removeFirst();
 		y = 12 - y;
-		if(y < 0)
-			y *= -1;
 		StringBuilder s = new StringBuilder("Location: " + x + "," + y
 				+ "\nTile: " + tile.getType().name() + "\n" +
 				"Cost to move: " + tile.getType().getEnergyCost()
@@ -80,12 +81,26 @@ public class EventLog {
 		if (log.size() > 20)
 			log.removeFirst();
 		y = 12 - y;
-		if(y < 0)
-			y *= -1;
 		StringBuilder s = new StringBuilder("Location: " + x + "," + y
 				+ "\nTile: " + tile.getType().name() + "\n" +
 				"Cost to move: " + tile.getType().getEnergyCost()
 				+ "\n");
+		return s.toString();
+	}
+
+	private String buildS(Item item, char icode){
+		if (log.size() > 20)
+			log.removeFirst();
+		StringBuilder s = new StringBuilder();
+		if (icode == 'u') {//item used
+			s.append("You used " + item.getName() + "!\n");
+		} else if (icode == 'a'){//item acquired
+			s.append("You picked up a " + item.getName() +
+					"!\n" + item.getDescription() + '\n');
+		}
+		else{
+			s.append("You bought a " + item.getName() + "!\n" + item.getDescription() + '\n');
+		}
 		return s.toString();
 	}
 
@@ -102,25 +117,51 @@ public class EventLog {
 	}
 
 	public void update(Tile tile, Player p, Item item, char icode, String event){
-		String s = buildS(tile, p.getPosX(), p.getPosY(), item, icode, event);
-		String last = log.peekLast();
-		if(last.compareTo(s) == 0)
-			return;
-		log.addLast(s);
+		this.pickedUp = true;
+		this.itemptr = item;
+		this.icodeptr = icode;
+		//String s = buildS(tile, p.getPosX(), p.getPosY(), item, icode, event);
+		//log.addLast(s);
 	}
 
 	public void update(Tile tile, Player p) {
-		String s = buildS(tile, p.getPosX(), p.getPosY());
+		String s;
+		if(this.pickedUp == true){
+			s = buildS(tile, p.getPosX(), p.getPosY(), this.itemptr, this.icodeptr);
+			this.pickedUp = false;
+		}
+		else
+			s = buildS(tile, p.getPosX(), p.getPosY());
 		log.addLast(s);
 	}
 
 	public void update(Tile tile, Player p, Item item, char icode){
-		String s = buildS(tile, p.getPosX(), p.getPosY(), item, icode);
-		log.addLast(s);
+		this.pickedUp = true;
+		this.itemptr = item;
+		this.icodeptr = icode;
+		//String s = buildS(tile, p.getPosX(), p.getPosY(), item, icode);
+		//log.addLast(s);
 	}
 
 	public void update(Tile tile, Player p, String event){
-		String s = buildS(tile, p.getPosX(), p.getPosY(), event);
+		String s;
+		if(this.pickedUp == true){
+			//log.removeLast();
+			s = buildS(tile, p.getPosX(), p.getPosY(), this.itemptr, this.icodeptr, event);
+			this.pickedUp = false;
+		}
+		else
+			s = buildS(tile, p.getPosX(), p.getPosY(), event);
 		log.addLast(s);
+	}
+
+	public void update(Item item, char icode){
+		String s = buildS(item, icode);
+		log.addLast(s);
+
+	}
+
+	public void clear(){
+		log.clear();
 	}
 }

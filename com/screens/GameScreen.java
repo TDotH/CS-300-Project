@@ -130,6 +130,7 @@ public class GameScreen implements IState {
 			    tempString = br.readLine();
 				try {
 					player = new Player( map.getStartX(), map.getStartY(), map.getWidth(), map.getHeight(), eventLog );
+					eventLog.update(map.get_tile(player.getPosX(), player.getPosY()), player);
 					camera = new Camera( this.getWidth(), this.getHeight(), map.getTileSize(), map.getStartX(), map.getStartY(), map.getWidth(), map.getHeight() );
 					player.setEnergy( Integer.parseInt( tempString ));
 
@@ -157,6 +158,7 @@ public class GameScreen implements IState {
 
 		//Restarts map and player
 		protected void restartMap() {
+			eventLog.clear();
 			loadConfig();
 			aInventoryPanel.setInventory();
 		}
@@ -232,7 +234,7 @@ public class GameScreen implements IState {
 	    protected void winButtonPressed() {
 
 	    	//Give the jewel to the player
-	    	player.addItem( map.getJewel() );
+	    	player.addItem( map.getJewel(), map.get_tile(player.getPosX(), player.getPosY()), 'a');
 	    	//Set the jewel's tile on the map to null
 	    	map.get_tile( map.getJewelX(), map.getJewelY() ).setObject( null );
 	    	winFlagCheck();
@@ -1187,5 +1189,6 @@ public class GameScreen implements IState {
 	public void onExit() {
 		aMapScreenPanel.stopManager();
 		aFrame.getContentPane().removeAll();
+		eventLog.clear();
 	}
 }
