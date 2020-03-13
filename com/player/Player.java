@@ -247,7 +247,7 @@ public class Player implements Objects {
 
     public void buyItem(Item item){
     	currMoney = currMoney - item.getValue();
-    	addItem(item);
+    	addItem(item, null, 'b');
 	}
 	
     //Does all the tile checking, takes away from players energy depending on stuff
@@ -267,7 +267,7 @@ public class Player implements Objects {
 
 	    			//Since the object is an item treat it as such
 	    			Item tempItem = (Item)tile.getObject();
-	    			addItem( tempItem );
+	    			addItem( tempItem, tile, 'a' );
 
 	    			//The tile no longer has the item
 	    			tile.setObject( null );
@@ -326,6 +326,8 @@ public class Player implements Objects {
     				
         			//Just remove it from the map for now
         			tile.setObject( null );
+        			Item item = new Item(obstacle.requiredItem());
+        			eventLog.update(tile, this, item, 'u');
     			}
 
     		}
@@ -362,7 +364,7 @@ public class Player implements Objects {
     }
 
     //Does item checking and adds it to the inventory
-    public void addItem( Item item ) {
+    public void addItem( Item item, Tile tile, char icode ) {
 
     	//Another check since this can be accessed outside of player
     	if ( item != null ) {
@@ -398,6 +400,10 @@ public class Player implements Objects {
     				inventoryFlag = true;
     				break;
     		}
+    		if(tile == null)
+    			eventLog.update(item, icode);
+    		else
+    			eventLog.update(tile, this, item, icode);
 
     		//Add the item to the inventory
     		//System.out.println("Adding: " + item.getName());
