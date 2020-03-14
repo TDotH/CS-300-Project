@@ -61,7 +61,8 @@ public class MapEditor extends JFrame implements IState {
 	enum Brushes {
 		TILES,
 		OBJECTS,
-		OBSTACLES
+		OBSTACLES,
+		ERASER
 	}
 
 	//Set so Java doesn't scream at you
@@ -363,6 +364,12 @@ public class MapEditor extends JFrame implements IState {
 										map.get_tile(tempX, tempY).setObject( obstacle );
 		
 										break;
+										
+									case ERASER:
+										
+										drawing = true;
+										checkTile( map.get_tile( tempX,  tempY ), tempX, tempY );
+										break;
 		
 									default:
 										throw new IllegalStateException("Unexpected value: " + String.valueOf(aBrush));
@@ -475,7 +482,20 @@ public class MapEditor extends JFrame implements IState {
 						int tempX = ( e.getX() - ( this.getWidth() - mapWidth*map.getTileSize() )/2 ) / map.getTileSize();
 						int tempY = ( e.getY() - ( this.getHeight() - mapHeight*map.getTileSize() )/2 ) / map.getTileSize();
 
-						map.set_tile_at( currType, tempX, tempY );
+						switch ( aBrush ) {
+						
+						case TILES:
+							map.set_tile_at( currType, tempX, tempY );
+							break;
+							
+						case ERASER:
+							checkTile( map.get_tile( tempX,  tempY ), tempX, tempY );
+							break;
+						
+						default:
+							throw new IllegalStateException("Unexpected value: " + String.valueOf(aBrush));
+						}
+
 					}
 				}
 
@@ -520,7 +540,7 @@ public class MapEditor extends JFrame implements IState {
 			this.add( mapSizeLabel );
 			this.add( mapSizeSlider );
 			this.add( genMapButton );
-			this.setBorder( BorderFactory.createCompoundBorder( BorderFactory.createLineBorder(Color.black), BorderFactory.createEmptyBorder(5, 5, 10, 10 )));
+			this.setBorder( BorderFactory.createCompoundBorder( BorderFactory.createLineBorder(Color.black), BorderFactory.createEmptyBorder( 5, 5, 10, 10 )));
 		}
 
 		@Override
@@ -651,10 +671,30 @@ public class MapEditor extends JFrame implements IState {
 					aBrush = Brushes.OBJECTS;
 				}
 			});
+			
+			JButton EraserButton = new JButton( "ERASER" );
+			EraserButton.setToolTipText( "Eraser" );
+			EraserButton.setPreferredSize( new Dimension( 40, 40 ));
+			EraserButton.addActionListener( new ActionListener() {
+				public void actionPerformed( ActionEvent e ) {
+
+					//Clear the description box
+					descriptionPanel.clearText();
+
+					//Name of the item
+					descriptionPanel.addText( "Eraser" );
+
+					//Flavor text
+					descriptionPanel.addText( "Allows you to erase objects on the map" );
+					
+					aBrush = Brushes.ERASER;
+				}
+			});
 
 			requiredPanel.add(playerButton);
 			requiredPanel.add(JewelButton);
 			requiredPanel.add(ShopkeepButton);
+			requiredPanel.add(EraserButton);
 
 			//Generate buttons to place items
 			JPanel objectsPanel = new JPanel( new GridLayout( 3, 3 ));

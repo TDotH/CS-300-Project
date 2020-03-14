@@ -20,7 +20,7 @@ public class Frupal extends JPanel {
 	static final int SCREEN_HEIGHT = 720;
 	
 	//Current version 
-	static final String version = "1.0"; 
+	static final String version = "1.1"; 
 	
 	public static void main( String[] args ) throws Exception  {
 		

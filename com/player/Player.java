@@ -376,7 +376,7 @@ public class Player implements Objects {
 	    			break;
 
 	    		case GOLD:
-	    			currMoney += 25;
+	    			currMoney += 30;
 	    			break;
 
 	    		case POWERBAR:

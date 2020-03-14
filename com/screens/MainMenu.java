@@ -108,7 +108,7 @@ public class MainMenu extends JFrame implements IState{
 						mainFrame.dispatchEvent( new WindowEvent( mainFrame, WindowEvent.WINDOW_CLOSING));
 						break;
 					case "manual":
-						System.out.println("I do nothing!");
+						ManualScreen aManualScreen = new ManualScreen();
 						break;
 					default:
 						throw new IllegalStateException("Unexpected value: " + String.valueOf( e.getActionCommand()));
